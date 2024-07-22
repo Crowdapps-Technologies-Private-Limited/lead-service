@@ -1,7 +1,9 @@
 import { addLeadHandler } from './addLeadHandler';
+import { getReferrerListHandler } from './getReferrerListHandler';
 
 const authHandlers = {
-    addLeadHandler
+    addLeadHandler,
+    getReferrerListHandler
 };
 
 export default authHandlers;

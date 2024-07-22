@@ -18,17 +18,17 @@ export const addLeadHandler: RouteHandler = async (
         // Validate payload
         await addLeadDTO(payload);
 
-        // Update user profile, including handling the photo file
         const result = await addLead(tenant, payload);
-        logger.info('User profile updated successfully', { result });
 
-        return ResponseHandler.createdResponse(result);
+        return ResponseHandler.createdResponse({ message: 'Lead added successfully' });
     }  catch (error: any) {
         logger.error('Error occurred add lead handler', { error });
         if(error?.message?.includes('Payload Validation Failed')) {
             return ResponseHandler.notFoundResponse({ message: error.message });
-        } else if (error?.message?.includes('Please! check your current password and try again')) {
-            return ResponseHandler.notFoundResponse({ message: "Please! check your current password and try again" });
+        } else if (error?.message?.includes('Lead already exists with this name')) {
+            return ResponseHandler.notFoundResponse({ message: "Lead already exists with this name!" });
+        } else if (error?.message?.includes('Lead already exists with this email')) {
+            return ResponseHandler.notFoundResponse({ message: "Lead already exists with this email!*-" });
         } else if(error?.message?.includes('Tenant is suspended')) {
             return ResponseHandler.badRequestResponse({ message: "Your account is suspended. Kindly ask the admin to reactivate your account!" });
         } else {
