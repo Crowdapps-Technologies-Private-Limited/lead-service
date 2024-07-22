@@ -1,31 +1,19 @@
 import * as multipart from 'aws-lambda-multipart-parser';
 
-export interface ProfilePayload {
-    firstName?: string | null;
-    lastName?: string | null;
+export interface AddLeadPayload {
+    name: string;
     phone?: string | null;
-    photo?: string | null;
-    socialNumber?: string | null;
-    signature?: string | null;
-    status?: string | null;
-  }
-
-export interface ChangePasswordPayload {
-    previousPassword: string;
-    proposedPassword: string;
-}
-
-export interface ActivateAccountPayload {
-    username: string;
-    previousPassword: string;
-    proposedPassword: string;
-}
-
-export interface CreateFeaturePayload {
-    feature_name: string;
-}
-
-export interface Feature {
-    id: string;
-    feature_name: string;
+    email: string;
+    followUp?: string | null;
+    movingOn?: string | null;
+    collectionAddress?: string | null;
+    collectionPurchaseStatus?: string | null;
+    collectionHouseSize?: string | null;
+    collectionVolume?: number | null;
+    collectionDistance?: number | null;
+    deliveryAddress?: string | null;
+    deliveryPurchaseStatus?: string | null;
+    deliveryHouseSize?: string | null;
+    deliveryVolume?: number | null;
+    deliveryDistance?: number | null;
 }

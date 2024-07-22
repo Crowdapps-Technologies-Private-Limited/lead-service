@@ -1,15 +1,7 @@
-import { getProfile } from './getProfileHandler';
-import { updateProfile } from './updateProfileHandler';
-import { changePassword } from './changePasswordHandler';
-import { getUploadKeyHandler } from './getUploadKeyHandler';
-import { activateAccount } from './activateAccountHandler';
+import { addLeadHandler } from './addLeadHandler';
 
 const authHandlers = {
-    getProfile,
-    updateProfile,
-    changePassword,
-    getUploadKeyHandler,
-    activateAccount
+    addLeadHandler
 };
 
 export default authHandlers;
