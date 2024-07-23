@@ -2,9 +2,11 @@ export const SELECT_TENANT = 'SELECT * FROM tenants WHERE cognito_sub = $1';
 
 export const SELECT_COMPANY_INFO = 'SELECT * FROM company_info WHERE tenant_id = $1';
 
+export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
 export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS leads (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    referrer_id uuid,
+    referrer_id UUID,
     name VARCHAR(100),
 	phone VARCHAR(20),
 	email VARCHAR(100),
@@ -25,7 +27,7 @@ export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS leads (
     customer_notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT NULL,
-    FOREIGN KEY (referrer_id) REFERENCES referrers(id)
+    FOREIGN KEY (referrer_id) REFERENCES public.referrers(id) ON DELETE CASCADE
 )`;
 
 export const INSERT_LEAD = `INSERT INTO leads (
@@ -46,7 +48,7 @@ export const INSERT_LEAD = `INSERT INTO leads (
     delivery_volume, 
     customer_notes,
     referrer_id
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`;
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`;
 
 export const CHECK_LEAD_BY_EMAIL = `SELECT COUNT(*) FROM leads WHERE email = $1`;
 
