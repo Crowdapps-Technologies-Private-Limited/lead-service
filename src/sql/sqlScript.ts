@@ -5,7 +5,7 @@ export const SELECT_COMPANY_INFO = 'SELECT * FROM company_info WHERE tenant_id =
 export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
 export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS leads (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     referrer_id UUID,
     name VARCHAR(100),
 	phone VARCHAR(20),

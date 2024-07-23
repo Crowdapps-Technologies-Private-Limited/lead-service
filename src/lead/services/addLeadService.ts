@@ -41,10 +41,10 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         logger.info('Schema:', { schema });
         await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
         logger.info('Schema created successfully');
-        await addUuidExtensionToSchema(schema);
-        logger.info('Extension created successfully');
         await client.query(`SET search_path TO ${schema}`);
         logger.info('Schema set successfully');
+        // await client.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA ${schema}`);
+        // logger.info('Extension created successfully');
         await client.query(CREATE_LEAD_TABLE);
         logger.info('Lead table created successfully');
         const result = await client.query(INSERT_LEAD, [
