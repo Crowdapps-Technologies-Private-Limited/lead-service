@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: 'client-service
+Description: 'lead-service
 
   Sample SAM Template for client-service
 
@@ -23,7 +23,7 @@ Parameters:
     Description: Product Name
     Default: mmym
 Resources:
-  ClientLambdaExecutionRole:
+  LeadLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -78,14 +78,14 @@ Resources:
             - s3:GetObject
             - s3:DeleteObject
             Resource: arn:aws:s3:::dev-mmym-files/*
-  ClientLambdaFunction:
+  LeadLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ClientLambdaFunction
+      CodeUri: LeadLambdaFunction
       Handler: index.handler
       Role:
         Fn::GetAtt:
-        - ClientLambdaExecutionRole
+        - LeadLambdaExecutionRole
         - Arn
       Runtime: nodejs20.x
       Architectures:
@@ -103,21 +103,11 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: es2020
-      SamResourceId: ClientLambdaFunction
-    Events:
-      UpdateProfileApi:
-        Type: Api
-        Properties:
-          Path: /client/me
-          Method: post
-          Request:
-            Parameters:
-              Headers:
-                Content-Type: true
+      SamResourceId: LeadLambdaFunction
 Outputs:
-  ClientLambdaFunctionArn:
+  LeadLambdaFunctionArn:
     Description: ARN of the Lambda function
     Value:
       Fn::GetAtt:
-      - ClientLambdaFunction
+      - LeadLambdaFunction
       - Arn
