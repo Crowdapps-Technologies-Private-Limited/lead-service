@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'lead-service
+
+  Sample SAM Template for client-service
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+    LoggingConfig:
+      LogFormat: JSON
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: Environment
+    Default: dev
+    AllowedValues:
+    - prod
+    - dev
+  Product:
+    Type: String
+    Description: Product Name
+    Default: mmym
+Resources:
+  LeadLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: LambdaExecutionPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
+            - ec2:CreateNetworkInterface
+            - ec2:DeleteNetworkInterface
+            - ec2:DescribeNetworkInterfaces
+            - ec2:DescribeInstances
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - rds:DescribeDBInstances
+            - rds:DescribeDBClusters
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - rds-data:*
+            Resource: '*'
+          - Effect: Allow
+            Action: lambda:*
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - ssm:GetParametersByPath
+            - ssm:GetParameters
+            - ssm:GetParameter
+            Resource: arn:aws:ssm:*:*:parameter/*
+          - Effect: Allow
+            Action: cognito-idp:*
+            Resource: arn:aws:cognito-idp:*:*:userpool/*
+          - Effect: Allow
+            Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+            Resource: arn:aws:s3:::dev-mmym-files/*
+  LeadLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: LeadLambdaFunction
+      Handler: index.handler
+      Role:
+        Fn::GetAtt:
+        - LeadLambdaExecutionRole
+        - Arn
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      MemorySize: 512
+      Timeout: 900
+      Environment:
+        Variables:
+          NODE_OPTIONS: ' --enable-source-maps'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+        - index.ts
+        Minify: true
+        Sourcemap: true
+        Target: es2020
+      SamResourceId: LeadLambdaFunction
+Outputs:
+  LeadLambdaFunctionArn:
+    Description: ARN of the Lambda function
+    Value:
+      Fn::GetAtt:
+      - LeadLambdaFunction
+      - Arn
