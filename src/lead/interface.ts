@@ -16,4 +16,6 @@ export interface AddLeadPayload {
     deliveryHouseSize?: string | null;
     deliveryVolume?: number | null;
     deliveryDistance?: number | null;
+    customerNotes?: string | null;
+    referrerId?: string | null;
 }

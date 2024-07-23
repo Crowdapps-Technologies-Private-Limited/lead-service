@@ -100,16 +100,6 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - index.ts
-    Events:
-      UpdateProfileApi:
-        Type: Api
-        Properties:
-          Path: /client/me
-          Method: post
-          Request:
-            Parameters:
-              Headers:
-                Content-Type: true
 
 Outputs:
   LeadLambdaFunctionArn:

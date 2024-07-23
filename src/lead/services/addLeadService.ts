@@ -25,6 +25,8 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         deliveryHouseSize,
         deliveryVolume,
         deliveryDistance,
+        customerNotes,
+        referrerId
     } = payload;
     const client = await connectToDatabase();
 
@@ -40,10 +42,10 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         // if(checkLeadByName.rows.length > 0){
         //     throw new Error('Lead already exists with this name');
         // }
-        const checkLeadByEmail = await client.query(CHECK_LEAD_BY_EMAIL, [email]);
-        if(checkLeadByEmail.rows.length > 0){
-            throw new Error('Lead already exists with this email');
-        }
+        // const checkLeadByEmail = await client.query(CHECK_LEAD_BY_EMAIL, [email]);
+        // if(checkLeadByEmail.rows.length > 0){
+        //     throw new Error('Lead already exists with this email');
+        // }
         const result = await client.query(INSERT_LEAD, [
             name,
             phone ?? null,
@@ -60,6 +62,8 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             deliveryHouseSize ?? null,
             deliveryVolume ?? null,
             deliveryDistance ?? null,
+            customerNotes ?? null,
+            referrerId ?? null
         ]);
         await client.query('COMMIT');
         return result?.rows[0];

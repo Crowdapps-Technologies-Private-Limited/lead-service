@@ -14,13 +14,23 @@ const passwordSchema = yup
 
 // Define the update profile schema
 export const addLeadSchema = yup.object().shape({
-  firstName: yup.string().nullable(),
-  lastName: yup.string().nullable(),
-  phone: yup.string().nullable(),
-  photo: yup.string().nullable(),
-  socialNumber: yup.string().nullable(),
-  status: yup.string().nullable(),
-  signature: yup.string().nullable()
+    name: yup.string().required("Name is required"),
+    phone: yup.string().matches(/^\d{10}$/, 'Mobile number must be exactly 10 digits').nullable(),
+    email: yup.string().email('Invalid email').required('Email is required'),
+    followUp: yup.string().nullable(),
+    movingOn: yup.string().nullable(),
+    collectionAddress: yup.string().nullable(),
+    collectionPurchaseStatus: yup.string().nullable(),
+    collectionHouseSize: yup.string().nullable(),
+    collectionVolume: yup.number().nullable(),
+    collectionDistance: yup.number().nullable(),
+    deliveryAddress: yup.string().nullable(),
+    deliveryPurchaseStatus: yup.string().nullable(),
+    deliveryHouseSize: yup.string().nullable(),
+    deliveryVolume: yup.number().nullable(),
+    deliveryDistance: yup.number().nullable(),
+    customerNotes: yup.string().nullable(),
+    referrerId: yup.string().nullable()
 }).noUnknown(true, 'Unknown field in payload');
 
 
