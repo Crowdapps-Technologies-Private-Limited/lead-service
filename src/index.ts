@@ -88,6 +88,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                     ...response.headers,
                 };
             } else {
+                logger.error('Invalid request at line 91', { event });
                 response = {
                     statusCode: 400,
                     headers: defaultHeaders,
@@ -95,6 +96,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 };
             }
         } else {
+            logger.error('Invalid request at line 98', { event });
             response = {
                 statusCode: 400,
                 headers: defaultHeaders,

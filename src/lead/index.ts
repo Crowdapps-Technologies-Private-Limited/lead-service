@@ -3,12 +3,14 @@ import admiinHandlers from './handlers';
 
 export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
     GET: {
-       '/client/leads/referrers': admiinHandlers.getReferrerListHandler, 
+       '/leads/referrers': admiinHandlers.getReferrerListHandler, 
+       '/leads': admiinHandlers.addLeadHandler,
     },
     PUT: {
+        '/leads/{id}': admiinHandlers.addLeadHandler,
     },
     POST: {
-        '/client/leads': admiinHandlers.addLeadHandler,
+        '/leads': admiinHandlers.addLeadHandler,
     },
     
 };
