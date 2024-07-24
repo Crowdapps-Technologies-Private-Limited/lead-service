@@ -25,9 +25,9 @@ export const getAllLeads = async (
   logger.info('Fetching user list', { pageSize, pageNumber, orderBy, orderIn, searchQuery, offset });
   try {
     await client.query('BEGIN');
-    if(tenant?.is_suspended){
-      throw new Error('Tenant is suspended');
-    }
+    // if(tenant?.is_suspended){
+    //   throw new Error('Tenant is suspended');
+    // }
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
     await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);

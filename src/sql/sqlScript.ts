@@ -58,7 +58,14 @@ export const CHECK_LEAD_BY_NAME = `SELECT COUNT(*) FROM leads WHERE name = $1`;
 
 export const GET_ALL_REFERRERS = `SELECT * FROM public.referrers`;
 
-export const GET_REFERRER_BY_ID = `SELECT * FROM public.referrers WHERE id = $1`;
+export const GET_REFERRER_BY_ID = `
+SELECT
+    name,
+    contact_name,
+    email,
+    id_string
+FROM public.referrers 
+WHERE id = $1`;
 
 export const GET_LEAD_COUNT = `
     SELECT COUNT(*) 
@@ -71,28 +78,7 @@ export const GET_ALL_LEADS = `
     order by generated_id DESC
 `;
 
-export const GET_LEAD_BY_ID = `SELECT 
-    id,
-    email,
-    name,
-    status,
-    phone,
-    follow_up_date,
-    moving_on_date,
-    packing_on_date,
-    customer_notes,
-    collection_address,
-    collection_purchase_status,
-    collection_house_size,
-    collection_distance,
-    collection_volume,
-    delivery_address,
-    delivery_purchase_status,
-    delivery_house_size,
-    delivery_distance,
-    delivery_volume
-FROM leads
-WHERE id = $1`;
+export const GET_LEAD_BY_ID = `SELECT * FROM leads WHERE id = $1`;
 
 export const GET_EMAIL_TEMPLATE_BY_EVENT = `
     SELECT template_id, template_name, subject, salutation, body, links, signature, disclaimer, placeholders
