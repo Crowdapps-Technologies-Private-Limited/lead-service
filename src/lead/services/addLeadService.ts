@@ -1,11 +1,11 @@
-import { CREATE_LEAD_TABLE, INSERT_LEAD, CREATE_EXTENSION } from '../../sql/sqlScript';
+import { CREATE_LEAD_TABLE, INSERT_LEAD, GET_ALL_LEADS} from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import AWS from 'aws-sdk';
 import { getconfigSecrets } from '../../utils/getConfig';
 import logger from '../../utils/logger';
 import { log } from 'console';
 import { AddLeadPayload } from '../interface';
-import { addUuidExtensionToSchema } from '../../utils/AddUUIDExtensionToSchema'
+import { generateEmail } from '../../utils/generateEmailService';
 
 const s3 = new AWS.S3();
 
@@ -47,6 +47,15 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         // logger.info('Extension created successfully');
         await client.query(CREATE_LEAD_TABLE);
         logger.info('Lead table created successfully');
+        let generatedId: any;
+        const idArray = await client.query(GET_ALL_LEADS);
+        if (idArray?.rows.length === 0) {
+            generatedId = 10000000;
+        } else {
+            const ids = idArray?.rows.map((item: any) => item.generated_id);
+            const maxId = Math.max(...ids);
+            generatedId = maxId + 1;
+        }
         const result = await client.query(INSERT_LEAD, [
             name,
             phone ?? null,
@@ -64,8 +73,10 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             deliveryVolume ?? null,
             deliveryDistance ?? null,
             customerNotes ?? null,
-            referrerId ?? null
+            referrerId ?? null,
+            generatedId
         ]);
+        await generateEmail('Add Lead', email, { name });
         logger.info('Lead added successfully', { result: result?.rows[0] });
         await client.query('COMMIT');
         return result?.rows[0];

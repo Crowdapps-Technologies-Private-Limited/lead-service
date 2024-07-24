@@ -1,19 +1,16 @@
-import { GET_USER_BY_ID } from '../../sql/sqlScript';
+import { GET_LEAD_BY_ID } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 
-export const getLeadById = async (userId: string) => {
+export const getLeadById = async (leadId: string) => {
   // Connect to PostgreSQL database
   const client = await connectToDatabase();
   try {
     // Fetch client data
-    const res = await client.query(GET_USER_BY_ID,[userId]);
+    const res = await client.query(GET_LEAD_BY_ID,[leadId]);
     if(res.rows.length === 0) {
       throw new Error(`No data found.`);
     }
-    // if(res.rows[0].is_deleted) {
-    //   throw new Error(`No data found.`);
-    // }
     return res.rows[0] || {};
   } catch (error: any) {
     logger.error('Failed to fetch data', { error });

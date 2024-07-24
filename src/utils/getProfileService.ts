@@ -1,8 +1,8 @@
-import { SELECT_TENANT, SELECT_COMPANY_INFO } from '../../sql/sqlScript';
-import { connectToDatabase } from '../../utils/database';
+import { SELECT_TENANT, SELECT_COMPANY_INFO } from '../sql/sqlScript';
+import { connectToDatabase } from './database';
 import AWS from 'aws-sdk';
-import { getconfigSecrets } from '../../utils/getConfig';
-import logger from '../../utils/logger';
+import { getconfigSecrets } from './getConfig';
+import logger from './logger';
 import { log } from 'console';
 
 const s3 = new AWS.S3();

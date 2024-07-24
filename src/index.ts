@@ -7,7 +7,7 @@ import { getconfigSecrets } from './utils/getConfig';
 import { ResponseHandler } from './utils/ResponseHandler';
 import { getUserBySub } from './utils/getCognitoUserBySub';
 import logger from './utils/logger';
-import { getUserProfile } from './lead/services';
+import { getUserProfile } from './utils/getProfileService';
 
 const routes = merge(adminRoutes);
 

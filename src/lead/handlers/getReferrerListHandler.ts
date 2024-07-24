@@ -14,6 +14,7 @@ export const getReferrerListHandler: RouteHandler = async (
         return ResponseHandler.successResponse({ message: 'Referrer list fetched successfully', data: result });
     } catch (error: any) {
         logger.error('Error occurred', { error });
-        return ResponseHandler.badRequestResponse({ message: "Something went wrong. Please try later!", details: error.errors });
+        return ResponseHandler.notFoundResponse({ message: error.message });
+        // return ResponseHandler.badRequestResponse({ message: "Something went wrong. Please try later!", details: error.errors });
     }
 };

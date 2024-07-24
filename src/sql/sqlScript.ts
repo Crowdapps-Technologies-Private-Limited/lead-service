@@ -6,6 +6,7 @@ export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
 export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS leads (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    generated_id VARCHAR(10) NOT NULL UNIQUE,
     referrer_id UUID,
     name VARCHAR(100),
 	phone VARCHAR(20),
@@ -47,8 +48,9 @@ export const INSERT_LEAD = `INSERT INTO leads (
     delivery_distance,
     delivery_volume, 
     customer_notes,
-    referrer_id
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`;
+    referrer_id,
+    generated_id
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`;
 
 export const CHECK_LEAD_BY_EMAIL = `SELECT COUNT(*) FROM leads WHERE email = $1`;
 
@@ -59,4 +61,39 @@ export const GET_ALL_REFERRERS = `SELECT * FROM referrers`;
 export const GET_LEAD_COUNT = `
     SELECT COUNT(*) 
     FROM leads
+`;
+
+export const GET_ALL_LEADS = `
+    SELECT generated_id
+    FROM leads
+    order by generated_id DESC
+`;
+
+export const GET_LEAD_BY_ID = `SELECT 
+    id,
+    email,
+    name,
+    status,
+    phone,
+    follow_up_date,
+    moving_on_date,
+    packing_on_date,
+    customer_notes,
+    collection_address,
+    collection_purchase_status,
+    collection_house_size,
+    collection_distance,
+    collection_volume,
+    delivery_address,
+    delivery_purchase_status,
+    delivery_house_size,
+    delivery_distance,
+    delivery_volume
+FROM leads
+WHERE id = $1`;
+
+export const GET_EMAIL_TEMPLATE_BY_EVENT = `
+    SELECT template_id, template_name, subject, salutation, body, links, signature, disclaimer, placeholders
+    FROM public.email_templates 
+    WHERE event = $1
 `;
