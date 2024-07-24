@@ -1,17 +1,32 @@
-import { GET_LEAD_BY_ID } from '../../sql/sqlScript';
+import { GET_LEAD_BY_ID, GET_REFERRER_BY_ID } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 
-export const getLeadById = async (leadId: string) => {
+export const getLeadById = async (leadId: string, tenant: any) => {
   // Connect to PostgreSQL database
   const client = await connectToDatabase();
   try {
     // Fetch client data
-    const res = await client.query(GET_LEAD_BY_ID,[leadId]);
+    let res = await client.query(GET_LEAD_BY_ID,[leadId]);
     if(res.rows.length === 0) {
       throw new Error(`No data found.`);
     }
-    return res.rows[0] || {};
+    const lead = res.rows[0] || {};
+    res = await client.query(GET_REFERRER_BY_ID,[lead.referrer_id]);
+    const referrer = res.rows[0] || {};
+    const company = {
+      logo: tenant.logo,
+      companyName: tenant.companyName,
+      postCode: tenant.postCode
+    }
+    return {
+      message: 'Lead data fetched successfully',
+      data: {
+        lead,
+        referrer,
+        company
+      }
+    };
   } catch (error: any) {
     logger.error('Failed to fetch data', { error });
     throw new Error(`Failed to fetch data: ${error.message}`);

@@ -24,7 +24,9 @@ export const getUserProfile = async (userId: string) => {
         }
         user.logo = company.rows[0].logo;
         user.phoneNumber = company.rows[0].phone_number;
-
+        user.companyName = company.rows[0].company_name;
+        user.postCode = company.rows[0].post_code;
+        
         logger.info('User profile:', { user });
 
         if (user.logo) {
