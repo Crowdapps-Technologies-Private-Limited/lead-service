@@ -9,7 +9,7 @@ export const getLeadListHandler: RouteHandler = async (
 ): Promise<APIGatewayProxyResult> => {
     logger.info('getLeadListHandler event ', { event });  
     try {
-        const user = (event.requestContext as any).user;
+        const tenant = (event.requestContext as any).tenant;
         const queryParams = event.queryStringParameters;
         const pageNumber = queryParams?.page ? parseInt(queryParams?.page as string) : 1;
         const pageSize = queryParams?.limit ? parseInt(queryParams?.limit as string) : 10;
@@ -18,10 +18,11 @@ export const getLeadListHandler: RouteHandler = async (
         const search = queryParams?.search || '';  // New search parameter
 
         // Fetch user list
-        const result = await getAllLeads(pageSize, pageNumber, orderBy, orderIn, search, user);
+        const result = await getAllLeads(pageSize, pageNumber, orderBy, orderIn, search, tenant);
         return ResponseHandler.successResponse({ message: 'Lead list fetched successfully', data: result });
     } catch (error: any) {
         logger.error('Error occurred', { error });
-        return ResponseHandler.badRequestResponse({ message: "Something went wrong. Please try later!" });
+        return ResponseHandler.notFoundResponse({ message: error.message });
+        //return ResponseHandler.badRequestResponse({ message: "Something went wrong. Please try later!" });
     }
 };

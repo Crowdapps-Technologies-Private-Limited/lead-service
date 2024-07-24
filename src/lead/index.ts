@@ -4,7 +4,8 @@ import admiinHandlers from './handlers';
 export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
     GET: {
        '/leads/referrers': admiinHandlers.getReferrerListHandler, 
-       '/leads': admiinHandlers.addLeadHandler,
+       '/leads': admiinHandlers.getLeadListHandler,
+       '/leads/{id}': admiinHandlers.getLeadListHandler,
     },
     PUT: {
         '/leads/{id}': admiinHandlers.addLeadHandler,

@@ -16,16 +16,24 @@ export const getAllLeads = async (
   orderBy: string,
   orderIn: string,
   search: string,
-  user: any // New search parameter
+  tenant: any // New search parameter
 ) => {
-  const orderField = allowedOrderFields[orderBy] || 'created_at';
-  const orderDirection = orderIn.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
   // Connect to PostgreSQL database
   const client = await connectToDatabase();
   const offset = pageSize * (pageNumber - 1);
   const searchQuery = `%${search}%`; // For partial matching
   logger.info('Fetching user list', { pageSize, pageNumber, orderBy, orderIn, searchQuery, offset });
   try {
+    await client.query('BEGIN');
+    if(tenant?.is_suspended){
+      throw new Error('Tenant is suspended');
+    }
+    const schema = tenant.schema;
+    logger.info('Schema:', { schema });
+    await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
+    logger.info('Schema created successfully');
+    await client.query(`SET search_path TO ${schema}`);
+    logger.info('Schema set successfully');
     // Fetch user count
     const resultCount = await client.query(GET_LEAD_COUNT);
     // Fetch user list
@@ -33,21 +41,15 @@ export const getAllLeads = async (
       res = await client.query(`SELECT 
         id,
         email,
-        first_name,
-        last_name,
+        name,
         status,
-        photo,
-        employee_id,
-        created_at,
-        is_active,
-        is_deleted
-    FROM super_admins
+        created_at
+    FROM leads
     WHERE 
-      (first_name ILIKE $3 OR last_name ILIKE $3 OR email ILIKE $3 OR employee_id ILIKE $3) -- Search condition
-      AND email != $4 
-    ORDER BY employee_id DESC, ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
+      (name ILIKE $3 OR status ILIKE $3) -- Search condition
+    ORDER BY created_at DESC, ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
     LIMIT $1 
-    OFFSET $2`, [pageSize, offset, searchQuery, user.email]);
+    OFFSET $2`, [pageSize, offset, searchQuery]);
 
     const pagination = setPaginationData(resultCount.rows[0].count, pageSize, res.rows.length, pageNumber);
     const result = {
@@ -56,8 +58,8 @@ export const getAllLeads = async (
     };
     return result;
   } catch (error: any) {
-    logger.error('Failed to fetch user list', { error });
-    throw new Error(`Failed to fetch user list: ${error.message}`);
+    logger.error('Failed to fetch lead list', { error });
+    throw new Error(`Failed to fetch lead list: ${error.message}`);
   } finally {
     try {
       await client.end();
