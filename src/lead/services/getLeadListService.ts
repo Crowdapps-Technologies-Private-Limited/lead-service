@@ -42,12 +42,13 @@ export const getAllLeads = async (
         id,
         email,
         name,
+        generated_id,
         status,
         created_at
     FROM leads
     WHERE 
-      (name ILIKE $3 OR status ILIKE $3) -- Search condition
-    ORDER BY created_at DESC, ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
+      (name ILIKE $3 OR status ILIKE $3 OR generated_id ILIKE $3) -- Search condition
+    ORDER BY generated_id DESC, ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
     LIMIT $1 
     OFFSET $2`, [pageSize, offset, searchQuery]);
 

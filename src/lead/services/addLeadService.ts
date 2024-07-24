@@ -1,4 +1,10 @@
-import { CREATE_LEAD_TABLE, INSERT_LEAD, GET_ALL_LEADS} from '../../sql/sqlScript';
+import { 
+    CREATE_LEAD_TABLE, 
+    INSERT_LEAD, 
+    GET_ALL_LEADS,
+    CREATE_LOG_TABLE,
+    INSERT_LOG
+} from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import AWS from 'aws-sdk';
 import { getconfigSecrets } from '../../utils/getConfig';
@@ -76,7 +82,16 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             referrerId ?? null,
             generatedId
         ]);
-        await generateEmail('Add Lead', email, { name });
+        await client.query(CREATE_LOG_TABLE);
+        await client.query(INSERT_LOG, [
+            tenant.id,
+            tenant.name,
+            tenant.email,
+            'You have added a new lead',
+            'LEAD',
+            'NEW',
+        ]);
+        await generateEmail('Add Lead', email, { username: name });
         logger.info('Lead added successfully', { result: result?.rows[0] });
         await client.query('COMMIT');
         return result?.rows[0];

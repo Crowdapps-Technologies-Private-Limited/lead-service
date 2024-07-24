@@ -97,3 +97,26 @@ export const GET_EMAIL_TEMPLATE_BY_EVENT = `
     FROM public.email_templates 
     WHERE event = $1
 `;
+
+export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS audit_trails (
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    actor_id UUID,
+    actor_name VARCHAR(150),
+	actor_email VARCHAR(150),
+    action TEXT,
+    performed_on VARCHAR(150),
+    lead_status VARCHAR(100),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL,
+    FOREIGN KEY (actor_id) REFERENCES public.tenants(id) ON DELETE CASCADE
+)`;
+
+export const INSERT_LOG = `INSERT INTO audit_trails (
+    actor_id,
+    actor_name,
+    actor_email,
+    action,
+    performed_on,
+    lead_status
+) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+
