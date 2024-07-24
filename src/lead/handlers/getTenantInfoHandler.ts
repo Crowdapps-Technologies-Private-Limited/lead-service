@@ -4,10 +4,10 @@ import { getLeadById } from '../services';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 
-export const getSingleLeadHandler: RouteHandler = async (
+export const getTenantInfoHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('getSingleLeadHandler event ', { event });  
+    logger.info('getTenantInfoHandler event ', { event });  
     try {
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
