@@ -15,11 +15,13 @@ export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS leads (
 	moving_on_date	TIMESTAMP,
     packing_on_date	TIMESTAMP DEFAULT NULL,
 	collection_address VARCHAR(300),
+    collection_postcode VARCHAR(50),
 	collection_purchase_status VARCHAR(100),
 	collection_house_size VARCHAR(100),
 	collection_distance DECIMAL(8,2),
 	collection_volume DECIMAL(8,2),
 	delivery_address VARCHAR(300),
+    delivery_postcode VARCHAR(50),
 	delivery_purchase_status VARCHAR(100),
 	delivery_house_size VARCHAR(100),
 	delivery_distance DECIMAL(8,2),
@@ -49,8 +51,10 @@ export const INSERT_LEAD = `INSERT INTO leads (
     delivery_volume, 
     customer_notes,
     referrer_id,
-    generated_id
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`;
+    generated_id,
+    collection_postcode,
+    delivery_postcode
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *`;
 
 export const CHECK_LEAD_BY_EMAIL = `SELECT COUNT(*) FROM leads WHERE email = $1`;
 
@@ -89,6 +93,7 @@ export const GET_EMAIL_TEMPLATE_BY_EVENT = `
 export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS audit_trails (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     actor_id UUID,
+    lead_id UUID,
     actor_name VARCHAR(150),
 	actor_email VARCHAR(150),
     action TEXT,
@@ -96,7 +101,8 @@ export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS audit_trails (
     lead_status VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT NULL,
-    FOREIGN KEY (actor_id) REFERENCES public.tenants(id) ON DELETE CASCADE
+    FOREIGN KEY (actor_id) REFERENCES public.tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
 )`;
 
 export const INSERT_LOG = `INSERT INTO audit_trails (
@@ -105,6 +111,20 @@ export const INSERT_LOG = `INSERT INTO audit_trails (
     actor_email,
     action,
     performed_on,
-    lead_status
-) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+    lead_status,
+    lead_id
+) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
 
+export const GET_LOG_COUNT = `
+    SELECT COUNT(*) 
+    FROM audit_trails
+    WHERE lead_id = $1
+`;
+
+export const CHECK_TABLE_EXISTS = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = $1 
+        AND table_name = $2
+      );
+    `;

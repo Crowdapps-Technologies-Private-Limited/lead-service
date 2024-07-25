@@ -90,6 +90,7 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             'You have added a new lead',
             'LEAD',
             'NEW',
+            result?.rows[0].id
         ]);
         await generateEmail('Add Lead', email, { username: name });
         logger.info('Lead added successfully', { result: result?.rows[0] });

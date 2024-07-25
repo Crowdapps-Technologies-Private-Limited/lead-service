@@ -1,4 +1,4 @@
-import { GET_LEAD_COUNT } from '../../sql/sqlScript';
+import { GET_LEAD_COUNT, CHECK_TABLE_EXISTS } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { setPaginationData } from '../../utils/utility';
 import logger from '../../utils/logger';
@@ -34,27 +34,37 @@ export const getAllLeads = async (
     logger.info('Schema created successfully');
     await client.query(`SET search_path TO ${schema}`);
     logger.info('Schema set successfully');
-    // Fetch user count
-    const resultCount = await client.query(GET_LEAD_COUNT);
-    // Fetch user list
-    let res;
-      res = await client.query(`SELECT 
-        id,
-        email,
-        name,
-        generated_id,
-        status,
-        created_at
-    FROM leads
-    WHERE 
-      (name ILIKE $3 OR status ILIKE $3 OR generated_id ILIKE $3) -- Search condition
-    ORDER BY generated_id DESC, ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
-    LIMIT $1 
-    OFFSET $2`, [pageSize, offset, searchQuery]);
+    // Check if leads table exists
+    const tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);
 
-    const pagination = setPaginationData(resultCount.rows[0].count, pageSize, res.rows.length, pageNumber);
+    const leadsTableExists = tableCheckRes.rows[0].exists;
+    if (!leadsTableExists) {
+      logger.info('Leads table does not exist');
+      return {
+        list: [],
+        pagination: setPaginationData(0, pageSize, 0, pageNumber)
+      };
+    }
+    // Fetch user count
+    let resultCount = await client.query(GET_LEAD_COUNT);
+    // Fetch user list
+    let res: any;
+        res = await client.query(`SELECT 
+          id,
+          email,
+          name,
+          generated_id,
+          status,
+          created_at
+      FROM leads
+      WHERE 
+        (name ILIKE $3 OR status ILIKE $3 OR generated_id ILIKE $3) -- Search condition
+      ORDER BY generated_id DESC, ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
+      LIMIT $1 
+      OFFSET $2`, [pageSize, offset, searchQuery]);
+    const pagination = setPaginationData(resultCount.rows[0].count, pageSize, res?.rows?.length, pageNumber);
     const result = {
-      list: res.rows || [],
+      list: res?.rows || [],
       pagination
     };
     return result;
