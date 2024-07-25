@@ -20,11 +20,10 @@ export const getLogListByLeadHandler: RouteHandler = async (
         const pageSize = queryParams?.limit ? parseInt(queryParams?.limit as string) : 10;
         const orderBy = queryParams?.orderBy as string || 'created_at';
         const orderIn = queryParams?.orderIn as string || 'DESC';
-        const search = queryParams?.search || '';  // New search parameter
 
         // Fetch user list
         const result = await getAllLogsByLead(pageSize, pageNumber, orderBy, orderIn, tenant, leadId);
-        return ResponseHandler.successResponse({ message: 'Lead list fetched successfully', data: result });
+        return ResponseHandler.successResponse({ message: 'Log list fetched successfully', data: result });
     } catch (error: any) {
         logger.error('Error occurred', { error });
         return ResponseHandler.notFoundResponse({ message: error.message });

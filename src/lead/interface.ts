@@ -18,4 +18,6 @@ export interface AddLeadPayload {
     deliveryDistance?: number | null;
     customerNotes?: string | null;
     referrerId?: string | null;
+    collectionPostcode?: string | null;
+    deliveryPostcode?: string | null;
 }

@@ -34,7 +34,9 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         deliveryVolume,
         deliveryDistance,
         customerNotes,
-        referrerId
+        referrerId,
+        collectionPostcode,
+        deliveryPostcode
     } = payload;
     const client = await connectToDatabase();
 
@@ -64,23 +66,25 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         }
         const result = await client.query(INSERT_LEAD, [
             name,
-            phone ?? null,
+            phone || null,
             email,
-            followUp ?? null,
-            movingOn ?? null,
-            collectionAddress ?? null,
-            collectionPurchaseStatus ?? null,
-            collectionHouseSize ?? null,
+            followUp || null,
+            movingOn || null,
+            collectionAddress || null,
+            collectionPurchaseStatus || null,
+            collectionHouseSize || null,
             collectionVolume ?? null,
             collectionDistance ?? null,
-            deliveryAddress ?? null,
-            deliveryPurchaseStatus ?? null,
-            deliveryHouseSize ?? null,
+            deliveryAddress || null,
+            deliveryPurchaseStatus || null,
+            deliveryHouseSize || null,
             deliveryVolume ?? null,
             deliveryDistance ?? null,
-            customerNotes ?? null,
-            referrerId ?? null,
-            generatedId
+            customerNotes || null,
+            referrerId || null,
+            generatedId,
+            collectionPostcode || null,
+            deliveryPostcode || null
         ]);
         await client.query(CREATE_LOG_TABLE);
         await client.query(INSERT_LOG, [

@@ -14,6 +14,7 @@ export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS leads (
 	follow_up_date	TIMESTAMP,
 	moving_on_date	TIMESTAMP,
     packing_on_date	TIMESTAMP DEFAULT NULL,
+    survey_date	TIMESTAMP DEFAULT NULL,
 	collection_address VARCHAR(300),
     collection_postcode VARCHAR(50),
 	collection_purchase_status VARCHAR(100),
