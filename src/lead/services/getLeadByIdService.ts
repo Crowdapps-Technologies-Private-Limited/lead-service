@@ -1,4 +1,4 @@
-import { GET_LEAD_BY_ID, GET_REFERRER_BY_ID } from '../../sql/sqlScript';
+import { GET_LEAD_BY_ID, GET_REFERRER_BY_ID, CHECK_TABLE_EXISTS } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 
@@ -13,6 +13,16 @@ export const getLeadById = async (leadId: string, tenant: any) => {
     logger.info('Schema created successfully');
     await client.query(`SET search_path TO ${schema}`);
     logger.info('Schema set successfully');
+    let tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);
+
+    const leadsTableExists = tableCheckRes.rows[0].exists;
+    if (!leadsTableExists) {
+      logger.info('Leads table does not exist');
+      return {
+        message: 'Lead data fetched successfully',
+        data: {}
+      };
+    }
     let res = await client.query(GET_LEAD_BY_ID,[leadId]);
     if(res.rows.length === 0) {
       throw new Error(`No data found.`);
