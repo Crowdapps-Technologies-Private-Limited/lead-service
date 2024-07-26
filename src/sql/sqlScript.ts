@@ -61,7 +61,11 @@ export const CHECK_LEAD_BY_EMAIL = `SELECT COUNT(*) FROM leads WHERE email = $1`
 
 export const CHECK_LEAD_BY_NAME = `SELECT COUNT(*) FROM leads WHERE name = $1`;
 
-export const GET_ALL_REFERRERS = `SELECT * FROM public.referrers`;
+export const GET_ALL_REFERRERS = `SELECT * 
+  FROM public.referrers 
+  ORDER BY 
+    CASE WHEN name = 'Others' THEN 1 ELSE 0 END, 
+    name`;
 
 export const GET_REFERRER_BY_ID = `
 SELECT
