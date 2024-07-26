@@ -1,3 +1,5 @@
+import { getDistanceHandler } from './handlers/getDistanceHandler';
+import { getDistanceBetweenPostcodes } from './../utils/googlemap';
 import { RouteHandler, Routes } from '../types/interfaces';
 import admiinHandlers from './handlers';
 
@@ -13,6 +15,7 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
     },
     POST: {
         '/leads': admiinHandlers.addLeadHandler,
+        '/leads/distance': admiinHandlers.getDistanceHandler,
     },
     
 };

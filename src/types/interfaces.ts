@@ -26,6 +26,7 @@ export interface Config {
     postmarkApiKey: string;
     emailSenderAddress: string;
     s3BucketName: string;
+    googlemapapi: string;
 }
 
 export interface UserPayload {

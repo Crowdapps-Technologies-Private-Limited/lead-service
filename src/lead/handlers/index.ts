@@ -1,5 +1,6 @@
 import { addLeadHandler } from './addLeadHandler';
 import { editLeadHandler } from './editLeadHandler';
+import { getDistanceHandler } from './getDistanceHandler';
 import { getLeadListHandler } from './getLeadListHandler';
 import { getLogListByLeadHandler } from './getLogListByLeadHandler';
 import { getReferrerListHandler } from './getReferrerListHandler';
@@ -12,6 +13,7 @@ const authHandlers = {
     getSingleLeadHandler,
     getLogListByLeadHandler,
     editLeadHandler,
+    getDistanceHandler
 };
 
 export default authHandlers;

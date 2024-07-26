@@ -84,6 +84,18 @@ export const editLeadDTO = async (payload: EditLeadPayload): Promise<void> => {
     }
 };
 
+export const getDistanceDTO = async (payload: { postcode1: string, postcode2: string }): Promise<void> => {
+    try {
+        if (!payload.postcode1) {
+            throw new Error('Postcode1 is required');
+        }
+        if (!payload.postcode2) {
+            throw new Error('Postcode2 is required');
+        }
+    } catch (err: any) {
+        throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
+    }
+};
 
 
 
