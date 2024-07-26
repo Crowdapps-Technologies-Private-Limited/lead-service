@@ -6,7 +6,7 @@ export const getLeadById = async (leadId: string, tenant: any) => {
   // Connect to PostgreSQL database
   const client = await connectToDatabase();
   try {
-    // Fetch client data
+    await client.query('BEGIN');
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
     await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
@@ -36,6 +36,7 @@ export const getLeadById = async (leadId: string, tenant: any) => {
       companyName: tenant.companyName,
       postCode: tenant.postCode
     }
+    await client.query('COMMIT');
     return {
       message: 'Lead data fetched successfully',
       data: {
@@ -45,6 +46,7 @@ export const getLeadById = async (leadId: string, tenant: any) => {
       }
     };
   } catch (error: any) {
+    await client.query('ROLLBACK');
     logger.error('Failed to fetch data', { error });
     throw new Error(`Failed to fetch data: ${error.message}`);
   } finally {

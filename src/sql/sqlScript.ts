@@ -128,4 +128,27 @@ export const CHECK_TABLE_EXISTS = `
         WHERE table_schema = $1 
         AND table_name = $2
       );
-    `;
+`;
+
+export const EDIT_LEAD = `UPDATE leads 
+SET
+    name = COALESCE($1, name),
+    phone = COALESCE($2, phone),
+    email = COALESCE($3, email),
+    follow_up_date = COALESCE($4, follow_up_date),
+    moving_on_date = COALESCE($5, moving_on_date),
+    collection_address = COALESCE($6, collection_address),
+    collection_purchase_status = COALESCE($7, collection_purchase_status),
+    collection_house_size = COALESCE($8, collection_house_size),
+    collection_distance = COALESCE($9, collection_distance),
+    collection_volume = COALESCE($10, collection_volume),
+    delivery_address = COALESCE($11, delivery_address),
+    delivery_purchase_status = COALESCE($12, delivery_purchase_status),
+    delivery_house_size = COALESCE($13, delivery_house_size),
+    delivery_distance = COALESCE($14, delivery_distance),
+    delivery_volume = COALESCE($15, delivery_volume),
+    customer_notes = COALESCE($16, customer_notes),
+    referrer_id = COALESCE($17, referrer_id),
+    collection_postcode = COALESCE($18, collection_postcode),
+    delivery_postcode = COALESCE($19, delivery_postcode)
+WHERE id = $20 RETURNING *`;

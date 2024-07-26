@@ -21,3 +21,25 @@ export interface AddLeadPayload {
     collectionPostcode?: string | null;
     deliveryPostcode?: string | null;
 }
+
+export interface EditLeadPayload {
+    name?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    followUp?: string | null;
+    movingOn?: string | null;
+    collectionAddress?: string | null;
+    collectionPurchaseStatus?: string | null;
+    collectionHouseSize?: string | null;
+    collectionVolume?: number | null;
+    collectionDistance?: number | null;
+    deliveryAddress?: string | null;
+    deliveryPurchaseStatus?: string | null;
+    deliveryHouseSize?: string | null;
+    deliveryVolume?: number | null;
+    deliveryDistance?: number | null;
+    customerNotes?: string | null;
+    referrerId?: string | null;
+    collectionPostcode?: string | null;
+    deliveryPostcode?: string | null;
+}
