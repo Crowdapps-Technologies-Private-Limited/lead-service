@@ -13,7 +13,7 @@ export const getDistanceHandler: RouteHandler = async (
     try {
         const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
-        const user = (event.requestContext as any).user;   
+        const user = (event.requestContext as any).user;
         logger.info('tenant:', { tenant });
         logger.info('user:', { user });
 
@@ -26,7 +26,10 @@ export const getDistanceHandler: RouteHandler = async (
 
         if (distance !== null) {
             logger.info(`Distance between ${postcode1} and ${postcode2} is ${distance.toFixed(2)} miles`);
-            return ResponseHandler.createdResponse({ message: `Distance calculated successfully`, data: { distance: distance.toFixed(2) } });
+            return ResponseHandler.createdResponse({
+                message: `Distance calculated successfully`,
+                data: { distance: distance.toFixed(2) },
+            });
         } else {
             throw new Error('Error calculating distance');
         }

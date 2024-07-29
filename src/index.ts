@@ -28,7 +28,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return {
                 statusCode: 401,
                 headers: defaultHeaders,
-                body: JSON.stringify({ message: 'Unauthorized' })
+                body: JSON.stringify({ message: 'Unauthorized' }),
             };
         }
 
@@ -44,23 +44,27 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return {
                 statusCode: 403,
                 headers: defaultHeaders,
-                body: JSON.stringify({ message: 'Forbidden' })
+                body: JSON.stringify({ message: 'Forbidden' }),
             };
         }
-        const clientDetail= await getUserProfile(user.sub);
+        const clientDetail = await getUserProfile(user.sub);
         logger.info('clientDetail:', { clientDetail });
-        if(clientDetail.is_deleted === true){   
+        if (clientDetail.is_deleted === true) {
             return {
                 statusCode: 403,
                 headers: defaultHeaders,
-                body: JSON.stringify({ message: 'Your account is deleted. Kindly ask the admin to reactivate your account!' })
+                body: JSON.stringify({
+                    message: 'Your account is deleted. Kindly ask the admin to reactivate your account!',
+                }),
             };
         }
-        if(clientDetail.is_active === false && clientDetail.status !== 'PENDING'){   
+        if (clientDetail.is_active === false && clientDetail.status !== 'PENDING') {
             return {
                 statusCode: 403,
                 headers: defaultHeaders,
-                body: JSON.stringify({ message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!' })
+                body: JSON.stringify({
+                    message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!',
+                }),
             };
         }
 
@@ -71,7 +75,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return {
             statusCode: 401,
             headers: defaultHeaders,
-            body: JSON.stringify({ message: 'Token not verified', details: error.message })
+            body: JSON.stringify({ message: 'Token not verified', details: error.message }),
         };
     }
 
@@ -92,7 +96,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 response = {
                     statusCode: 400,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: 'Invalid request' })
+                    body: JSON.stringify({ message: 'Invalid request' }),
                 };
             }
         } else {
@@ -100,7 +104,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             response = {
                 statusCode: 400,
                 headers: defaultHeaders,
-                body: JSON.stringify({ message: 'Invalid request' })
+                body: JSON.stringify({ message: 'Invalid request' }),
             };
         }
     } catch (error: any) {
@@ -108,7 +112,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         response = {
             statusCode: 500,
             headers: defaultHeaders,
-            body: JSON.stringify({ message: 'Internal server error', details: error.message })
+            body: JSON.stringify({ message: 'Internal server error', details: error.message }),
         };
     }
 

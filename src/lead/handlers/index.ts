@@ -13,7 +13,7 @@ const authHandlers = {
     getSingleLeadHandler,
     getLogListByLeadHandler,
     editLeadHandler,
-    getDistanceHandler
+    getDistanceHandler,
 };
 
 export default authHandlers;
