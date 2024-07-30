@@ -14,9 +14,9 @@ const passwordSchema = yup
 
 // Define the add lead schema
 export const addLeadSchema = yup.object().shape({
-    name: yup.string().nullable(),
+    name: yup.string().required('Name is required'),
     phone: yup.string().matches(/^\d{10}$/, 'Mobile number must be exactly 10 digits').nullable(),
-    email: yup.string().email('Invalid email').nullable(),
+    email: yup.string().email('Invalid email').required('Email is required'),
     followUp: yup.string().nullable(),
     movingOn: yup.string().nullable(),
     collectionAddress: yup.string().nullable(),
