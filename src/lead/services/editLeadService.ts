@@ -2,7 +2,9 @@ import AWS from 'aws-sdk';
 import {
     GET_LEAD_BY_ID,
     CHECK_TABLE_EXISTS,
-    EDIT_LEAD
+    EDIT_LEAD,
+    CREATE_LOG_TABLE,
+    INSERT_LOG
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { EditLeadPayload } from '../interface';
@@ -100,6 +102,16 @@ export const updateLead = async (payload: EditLeadPayload, leadId: string, tenan
             deliveryPostcode || res.rows[0].delivery_postcode,
             packingOn || res.rows[0].packing_on_date,
             leadId    
+        ]);
+        await client.query(CREATE_LOG_TABLE);
+        await client.query(INSERT_LOG, [
+            tenant.id,
+            tenant.name,
+            tenant.email,
+            'You have updated a new lead',
+            'LEAD',
+            'NEW',
+            leadId
         ]);
         await client.query('COMMIT');
         return {
