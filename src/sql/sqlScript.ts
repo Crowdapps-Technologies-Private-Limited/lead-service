@@ -182,3 +182,204 @@ SET
     packing_on_date = COALESCE($28, packing_on_date),
     updated_at = NOW()
 WHERE id = $29 RETURNING *`;
+
+export const CREATE_ESTIMATE_TABLE = `CREATE TABLE IF NOT EXISTS estimates (
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    lead_id UUID REFERENCES leads(id) ON DELETE CASCADE,
+    quote_total NUMERIC,
+    cost_total NUMERIC,
+    quote_expires_on DATE,
+    notes TEXT,
+    vat_included BOOLEAN,
+    material_price_chargeable BOOLEAN
+)`;
+
+export const INSERT_ESTIMATE = `INSERT INTO estimates (
+    lead_id,
+    quote_total,
+    cost_total,
+    quote_expires_on,
+    notes,
+    vat_included,
+    material_price_chargeable
+) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
+
+export const CREATE_ESTIMATE_SERVICES_TABLE = `CREATE TABLE IF NOT EXISTS estimate_services (
+    estimate_id UUID REFERENCES estimates(id),
+    service_id UUID REFERENCES services(id),
+    PRIMARY KEY (estimate_id, service_id)
+)`;
+
+export const INSERT_ESTIMATE_SERVICE = `INSERT INTO estimate_services (
+    estimate_id,
+    service_id
+) VALUES ($1, $2)`;
+
+export const CREATE_ESTIMATE_MATERIALS_TABLE = `CREATE TABLE IF NOT EXISTS estimate_materials (
+    estimate_id UUID REFERENCES estimates(id),
+    material_id UUID REFERENCES materials(id),
+    PRIMARY KEY (estimate_id, material_id)
+)`;
+
+export const INSERT_ESTIMATE_MATERIAL = `INSERT INTO estimate_materials (
+    estimate_id,
+    material_id
+) VALUES ($1, $2)`;
+
+export const CREATE_ESTIMATE_COSTS_TABLE = `CREATE TABLE IF NOT EXISTS estimate_costs (
+    estimate_id UUID REFERENCES estimates(id),
+    cost_id UUID REFERENCES costs(id),
+    PRIMARY KEY (estimate_id, cost_id)
+)`;
+
+export const INSERT_ESTIMATE_COST = `INSERT INTO estimate_costs (
+    estimate_id,
+    cost_id
+) VALUES ($1, $2)`;
+
+export const CREATE_ESTIMATE_GENERAL_INFO_TABLE = `CREATE TABLE IF NOT EXISTS estimate_general_info (
+    estimate_id UUID REFERENCES estimates(id),
+    general_info_id UUID REFERENCES general_information(id),
+    PRIMARY KEY (estimate_id, general_info_id)
+)`;
+
+export const INSERT_ESTIMATE_GENERAL_INFO = `INSERT INTO estimate_general_info (
+    estimate_id,
+    general_info_id
+) VALUES ($1, $2)`;
+
+export const CREATE_ESTIMATE_ANCILLARIES_TABLE = `CREATE TABLE IF NOT EXISTS estimate_ancillaries (
+    estimate_id UUID REFERENCES estimates(id),
+    ancillary_id UUID REFERENCES ancillaries(id),
+    PRIMARY KEY (estimate_id, ancillary_id)
+)`;
+
+export const INSERT_ESTIMATE_ANCILLARY = `INSERT INTO estimate_ancillaries (
+    estimate_id,
+    ancillary_id
+) VALUES ($1, $2)`;
+
+// Additional Insert Statements for Related Tables
+export const INSERT_SERVICE = `INSERT INTO services (
+    service_name,
+    description,
+    price
+) VALUES ($1, $2, $3) RETURNING *`;
+
+export const INSERT_MATERIAL = `INSERT INTO materials (
+    name,
+    dimensions,
+    surveyed_qty,
+    charge_qty,
+    price,
+    total,
+    volume_cost
+) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
+
+export const INSERT_COST = `INSERT INTO costs (
+    driver_qty,
+    porter_qty,
+    packer_qty,
+    vehicle_qty,
+    vehicle_type_id,
+    fuel_qty,
+    fuel_charge
+) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
+
+export const INSERT_GENERAL_INFO = `INSERT INTO general_information (
+    driver_wage,
+    porter_wage,
+    packer_wage,
+    contents_value,
+    payment_method,
+    insurance,
+    insurance_percentage,
+    insurance_type
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`;
+
+export const INSERT_ANCILLARY = `INSERT INTO ancillaries (
+    name,
+    charge,
+    isChargeable
+) VALUES ($1, $2, $3) RETURNING *`;
+
+
+export const UPDATE_ESTIMATE = `
+    UPDATE estimates 
+    SET
+        lead_id = $1,
+        quote_total = $2,
+        cost_total = $3,
+        quote_expires_on = $4,
+        notes = $5,
+        vat_included = $6,
+        material_price_chargeable = $7
+    WHERE id = $8
+`;
+
+
+export const UPDATE_SERVICE = `
+    UPDATE services
+    SET
+        service_name = $1,
+        description = $2,
+        price = $3
+    WHERE id = $4
+`;
+
+
+export const UPDATE_MATERIAL = `
+    UPDATE materials
+    SET
+        name = $1,
+        dimensions = $2,
+        surveyed_qty = $3,
+        charge_qty = $4,
+        price = $5,
+        total = $6,
+        volume_cost = $7
+    WHERE id = $8
+`;
+
+
+
+export const UPDATE_COST = `
+    UPDATE costs
+    SET
+        driver_qty = $1,
+        porter_qty = $2,
+        packer_qty = $3,
+        vehicle_qty = $4,
+        vehicle_type_id = $5,
+        fuel_qty = $6,
+        fuel_charge = $7
+    WHERE id = $8
+`;
+
+export const UPDATE_GENERAL_INFO = `
+    UPDATE general_information
+    SET
+        driver_wage = $1,
+        porter_wage = $2,
+        packer_wage = $3,
+        contents_value = $4,
+        payment_method = $5,
+        insurance = $6,
+        insurance_percentage = $7,
+        insurance_type = $8
+    WHERE id = $9
+`;
+
+
+
+export const UPDATE_ANCILLARY = `
+    UPDATE ancillaries
+    SET
+        name = $1,
+        charge = $2,
+        isChargeable = $3
+    WHERE id = $4
+`;
+
+
+

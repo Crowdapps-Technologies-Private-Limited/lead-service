@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { AddLeadPayload, EditLeadPayload } from './interface';
+import { AddEstimatePayload, AddLeadPayload, EditEstimatePayload, EditLeadPayload } from './interface';
 import logger from '../utils/logger';
 
 // Define the password schema
@@ -101,6 +101,145 @@ export const getDistanceDTO = async (payload: { postcode1: string, postcode2: st
         if (!payload.postcode2) {
             throw new Error('Postcode2 is required');
         }
+    } catch (err: any) {
+        throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
+    }
+};
+
+// Define the add estimate schema
+export const addEstimateSchema = yup.object().shape({
+    quoteTotal: yup.number().required('Quote total is required'),
+    costTotal: yup.number().required('Cost total is required'),
+    quoteExpiresOn: yup.date().required('Quote expiry date is required'),
+    notes: yup.string().nullable(),
+    vatIncluded: yup.boolean().required('VAT inclusion status is required'),
+    materialPriceChargeable: yup.boolean().required('Material price chargeable status is required'),
+    services: yup.array().of(
+        yup.object().shape({
+            typeName: yup.string().required('Service type name is required'),
+            description: yup.string().nullable(),
+            price: yup.number().required('Service price is required')
+        })
+    ).required('Services are required'),
+    materials: yup.array().of(
+        yup.object().shape({
+            name: yup.string().required('Material name is required'),
+            dimensions: yup.string().nullable(),
+            surveyedQty: yup.number().nullable(),
+            chargeQty: yup.number().nullable(),
+            price: yup.number().nullable(),
+            total: yup.number().nullable(),
+            volumeCost: yup.number().nullable()
+        })
+    ).required('Materials are required'),
+    costs: yup.array().of(
+        yup.object().shape({
+            driverQty: yup.number().nullable(),
+            porterQty: yup.number().nullable(),
+            packerQty: yup.number().nullable(),
+            vehicleQty: yup.number().nullable(),
+            vehicleTypeId: yup.string().nullable(),
+            fuelQty: yup.number().nullable(),
+            fuelCharge: yup.number().nullable()
+        })
+    ).required('Costs are required'),
+    generalInfo: yup.array().of(
+        yup.object().shape({
+            driverWage: yup.number().nullable(),
+            porterWage: yup.number().nullable(),
+            packerWage: yup.number().nullable(),
+            contentsValue: yup.number().nullable(),
+            paymentMethod: yup.string().nullable(),
+            insurance: yup.number().nullable(),
+            insurancePercentage: yup.number().nullable(),
+            insuranceType: yup.string().nullable()
+        })
+    ).required('General Information is required'),
+    ancillaries: yup.array().of(
+        yup.object().shape({
+            name: yup.string().required('Ancillary name is required'),
+            charge: yup.number().nullable(),
+            isChargeable: yup.boolean().nullable()
+        })
+    ).required('Ancillaries are required'),
+}).noUnknown(true, 'Unknown field in payload');
+
+// Validate the add estimate payload
+export const addEstimateDTO = async (payload: AddEstimatePayload): Promise<void> => {
+    try {
+        await addEstimateSchema.validate(payload, { abortEarly: false, strict: true });
+    } catch (err: any) {
+        throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
+    }
+};
+
+// Define the edit estimate schema
+export const editEstimateSchema = yup.object().shape({
+    quoteTotal: yup.number().required('Quote total is required'),
+    costTotal: yup.number().required('Cost total is required'),
+    quoteExpiresOn: yup.date().required('Quote expiry date is required'),
+    notes: yup.string().nullable(),
+    vatIncluded: yup.boolean().required('VAT inclusion status is required'),
+    materialPriceChargeable: yup.boolean().required('Material price chargeable status is required'),
+    services: yup.array().of(
+        yup.object().shape({
+            id: yup.string().nullable(),
+            typeName: yup.string().required('Service type name is required'),
+            description: yup.string().nullable(),
+            price: yup.number().required('Service price is required')
+        })
+    ).required('Services are required'),
+    materials: yup.array().of(
+        yup.object().shape({
+            id: yup.string().nullable(),
+            name: yup.string().required('Material name is required'),
+            dimensions: yup.string().nullable(),
+            surveyedQty: yup.number().nullable(),
+            chargeQty: yup.number().nullable(),
+            price: yup.number().nullable(),
+            total: yup.number().nullable(),
+            volumeCost: yup.number().nullable()
+        })
+    ).required('Materials are required'),
+    costs: yup.array().of(
+        yup.object().shape({
+            id: yup.string().nullable(),
+            driverQty: yup.number().nullable(),
+            porterQty: yup.number().nullable(),
+            packerQty: yup.number().nullable(),
+            vehicleQty: yup.number().nullable(),
+            vehicleTypeId: yup.string().nullable(),
+            fuelQty: yup.number().nullable(),
+            fuelCharge: yup.number().nullable()
+        })
+    ).required('Costs are required'),
+    generalInfo: yup.array().of(
+        yup.object().shape({
+            id: yup.string().nullable(),
+            driverWage: yup.number().nullable(),
+            porterWage: yup.number().nullable(),
+            packerWage: yup.number().nullable(),
+            contentsValue: yup.number().nullable(),
+            paymentMethod: yup.string().nullable(),
+            insurance: yup.number().nullable(),
+            insurancePercentage: yup.number().nullable(),
+            insuranceType: yup.string().nullable()
+        })
+    ).required('General Information is required'),
+    ancillaries: yup.array().of(
+        yup.object().shape({
+            id: yup.string().nullable(),
+            name: yup.string().required('Ancillary name is required'),
+            charge: yup.number().nullable(),
+            isChargeable: yup.boolean().nullable()
+        })
+    ).required('Ancillaries are required'),
+}).noUnknown(true, 'Unknown field in payload');
+
+// Validate the edit estimate payload
+export const editEstimateDTO = async (payload: EditEstimatePayload): Promise<void> => {
+    try {
+        await editEstimateSchema.validate(payload, { abortEarly: false, strict: true });
     } catch (err: any) {
         throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
     }
