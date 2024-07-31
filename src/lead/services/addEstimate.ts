@@ -9,7 +9,8 @@ import {
     INSERT_ESTIMATE_MATERIAL,
     INSERT_ESTIMATE_COST,
     INSERT_ESTIMATE_GENERAL_INFO,
-    INSERT_ESTIMATE_ANCILLARY
+    INSERT_ESTIMATE_ANCILLARY,
+    CREATE_ESTIMATE_AND_RELATED_TABLE
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
@@ -44,7 +45,7 @@ logger.info('Schema:', { schema });
         }
         
         await client.query(`SET search_path TO ${schema}`);
-
+        await client.query(CREATE_ESTIMATE_AND_RELATED_TABLE);
         // Insert estimate
         const result = await client.query(INSERT_ESTIMATE, [
             leadId,

@@ -183,7 +183,7 @@ SET
     updated_at = NOW()
 WHERE id = $29 RETURNING *`;
 
-export const CREATE_ESTIMATE_TABLE = `CREATE TABLE IF NOT EXISTS estimates (
+export const CREATE_ESTIMATE_AND_RELATED_TABLE = `CREATE TABLE IF NOT EXISTS estimates (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     lead_id UUID REFERENCES leads(id) ON DELETE CASCADE,
     quote_total NUMERIC,
@@ -192,7 +192,121 @@ export const CREATE_ESTIMATE_TABLE = `CREATE TABLE IF NOT EXISTS estimates (
     notes TEXT,
     vat_included BOOLEAN,
     material_price_chargeable BOOLEAN
-)`;
+)
+
+CREATE TABLE IF NOT EXISTS estimates (
+    id SERIAL PRIMARY KEY,
+    lead_id INT NOT NULL,
+    quote_total DECIMAL(10, 2),
+    cost_total DECIMAL(10, 2),
+    quote_expires_on DATE,
+    notes TEXT,
+    vat_included BOOLEAN,
+    material_price_chargeable BOOLEAN,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS services (
+    id SERIAL PRIMARY KEY,
+    service_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS materials (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    dimensions VARCHAR(255),
+    surveyed_qty DECIMAL(10, 2),
+    charge_qty DECIMAL(10, 2),
+    price DECIMAL(10, 2),
+    total DECIMAL(10, 2),
+    volume_cost DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS costs (
+    id SERIAL PRIMARY KEY,
+    driver_qty INT,
+    porter_qty INT,
+    packer_qty INT,
+    vehicle_qty INT,
+    vehicle_type_id INT,
+    fuel_qty DECIMAL(10, 2),
+    fuel_charge DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS general_information (
+    id SERIAL PRIMARY KEY,
+    driver_wage DECIMAL(10, 2),
+    porter_wage DECIMAL(10, 2),
+    packer_wage DECIMAL(10, 2),
+    contents_value DECIMAL(10, 2),
+    payment_method VARCHAR(255),
+    insurance BOOLEAN,
+    insurance_percentage DECIMAL(5, 2),
+    insurance_type VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS ancillaries (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    charge DECIMAL(10, 2),
+    isChargeable BOOLEAN,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS estimate_services (
+    estimate_id INT NOT NULL,
+    service_id INT NOT NULL,
+    PRIMARY KEY (estimate_id, service_id),
+    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
+    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS estimate_materials (
+    estimate_id INT NOT NULL,
+    material_id INT NOT NULL,
+    PRIMARY KEY (estimate_id, material_id),
+    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
+    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS estimate_costs (
+    estimate_id INT NOT NULL,
+    cost_id INT NOT NULL,
+    PRIMARY KEY (estimate_id, cost_id),
+    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
+    FOREIGN KEY (cost_id) REFERENCES costs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS estimate_general_info (
+    estimate_id INT NOT NULL,
+    general_info_id INT NOT NULL,
+    PRIMARY KEY (estimate_id, general_info_id),
+    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
+    FOREIGN KEY (general_info_id) REFERENCES general_information(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS estimate_ancillaries (
+    estimate_id INT NOT NULL,
+    ancillary_id INT NOT NULL,
+    PRIMARY KEY (estimate_id, ancillary_id),
+    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
+    FOREIGN KEY (ancillary_id) REFERENCES ancillaries(id) ON DELETE CASCADE
+);
+    
+`;
 
 export const INSERT_ESTIMATE = `INSERT INTO estimates (
     lead_id,
@@ -204,55 +318,35 @@ export const INSERT_ESTIMATE = `INSERT INTO estimates (
     material_price_chargeable
 ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
 
-export const CREATE_ESTIMATE_SERVICES_TABLE = `CREATE TABLE IF NOT EXISTS estimate_services (
-    estimate_id UUID REFERENCES estimates(id),
-    service_id UUID REFERENCES services(id),
-    PRIMARY KEY (estimate_id, service_id)
-)`;
+
 
 export const INSERT_ESTIMATE_SERVICE = `INSERT INTO estimate_services (
     estimate_id,
     service_id
 ) VALUES ($1, $2)`;
 
-export const CREATE_ESTIMATE_MATERIALS_TABLE = `CREATE TABLE IF NOT EXISTS estimate_materials (
-    estimate_id UUID REFERENCES estimates(id),
-    material_id UUID REFERENCES materials(id),
-    PRIMARY KEY (estimate_id, material_id)
-)`;
+
 
 export const INSERT_ESTIMATE_MATERIAL = `INSERT INTO estimate_materials (
     estimate_id,
     material_id
 ) VALUES ($1, $2)`;
 
-export const CREATE_ESTIMATE_COSTS_TABLE = `CREATE TABLE IF NOT EXISTS estimate_costs (
-    estimate_id UUID REFERENCES estimates(id),
-    cost_id UUID REFERENCES costs(id),
-    PRIMARY KEY (estimate_id, cost_id)
-)`;
+
 
 export const INSERT_ESTIMATE_COST = `INSERT INTO estimate_costs (
     estimate_id,
     cost_id
 ) VALUES ($1, $2)`;
 
-export const CREATE_ESTIMATE_GENERAL_INFO_TABLE = `CREATE TABLE IF NOT EXISTS estimate_general_info (
-    estimate_id UUID REFERENCES estimates(id),
-    general_info_id UUID REFERENCES general_information(id),
-    PRIMARY KEY (estimate_id, general_info_id)
-)`;
+
 
 export const INSERT_ESTIMATE_GENERAL_INFO = `INSERT INTO estimate_general_info (
     estimate_id,
     general_info_id
 ) VALUES ($1, $2)`;
 
-export const CREATE_ESTIMATE_ANCILLARIES_TABLE = `CREATE TABLE IF NOT EXISTS estimate_ancillaries (
-    estimate_id UUID REFERENCES estimates(id),
-    ancillary_id UUID REFERENCES ancillaries(id),
-    PRIMARY KEY (estimate_id, ancillary_id)
-)`;
+
 
 export const INSERT_ESTIMATE_ANCILLARY = `INSERT INTO estimate_ancillaries (
     estimate_id,
