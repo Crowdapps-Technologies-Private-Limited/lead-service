@@ -2,6 +2,7 @@ import { APIGatewayProxyEventBase, APIGatewayProxyResult, APIGatewayEventDefault
 import { RouteHandler } from '../../types/interfaces';
 import { getLatestEstimates } from '../services';
 import logger from '../../utils/logger';
+import { ResponseHandler } from '../../utils/ResponseHandler';
 
 export const getLatestEstimatesHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
@@ -22,16 +23,12 @@ export const getLatestEstimatesHandler: RouteHandler = async (
         logger.info('tenant:', { tenant });
 
         const result = await getLatestEstimates(leadId, tenant);
+        return ResponseHandler.successResponse({ message: 'Referrer list fetched successfully', data: result });
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify(result)
-        };
+
     } catch (error: any) {
         logger.error('Error occurred in getLatestEstimatesHandler', { error });
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal Server Error' })
-        };
+        return ResponseHandler.failureResponse({ message: error.message });
+       
     }
 };

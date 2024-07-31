@@ -97,7 +97,7 @@ export interface GeneralInfo {
     packerWage?: number;
     contentsValue?: number;
     paymentMethod?: string;
-    insurance?: number;
+    insurance_amount?: number;
     insurancePercentage?: number;
     insuranceType?: string;
 }

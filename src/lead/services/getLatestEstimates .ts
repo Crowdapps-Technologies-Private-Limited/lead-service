@@ -3,7 +3,7 @@ import logger from '../../utils/logger';
 
 export const getLatestEstimates = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
-    if(tenant?.is_suspended){
+    if (tenant?.is_suspended) {
         throw new Error('Tenant is suspended');
     }
     const schema = tenant.schema;
@@ -23,61 +23,76 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             e.notes,
             e.vat_included,
             e.material_price_chargeable,
-            s.id AS service_id,
-            s.service_name,
-            s.description AS service_description,
-            s.price AS service_price,
-            m.id AS material_id,
-            m.name AS material_name,
-            m.dimensions AS material_dimensions,
-            m.surveyed_qty,
-            m.charge_qty,
-            m.price AS material_price,
-            m.total AS material_total,
-            m.volume_cost AS material_volume_cost,
-            c.id AS cost_id,
-            c.driver_qty,
-            c.porter_qty,
-            c.packer_qty,
-            c.vehicle_qty,
-            c.vehicle_type_id,
-            c.fuel_qty,
-            c.fuel_charge,
-            gi.id AS general_info_id,
-            gi.driver_wage,
-            gi.porter_wage,
-            gi.packer_wage,
-            gi.contents_value,
-            gi.payment_method,
-            gi.insurance,
-            gi.insurance_percentage,
-            gi.insurance_type,
-            a.id AS ancillary_id,
-            a.name AS ancillary_name,
-            a.charge AS ancillary_charge,
-            a.isChargeable AS ancillary_is_chargeable
+            (
+                SELECT json_agg(json_build_object(
+                    'service_id', s.id,
+                    'service_name', s.service_name,
+                    'service_description', s.description,
+                    'service_price', s.price
+                ))
+                FROM ${schema}.estimate_services es
+                JOIN ${schema}.services s ON es.service_id = s.id
+                WHERE es.estimate_id = e.id
+            ) AS services,
+            (
+                SELECT json_agg(json_build_object(
+                    'material_id', m.id,
+                    'material_name', m.name,
+                    'material_dimensions', m.dimensions,
+                    'surveyed_qty', m.surveyed_qty,
+                    'charge_qty', m.charge_qty,
+                    'material_price', m.price,
+                    'material_total', m.total,
+                    'material_volume_cost', m.volume_cost
+                ))
+                FROM ${schema}.estimate_materials em
+                JOIN ${schema}.materials m ON em.material_id = m.id
+                WHERE em.estimate_id = e.id
+            ) AS materials,
+            (
+                SELECT json_agg(json_build_object(
+                    'cost_id', c.id,
+                    'driver_qty', c.driver_qty,
+                    'porter_qty', c.porter_qty,
+                    'packer_qty', c.packer_qty,
+                    'vehicle_qty', c.vehicle_qty,
+                    'vehicle_type_id', c.vehicle_type_id,
+                    'fuel_qty', c.fuel_qty,
+                    'fuel_charge', c.fuel_charge
+                ))
+                FROM ${schema}.estimate_costs ec
+                JOIN ${schema}.costs c ON ec.cost_id = c.id
+                WHERE ec.estimate_id = e.id
+            ) AS costs,
+            (
+                SELECT json_agg(json_build_object(
+                    'general_info_id', gi.id,
+                    'driver_wage', gi.driver_wage,
+                    'porter_wage', gi.porter_wage,
+                    'packer_wage', gi.packer_wage,
+                    'contents_value', gi.contents_value,
+                    'payment_method', gi.payment_method,
+                    'insurance_amount', gi.insurance_amount,
+                    'insurance_percentage', gi.insurance_percentage,
+                    'insurance_type', gi.insurance_type
+                ))
+                FROM ${schema}.estimate_general_info eg
+                JOIN ${schema}.general_information gi ON eg.general_info_id = gi.id
+                WHERE eg.estimate_id = e.id
+            ) AS general_info,
+            (
+                SELECT json_agg(json_build_object(
+                    'ancillary_id', a.id,
+                    'ancillary_name', a.name,
+                    'ancillary_charge', a.charge,
+                    'ancillary_is_chargeable', a.isChargeable
+                ))
+                FROM ${schema}.estimate_ancillaries ea
+                JOIN ${schema}.ancillaries a ON ea.ancillary_id = a.id
+                WHERE ea.estimate_id = e.id
+            ) AS ancillaries
         FROM 
             ${schema}.estimates e
-        LEFT JOIN 
-            ${schema}.estimate_services es ON e.id = es.estimate_id
-        LEFT JOIN 
-            ${schema}.services s ON es.service_id = s.id
-        LEFT JOIN 
-            ${schema}.estimate_materials em ON e.id = em.estimate_id
-        LEFT JOIN 
-            ${schema}.materials m ON em.material_id = m.id
-        LEFT JOIN 
-            ${schema}.estimate_costs ec ON e.id = ec.estimate_id
-        LEFT JOIN 
-            ${schema}.costs c ON ec.cost_id = c.id
-        LEFT JOIN 
-            ${schema}.estimate_general_info eg ON e.id = eg.estimate_id
-        LEFT JOIN 
-            ${schema}.general_information gi ON eg.general_info_id = gi.id
-        LEFT JOIN 
-            ${schema}.estimate_ancillaries ea ON e.id = ea.estimate_id
-        LEFT JOIN 
-            ${schema}.ancillaries a ON ea.ancillary_id = a.id
         WHERE 
             e.lead_id = $1
         ORDER BY 

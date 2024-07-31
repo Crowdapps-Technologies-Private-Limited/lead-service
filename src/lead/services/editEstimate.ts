@@ -10,11 +10,7 @@ import {
     INSERT_ANCILLARY,
     UPDATE_ANCILLARY,
     UPDATE_ESTIMATE,
-    INSERT_ESTIMATE_SERVICE,
-    INSERT_ESTIMATE_MATERIAL,
-    INSERT_ESTIMATE_COST,
-    INSERT_ESTIMATE_GENERAL_INFO,
-    INSERT_ESTIMATE_ANCILLARY
+    INSERT_LOG
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
@@ -77,7 +73,11 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     serviceId
                 ]);
             }
-            await client.query(INSERT_ESTIMATE_SERVICE, [estimateId, serviceId]);
+            await client.query(`
+                INSERT INTO estimate_services (estimate_id, service_id)
+                VALUES ($1, $2)
+                ON CONFLICT (estimate_id, service_id) DO NOTHING
+            `, [estimateId, serviceId]);
         }
 
         // Update or insert materials
@@ -106,7 +106,11 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     materialId
                 ]);
             }
-            await client.query(INSERT_ESTIMATE_MATERIAL, [estimateId, materialId]);
+            await client.query(`
+                INSERT INTO estimate_materials (estimate_id, material_id)
+                VALUES ($1, $2)
+                ON CONFLICT (estimate_id, material_id) DO NOTHING
+            `, [estimateId, materialId]);
         }
 
         // Update or insert costs
@@ -135,7 +139,11 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     costId
                 ]);
             }
-            await client.query(INSERT_ESTIMATE_COST, [estimateId, costId]);
+            await client.query(`
+                INSERT INTO estimate_costs (estimate_id, cost_id)
+                VALUES ($1, $2)
+                ON CONFLICT (estimate_id, cost_id) DO NOTHING
+            `, [estimateId, costId]);
         }
 
         // Update or insert general info
@@ -148,7 +156,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     info.packerWage || null,
                     info.contentsValue || null,
                     info.paymentMethod || null,
-                    info.insurance || null,
+                    info.insurance_amount || null,
                     info.insurancePercentage || null,
                     info.insuranceType || null
                 ]);
@@ -160,13 +168,17 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     info.packerWage || null,
                     info.contentsValue || null,
                     info.paymentMethod || null,
-                    info.insurance || null,
+                    info.insurance_amount || null,
                     info.insurancePercentage || null,
                     info.insuranceType || null,
                     infoId
                 ]);
             }
-            await client.query(INSERT_ESTIMATE_GENERAL_INFO, [estimateId, infoId]);
+            await client.query(`
+                INSERT INTO estimate_general_info (estimate_id, general_info_id)
+                VALUES ($1, $2)
+                ON CONFLICT (estimate_id, general_info_id) DO NOTHING
+            `, [estimateId, infoId]);
         }
 
         // Update or insert ancillaries
@@ -187,8 +199,22 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     ancillaryId
                 ]);
             }
-            await client.query(INSERT_ESTIMATE_ANCILLARY, [estimateId, ancillaryId]);
+            await client.query(`
+                INSERT INTO estimate_ancillaries (estimate_id, ancillary_id)
+                VALUES ($1, $2)
+                ON CONFLICT (estimate_id, ancillary_id) DO NOTHING
+            `, [estimateId, ancillaryId]);
         }
+
+        await client.query(INSERT_LOG, [
+            tenant.id,
+            tenant.name,
+            tenant.email,
+            'You have updated the estimation',
+            'ESTIMATE',
+            'NEW',
+            estimateId
+        ]);
 
         await client.query('COMMIT');
         return { message: 'Estimate updated successfully' };

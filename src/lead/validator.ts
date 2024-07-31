@@ -110,7 +110,7 @@ export const getDistanceDTO = async (payload: { postcode1: string, postcode2: st
 export const addEstimateSchema = yup.object().shape({
     quoteTotal: yup.number().required('Quote total is required'),
     costTotal: yup.number().required('Cost total is required'),
-    quoteExpiresOn: yup.date().required('Quote expiry date is required'),
+    quoteExpiresOn: yup.string().required('Quote expiry date is required'),
     notes: yup.string().nullable(),
     vatIncluded: yup.boolean().required('VAT inclusion status is required'),
     materialPriceChargeable: yup.boolean().required('Material price chargeable status is required'),
@@ -150,7 +150,7 @@ export const addEstimateSchema = yup.object().shape({
             packerWage: yup.number().nullable(),
             contentsValue: yup.number().nullable(),
             paymentMethod: yup.string().nullable(),
-            insurance: yup.number().nullable(),
+            insurance_amount: yup.number().nullable(),
             insurancePercentage: yup.number().nullable(),
             insuranceType: yup.string().nullable()
         })
@@ -177,7 +177,7 @@ export const addEstimateDTO = async (payload: AddEstimatePayload): Promise<void>
 export const editEstimateSchema = yup.object().shape({
     quoteTotal: yup.number().required('Quote total is required'),
     costTotal: yup.number().required('Cost total is required'),
-    quoteExpiresOn: yup.date().required('Quote expiry date is required'),
+    quoteExpiresOn: yup.string().required('Quote expiry date is required'),
     notes: yup.string().nullable(),
     vatIncluded: yup.boolean().required('VAT inclusion status is required'),
     materialPriceChargeable: yup.boolean().required('Material price chargeable status is required'),
@@ -221,7 +221,7 @@ export const editEstimateSchema = yup.object().shape({
             packerWage: yup.number().nullable(),
             contentsValue: yup.number().nullable(),
             paymentMethod: yup.string().nullable(),
-            insurance: yup.number().nullable(),
+            insurance_amount: yup.number().nullable(),
             insurancePercentage: yup.number().nullable(),
             insuranceType: yup.string().nullable()
         })

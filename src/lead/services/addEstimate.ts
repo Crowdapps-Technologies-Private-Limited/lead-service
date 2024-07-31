@@ -10,11 +10,12 @@ import {
     INSERT_ESTIMATE_COST,
     INSERT_ESTIMATE_GENERAL_INFO,
     INSERT_ESTIMATE_ANCILLARY,
-    CREATE_ESTIMATE_AND_RELATED_TABLE
+    CREATE_ESTIMATE_AND_RELATED_TABLE,
+    INSERT_LOG
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
-import { AddEstimatePayload, EditEstimatePayload } from '../interface';
+import { AddEstimatePayload } from '../interface';
 
 export const addEstimate = async (leadId: string, payload: AddEstimatePayload, tenant: any) => {
     logger.info('addEstimate service is running:');
@@ -36,7 +37,8 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
     
     const client = await connectToDatabase();
     const schema = tenant.schema;
-logger.info('Schema:', { schema });
+    logger.info('Schema:', { schema });
+    
     try {
         await client.query('BEGIN');
 
@@ -46,6 +48,7 @@ logger.info('Schema:', { schema });
         
         await client.query(`SET search_path TO ${schema}`);
         await client.query(CREATE_ESTIMATE_AND_RELATED_TABLE);
+        
         // Insert estimate
         const result = await client.query(INSERT_ESTIMATE, [
             leadId,
@@ -108,7 +111,7 @@ logger.info('Schema:', { schema });
                 info.packerWage || null,
                 info.contentsValue || null,
                 info.paymentMethod || null,
-                info.insurance || null,
+                info.insurance_amount || null,
                 info.insurancePercentage || null,
                 info.insuranceType || null
             ]);
@@ -126,6 +129,17 @@ logger.info('Schema:', { schema });
             const ancillaryId = ancillaryResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_ANCILLARY, [estimateId, ancillaryId]);
         }
+
+        await client.query(INSERT_LOG, [
+            tenant.id,
+            tenant.name,
+            tenant.email,
+            'You have added a new estimation',
+            'ESTIMATE',
+            'NEW',
+            result?.rows[0].id
+        ]);
+        // await generateEmail('Add Lead', tenant.email, { username: name });
 
         await client.query('COMMIT');
         return { message: 'Estimate added successfully', estimateId };
