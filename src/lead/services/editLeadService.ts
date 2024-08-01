@@ -70,7 +70,7 @@ export const updateLead = async (payload: EditLeadPayload, leadId: string, tenan
         }
         let res = await client.query(GET_LEAD_BY_ID,[leadId]);
         if(res.rows.length === 0) {
-        throw new Error(`No data found.`);
+            throw new Error(`No data found.`);
         }
         const lead = await client.query(EDIT_LEAD, [
             name || res.rows[0].name,

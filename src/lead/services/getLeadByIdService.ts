@@ -24,9 +24,9 @@ export const getLeadById = async (leadId: string, tenant: any) => {
       };
     }
     let res = await client.query(GET_LEAD_BY_ID,[leadId]);
-    if(res.rows.length === 0) {
-      throw new Error(`No data found.`);
-    }
+    // if(res.rows.length === 0) {
+    //   throw new Error(`No data found.`);
+    // }
     const lead = res.rows[0] || {};
     res = await client.query(GET_REFERRER_BY_ID,[lead.referrer_id]);
     logger.info('Referrer query result:', { res: res.rows[0]});

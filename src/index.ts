@@ -67,6 +67,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 }),
             };
         }
+        if(clientDetail.is_suspended === true){   
+            return {
+                statusCode: 403,
+                headers: defaultHeaders,
+                body: JSON.stringify({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' })
+            };
+        }
 
         // Attach userPayload to the request context
         (event.requestContext as any).user = user;
