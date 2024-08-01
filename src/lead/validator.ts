@@ -58,7 +58,10 @@ export const addLeadDTO = async (payload: AddLeadPayload): Promise<void> => {
 // Define the edit lead schema
 export const editLeadSchema = yup.object().shape({
     name: yup.string().nullable(),
-    phone: yup.string().matches(/^\d{10}$/, 'Mobile number must be exactly 10 digits').nullable(),
+    phone: yup.string()
+        .matches(/^\d{10}$/, 'Mobile number must be exactly 10 digits')
+        .nullable()
+        .transform((value, originalValue) => originalValue.trim() === '' ? null : value),
     email: yup.string().email('Invalid email').nullable(),
     followUp: yup.string().nullable(),
     movingOn: yup.string().nullable(),
