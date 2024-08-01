@@ -16,9 +16,9 @@ const passwordSchema = yup
 export const addLeadSchema = yup.object().shape({
     name: yup.string().required('Name is required'),
     phone: yup.string()
-        .matches(/^\d{10}$/, 'Mobile number must be exactly 10 digits')
-        .nullable()
-        .transform((value, originalValue) => originalValue.trim() === '' ? null : value),
+        .transform((value, originalValue) => originalValue.trim() === '' ? null : value)
+        .matches(/^\d{10}$/, { message: 'Mobile number must be exactly 10 digits', excludeEmptyString: true })
+        .nullable(),
     email: yup.string().email('Invalid email').required('Email is required'),
     followUp: yup.string().nullable(),
     movingOn: yup.string().nullable(),
@@ -59,9 +59,9 @@ export const addLeadDTO = async (payload: AddLeadPayload): Promise<void> => {
 export const editLeadSchema = yup.object().shape({
     name: yup.string().nullable(),
     phone: yup.string()
-        .matches(/^\d{10}$/, 'Mobile number must be exactly 10 digits')
-        .nullable()
-        .transform((value, originalValue) => originalValue.trim() === '' ? null : value),
+        .transform((value, originalValue) => originalValue.trim() === '' ? null : value)
+        .matches(/^\d{10}$/, { message: 'Mobile number must be exactly 10 digits', excludeEmptyString: true })
+        .nullable(),
     email: yup.string().email('Invalid email').nullable(),
     followUp: yup.string().nullable(),
     movingOn: yup.string().nullable(),

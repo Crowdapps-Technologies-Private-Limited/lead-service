@@ -155,8 +155,8 @@ SET
     name = COALESCE($1, name),
     phone = COALESCE($2, phone),
     email = COALESCE($3, email),
-    follow_up_date = COALESCE($4, follow_up_date),
-    moving_on_date = COALESCE($5, moving_on_date),
+    follow_up_date = $4,
+    moving_on_date = $5,
     collection_address = COALESCE($6, collection_address),
     collection_county = COALESCE($7, collection_county),
     collection_city = COALESCE($8, collection_city),
@@ -176,10 +176,10 @@ SET
     delivery_volume = COALESCE($22, delivery_volume),
     delivery_volume_unit = COALESCE($23, delivery_volume_unit),
     customer_notes = COALESCE($24, customer_notes),
-    referrer_id = COALESCE($25, referrer_id),
+    referrer_id = $25,
     collection_postcode = COALESCE($26, collection_postcode),
     delivery_postcode = COALESCE($27, delivery_postcode),
-    packing_on_date = COALESCE($28, packing_on_date),
+    packing_on_date = $28,
     updated_at = NOW()
 WHERE id = $29 RETURNING *`;
 
@@ -443,6 +443,12 @@ export const UPDATE_ANCILLARY = `
         charge = $2,
         isChargeable = $3
     WHERE id = $4
+`;
+
+export const ALTER_LEAD_TABLE_TO_ADD_COLUMNS = `ALTER TABLE leads 
+    ADD COLUMN IF NOT EXISTS collection_type VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS delivery_type VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS lead_date TIMESTAMP
 `;
 
 

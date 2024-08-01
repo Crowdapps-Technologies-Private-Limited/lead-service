@@ -43,3 +43,7 @@ export const toFloat = (value: any): number => {
     
     return parsedValue;
 };
+
+export const isEmptyString = (value: any): boolean => {
+  return typeof value === 'string' && value.trim() === '';
+};

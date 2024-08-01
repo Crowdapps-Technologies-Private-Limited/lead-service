@@ -10,6 +10,7 @@ import { connectToDatabase } from '../../utils/database';
 import { EditLeadPayload } from '../interface';
 import { getconfigSecrets } from '../../utils/getConfig';
 import logger from '../../utils/logger';
+import { isEmptyString } from '../../utils/utility';
 
 const { CognitoIdentityServiceProvider } = AWS;
 const cognito = new CognitoIdentityServiceProvider();
@@ -76,8 +77,8 @@ export const updateLead = async (payload: EditLeadPayload, leadId: string, tenan
             name,
             phone,
             email,
-            followUp,
-            movingOn,
+            isEmptyString(followUp)  ? null : followUp,
+            isEmptyString(movingOn)  ? null : movingOn,
             collectionAddress,
             collectionCounty,
             collectionCity,
@@ -97,10 +98,10 @@ export const updateLead = async (payload: EditLeadPayload, leadId: string, tenan
             deliveryVolume,
             deliveryVolumeUnit,
             customerNotes,
-            referrerId,
+            isEmptyString(referrerId) ? null : referrerId,
             collectionPostcode,
             deliveryPostcode,
-            packingOn,
+            isEmptyString(packingOn) ? null : packingOn,
             leadId    
         ]);
         await client.query(CREATE_LOG_TABLE);

@@ -12,6 +12,7 @@ import logger from '../../utils/logger';
 import { log } from 'console';
 import { AddLeadPayload } from '../interface';
 import { generateEmail } from '../../utils/generateEmailService';
+import { isEmptyString } from '../../utils/utility';
 
 const s3 = new AWS.S3();
 
@@ -76,8 +77,8 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             name,
             phone || null,
             email,
-            followUp || null,
-            movingOn || null,
+            isEmptyString(followUp) ? null : followUp,
+            isEmptyString(movingOn) ? null : movingOn,
             collectionAddress || null,
             collectionCounty || null,
             collectionCity || null,
@@ -97,7 +98,7 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             deliveryVolume ?? null,
             deliveryVolumeUnit || null,
             customerNotes || null,
-            referrerId || null,
+            isEmptyString(referrerId) ? null : referrerId,
             generatedId,
             collectionPostcode || null,
             deliveryPostcode || null
