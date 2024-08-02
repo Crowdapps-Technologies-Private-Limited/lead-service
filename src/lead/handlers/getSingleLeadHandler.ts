@@ -17,14 +17,13 @@ export const getSingleLeadHandler: RouteHandler = async (
             return ResponseHandler.badRequestResponse({ message: `Lead ID not provided` });
         }
         const result = await getLeadById(leadId, tenant);
-        return ResponseHandler.successResponse({ message: result?.message, data: result?.data });
+        return ResponseHandler.successResponse({ message: 'Lead fetched successfully', data: result });
     } catch (error: any) {
-        logger.error('Error occurred at get signle lead', { error });
+        logger.error('Error occurred at get single lead', { error });
         if (error?.message?.includes('No data found')) {
             return ResponseHandler.notFoundResponse({ message: "Lead not found." });
         } else {
             return ResponseHandler.notFoundResponse({ message: error.message });
-            // return ResponseHandler.internalServerErrorResponse({ message: "Something went wrong. Please try later!" });
         }
     }
 };

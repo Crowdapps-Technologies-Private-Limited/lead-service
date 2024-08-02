@@ -14,86 +14,64 @@ const passwordSchema = yup
 
 // Define the add lead schema
 export const addLeadSchema = yup.object().shape({
-    name: yup.string().required('Name is required'),
-    phone: yup.string()
-        .transform((value, originalValue) => originalValue.trim() === '' ? null : value)
-        .matches(/^\d{10}$/, { message: 'Mobile number must be exactly 10 digits', excludeEmptyString: true })
-        .nullable(),
-    email: yup.string().email('Invalid email').required('Email is required'),
-    followUp: yup.string().nullable(),
-    movingOn: yup.string().nullable(),
-    collectionAddress: yup.string().nullable(),
-    collectionCounty: yup.string().nullable(),
-    collectionState: yup.string().nullable(),
-    collectionCity: yup.string().nullable(),
-    collectionPostcode: yup.string().nullable(),
-    collectionPurchaseStatus: yup.string().nullable(),
-    collectionHouseSize: yup.string().nullable(),
-    collectionVolume: yup.number().nullable(),
-    collectionVolumeUnit: yup.string().nullable(),
-    collectionDistance: yup.number().nullable(),
-    deliveryAddress: yup.string().nullable(),
-    deliveryCounty: yup.string().nullable(),
-    deliveryState: yup.string().nullable(),
-    deliveryCity: yup.string().nullable(),
-    deliveryPostcode: yup.string().nullable(),
-    deliveryPurchaseStatus: yup.string().nullable(),
-    deliveryHouseSize: yup.string().nullable(),
-    deliveryVolume: yup.number().nullable(),
-    deliveryVolumeUnit: yup.string().nullable(),
-    deliveryDistance: yup.number().nullable(),
-    customerNotes: yup.string().nullable(),
-    referrerId: yup.string().nullable()
-}).noUnknown(true, 'Unknown field in payload');
+    referrer_id: yup.string().nullable(),
+    name: yup.string().required('Name is required').max(100),
+    phone: yup.string().required('Phone is required').max(20),
+    email: yup.string().required('Email is required').email('Invalid email format').max(100),
+    follow_up_date: yup.string().nullable(),
+    moving_on_date: yup.string().nullable(),
+    packing_on_date: yup.string().nullable(),
+    survey_date: yup.string().nullable(),
+    collection_address: yup.object().shape({
+        street: yup.string().nullable().max(300),
+        town: yup.string().nullable().max(300),
+        county: yup.string().nullable().max(300),
+        postcode: yup.string().nullable().max(50),
+        country: yup.string().nullable().max(100),
+    }).required('Collection address is required').default({}),
+    delivery_address: yup.object().shape({
+        street: yup.string().nullable().max(300),
+        town: yup.string().nullable().max(300),
+        county: yup.string().nullable().max(300),
+        postcode: yup.string().nullable().max(50),
+        country: yup.string().nullable().max(100),
+    }).required('Delivery address is required').default({}),
+    collection_purchase_status: yup.string().nullable().max(100),
+    collection_house_size: yup.string().nullable().max(100),
+    collection_distance: yup.number().nullable().max(99999999.99),
+    collection_volume: yup.number().nullable().max(99999999.99),
+    collection_volume_unit: yup.string().nullable().max(20),
+    delivery_purchase_status: yup.string().nullable().max(100),
+    delivery_house_size: yup.string().nullable().max(100),
+    delivery_distance: yup.number().nullable().max(99999999.99),
+    delivery_volume: yup.number().nullable().max(99999999.99),
+    delivery_volume_unit: yup.string().nullable().max(20),
+    status: yup.string().required('Status is required').oneOf(['NEW', 'ESTIMATES', 'SURVEY', 'QUOTE', 'CONFIRMED', 'COMPLETED'], 'Invalid status value'),
+    customer_notes: yup.string().nullable(),
+    batch: yup.string().required('Batch is required'),
+    incept_batch: yup.string().required('Incept Batch is required'),
+    lead_date: yup.string().required('Lead date is required'),
+    customer: yup.object().shape({
+        name: yup.string().nullable().max(100),
+        phone: yup.string().required('Customer phone is required').max(20),
+        email: yup.string().required('Customer email is required').email('Invalid email format').max(100),
+    }).required('Customer information is required').default({}),
+});
 
-// Validate change password payload
 export const addLeadDTO = async (payload: AddLeadPayload): Promise<void> => {
     try {
         await addLeadSchema.validate(payload, { abortEarly: false, strict: true });
     } catch (err: any) {
-        throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
+        throw new Error(`Payload Validation Failed: ${err.errors.join(', ')}`);
     }
 };
 
-// Define the edit lead schema
-export const editLeadSchema = yup.object().shape({
-    name: yup.string().nullable(),
-    phone: yup.string()
-        .transform((value, originalValue) => originalValue.trim() === '' ? null : value)
-        .matches(/^\d{10}$/, { message: 'Mobile number must be exactly 10 digits', excludeEmptyString: true })
-        .nullable(),
-    email: yup.string().email('Invalid email').nullable(),
-    followUp: yup.string().nullable(),
-    movingOn: yup.string().nullable(),
-    packingOn: yup.string().nullable(),
-    collectionAddress: yup.string().nullable(),
-    collectionCounty: yup.string().nullable(),
-    collectionState: yup.string().nullable(),
-    collectionCity: yup.string().nullable(),
-    collectionPostcode: yup.string().nullable(),
-    collectionPurchaseStatus: yup.string().nullable(),
-    collectionHouseSize: yup.string().nullable(),
-    collectionVolume: yup.number().nullable(),
-    collectionVolumeUnit: yup.string().nullable(),
-    collectionDistance: yup.number().nullable(),
-    deliveryAddress: yup.string().nullable(),
-    deliveryCounty: yup.string().nullable(),
-    deliveryState: yup.string().nullable(),
-    deliveryCity: yup.string().nullable(),
-    deliveryPostcode: yup.string().nullable(),
-    deliveryPurchaseStatus: yup.string().nullable(),
-    deliveryHouseSize: yup.string().nullable(),
-    deliveryVolume: yup.number().nullable(),
-    deliveryVolumeUnit: yup.string().nullable(),
-    deliveryDistance: yup.number().nullable(),
-    customerNotes: yup.string().nullable(),
-    referrerId: yup.string().nullable()
-}).noUnknown(true, 'Unknown field in payload');
 
-// Validate change password payload
-export const editLeadDTO = async (payload: EditLeadPayload): Promise<void> => {
+
+// Validate the edit lead payload
+export const validateEditLeadDTO = async (payload: any): Promise<void> => {
     try {
-        await editLeadSchema.validate(payload, { abortEarly: false, strict: true });
+        await addLeadSchema.validate(payload, { abortEarly: false, strict: true });
     } catch (err: any) {
         throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
     }

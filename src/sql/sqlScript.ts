@@ -4,74 +4,60 @@ export const SELECT_COMPANY_INFO = 'SELECT * FROM company_info WHERE tenant_id =
 
 export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS leads (
+export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS customers (
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    email VARCHAR(100),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL
+);
+
+-- Create addresses table
+CREATE TABLE IF NOT EXISTS addresses (
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    street VARCHAR(300),
+    town VARCHAR(300),
+    county VARCHAR(300),
+    postcode VARCHAR(50),
+    country VARCHAR(100),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL
+);
+
+-- Create leads table
+CREATE TABLE IF NOT EXISTS leads (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     generated_id VARCHAR(10) NOT NULL UNIQUE,
     referrer_id UUID,
-    name VARCHAR(100),
-	phone VARCHAR(20),
-	email VARCHAR(100),
-	follow_up_date	TIMESTAMP,
-	moving_on_date	TIMESTAMP,
-    packing_on_date	TIMESTAMP DEFAULT NULL,
-    survey_date	TIMESTAMP DEFAULT NULL,
-	collection_address VARCHAR(300),
-    collection_county VARCHAR(300),
-    collection_city VARCHAR(300),
-    collection_state VARCHAR(300),
-    collection_postcode VARCHAR(50),
-	collection_purchase_status VARCHAR(100),
-	collection_house_size VARCHAR(100),
-	collection_distance DECIMAL(8,2),
-	collection_volume DECIMAL(8,2),
+    customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
+    collection_address_id UUID REFERENCES addresses(id) ON DELETE CASCADE,
+    delivery_address_id UUID REFERENCES addresses(id) ON DELETE CASCADE,
+    follow_up_date TIMESTAMP,
+    moving_on_date TIMESTAMP,
+    packing_on_date TIMESTAMP DEFAULT NULL,
+    survey_date TIMESTAMP DEFAULT NULL,
+    collection_purchase_status VARCHAR(100),
+    collection_house_size VARCHAR(100),
+    collection_distance DECIMAL(8, 2),
+    collection_volume DECIMAL(8, 2),
     collection_volume_unit VARCHAR(20),
-	delivery_address VARCHAR(300),
-    delivery_county VARCHAR(300),
-    delivery_city VARCHAR(300),
-    delivery_state VARCHAR(300),
-    delivery_postcode VARCHAR(50),
-	delivery_purchase_status VARCHAR(100),
-	delivery_house_size VARCHAR(100),
-	delivery_distance DECIMAL(8,2),
-	delivery_volume DECIMAL(8,2),
+    delivery_purchase_status VARCHAR(100),
+    delivery_house_size VARCHAR(100),
+    delivery_distance DECIMAL(8, 2),
+    delivery_volume DECIMAL(8, 2),
     delivery_volume_unit VARCHAR(20),
     status VARCHAR(100) NOT NULL CHECK (status IN ('NEW', 'ESTIMATES', 'SURVEY', 'QUOTE', 'CONFIRMED', 'COMPLETED')) DEFAULT 'NEW',
     customer_notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT NULL,
+    batch VARCHAR(20),
+    incept_batch VARCHAR(20),
+    lead_id VARCHAR(10),
+    lead_date TIMESTAMP,
     FOREIGN KEY (referrer_id) REFERENCES public.referrers(id) ON DELETE CASCADE
-)`;
+);`;
 
-export const INSERT_LEAD = `INSERT INTO leads (
-    name,
-    phone,
-    email,
-    follow_up_date,
-    moving_on_date,
-    collection_address,
-    collection_county,
-    collection_city,
-    collection_state,
-    collection_purchase_status,
-    collection_house_size,
-    collection_distance,
-    collection_volume,
-    collection_volume_unit,
-    delivery_address,
-    delivery_county,
-    delivery_city,
-    delivery_state,
-    delivery_purchase_status,
-    delivery_house_size,
-    delivery_distance,
-    delivery_volume,
-    delivery_volume_unit, 
-    customer_notes,
-    referrer_id,
-    generated_id,
-    collection_postcode,
-    delivery_postcode
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28) RETURNING *`;
 
 export const CHECK_LEAD_BY_EMAIL = `SELECT COUNT(*) FROM leads WHERE email = $1`;
 
@@ -97,13 +83,67 @@ export const GET_LEAD_COUNT = `
     FROM leads
 `;
 
-export const GET_ALL_LEADS = `
-    SELECT generated_id
-    FROM leads
-    order by generated_id DESC
+export const GET_LEAD_BY_ID = `
+SELECT 
+    leads.id AS lead_id,
+    leads.generated_id,
+    leads.referrer_id,
+    leads.follow_up_date,
+    leads.moving_on_date,
+    leads.packing_on_date,
+    leads.survey_date,
+    leads.collection_purchase_status,
+    leads.collection_house_size,
+    leads.collection_distance,
+    leads.collection_volume,
+    leads.collection_volume_unit,
+    leads.delivery_purchase_status,
+    leads.delivery_house_size,
+    leads.delivery_distance,
+    leads.delivery_volume,
+    leads.delivery_volume_unit,
+    leads.status,
+    leads.customer_notes,
+    leads.batch,
+    leads.incept_batch,
+    leads.lead_id,
+    leads.lead_date,
+    leads.created_at,
+    leads.updated_at,
+    customers.id AS customer_id,
+    customers.name AS customer_name,
+    customers.phone AS customer_phone,
+    customers.email AS customer_email,
+    customers.created_at AS customer_created_at,
+    customers.updated_at AS customer_updated_at,
+    collection_addresses.id AS collection_address_id,
+    collection_addresses.street AS collection_street,
+    collection_addresses.town AS collection_town,
+    collection_addresses.county AS collection_county,
+    collection_addresses.postcode AS collection_postcode,
+    collection_addresses.country AS collection_country,
+    collection_addresses.created_at AS collection_created_at,
+    collection_addresses.updated_at AS collection_updated_at,
+    delivery_addresses.id AS delivery_address_id,
+    delivery_addresses.street AS delivery_street,
+    delivery_addresses.town AS delivery_town,
+    delivery_addresses.county AS delivery_county,
+    delivery_addresses.postcode AS delivery_postcode,
+    delivery_addresses.country AS delivery_country,
+    delivery_addresses.created_at AS delivery_created_at,
+    delivery_addresses.updated_at AS delivery_updated_at
+FROM 
+    leads
+LEFT JOIN 
+    customers ON leads.customer_id = customers.id
+LEFT JOIN 
+    addresses AS collection_addresses ON leads.collection_address_id = collection_addresses.id
+LEFT JOIN 
+    addresses AS delivery_addresses ON leads.delivery_address_id = delivery_addresses.id
+WHERE 
+    leads.id = $1;
 `;
 
-export const GET_LEAD_BY_ID = `SELECT * FROM leads WHERE id = $1`;
 
 export const GET_EMAIL_TEMPLATE_BY_EVENT = `
     SELECT template_id, template_name, subject, salutation, body, links, signature, disclaimer, placeholders
@@ -451,5 +491,10 @@ export const ALTER_LEAD_TABLE_TO_ADD_COLUMNS = `ALTER TABLE leads
     ADD COLUMN IF NOT EXISTS lead_date TIMESTAMP
 `;
 
+export const GET_ALL_LEADS = `
+    SELECT generated_id
+    FROM leads
+    order by generated_id DESC
+    `;
 
 

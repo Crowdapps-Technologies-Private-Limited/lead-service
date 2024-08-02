@@ -1,108 +1,159 @@
-import { 
-    CREATE_LEAD_TABLE, 
-    INSERT_LEAD, 
-    GET_ALL_LEADS,
-    CREATE_LOG_TABLE,
-    INSERT_LOG
-} from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
-import AWS from 'aws-sdk';
-import { getconfigSecrets } from '../../utils/getConfig';
 import logger from '../../utils/logger';
-import { log } from 'console';
 import { AddLeadPayload } from '../interface';
 import { generateEmail } from '../../utils/generateEmailService';
-import { isEmptyString } from '../../utils/utility';
-
-const s3 = new AWS.S3();
+import { CREATE_LEAD_TABLE, CREATE_LOG_TABLE, INSERT_LOG, GET_ALL_LEADS } from '../../sql/sqlScript';
 
 export const addLead = async (payload: AddLeadPayload, tenant: any) => {
-    logger.info('addLead payload:', { payload });
     const {
-        name,
-        phone,
-        email,
-        followUp,
-        movingOn,
+        referrerId,
+        customer,
         collectionAddress,
-        collectionCounty,
-        collectionState,
-        collectionCity,
+        deliveryAddress,
+        followUpDate,
+        movingOnDate,
+        packingOnDate,
+        surveyDate,
         collectionPurchaseStatus,
         collectionHouseSize,
+        collectionDistance,
         collectionVolume,
         collectionVolumeUnit,
-        collectionDistance,
-        deliveryAddress,
-        deliveryCounty,
-        deliveryState,
-        deliveryCity,
         deliveryPurchaseStatus,
         deliveryHouseSize,
+        deliveryDistance,
         deliveryVolume,
         deliveryVolumeUnit,
-        deliveryDistance,
+        status,
         customerNotes,
-        referrerId,
-        collectionPostcode,
-        deliveryPostcode
+        batch,
+        inceptBatch,
+        leadId,
+        leadDate
     } = payload;
+
     const client = await connectToDatabase();
+    const schema = tenant.schema;
 
     try {
         await client.query('BEGIN');
-        if(tenant?.is_suspended){
+
+        if (tenant?.is_suspended) {
             throw new Error('Tenant is suspended');
         }
-        const schema = tenant.schema;
-        logger.info('Schema:', { schema });
-        await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
-        logger.info('Schema created successfully');
+
         await client.query(`SET search_path TO ${schema}`);
-        logger.info('Schema set successfully');
-        // await client.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA ${schema}`);
-        // logger.info('Extension created successfully');
+
+        // Create leads table if it doesn't exist
         await client.query(CREATE_LEAD_TABLE);
         logger.info('Lead table created successfully');
-        let generatedId: any;
+
+        // Check if customer exists
+        let customerId;
+        const customerCheckResult = await client.query(`
+            SELECT id FROM customers WHERE email = $1 OR phone = $2
+        `, [customer.email, customer.phone]);
+
+        if (customerCheckResult.rows.length > 0) {
+            customerId = customerCheckResult.rows[0].id;
+        } else {
+            const customerResult = await client.query(`
+                INSERT INTO customers (name, phone, email)
+                VALUES ($1, $2, $3) RETURNING id
+            `, [customer.name, customer.phone, customer.email]);
+            customerId = customerResult.rows[0].id;
+        }
+
+        logger.info('Customer created successfully');
+        logger.info('Customer ID:', { customerId });
+        logger.info('Referrer ID:', { referrerId });
+        logger.info('Collection Address:', { collectionAddress });
+        logger.info('Delivery Address:', { deliveryAddress });
+        // Check if collection address exists
+        let collectionAddressId;
+        try {
+        const collectionAddressCheckResult = await client.query(`
+            SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
+        `, [collectionAddress.street, collectionAddress.town, collectionAddress.postcode]);
+
+        if (collectionAddressCheckResult.rows.length > 0) {
+            collectionAddressId = collectionAddressCheckResult.rows[0].id;
+        } else {
+            const collectionAddressResult = await client.query(`
+                INSERT INTO addresses (street, town, county, postcode, country)
+                VALUES ($1, $2, $3, $4, $5) RETURNING id
+            `, [
+                collectionAddress.street,
+                collectionAddress.town,
+                collectionAddress.county,
+                collectionAddress.postcode,
+                collectionAddress.country
+            ]);
+            collectionAddressId = collectionAddressResult.rows[0].id;
+        }
+    } catch (error) {
+        logger.error('Failed to add collection address', { error });
+        throw new Error(`Failed to add collection address: ${error.message}`);
+    }
+        // Check if delivery address exists
+        let deliveryAddressId;
+        try {
+        const deliveryAddressCheckResult = await client.query(`
+            SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
+        `, [deliveryAddress.street, deliveryAddress.town, deliveryAddress.postcode]);
+
+        if (deliveryAddressCheckResult.rows.length > 0) {
+            deliveryAddressId = deliveryAddressCheckResult.rows[0].id;
+        } else {
+            const deliveryAddressResult = await client.query(`
+                INSERT INTO addresses (street, town, county, postcode, country)
+                VALUES ($1, $2, $3, $4, $5) RETURNING id
+            `, [
+                deliveryAddress.street,
+                deliveryAddress.town,
+                deliveryAddress.county,
+                deliveryAddress.postcode,
+                deliveryAddress.country
+            ]);
+            deliveryAddressId = deliveryAddressResult.rows[0].id;
+        }
+    }
+    catch (error:any) {
+        logger.error('Failed to add delivery address', { error });
+        throw new Error(`Failed to add delivery address: ${error.message}`);
+    }
+
+        // Generate new lead ID
+        let newGeneratedId;
         const idArray = await client.query(GET_ALL_LEADS);
         if (idArray?.rows.length === 0) {
-            generatedId = 10000000;
+            newGeneratedId = 10000000;
         } else {
             const ids = idArray?.rows.map((item: any) => item.generated_id);
             const maxId = Math.max(...ids);
-            generatedId = maxId + 1;
+            newGeneratedId = maxId + 1;
         }
-        const result = await client.query(INSERT_LEAD, [
-            name,
-            phone || null,
-            email,
-            isEmptyString(followUp) ? null : followUp,
-            isEmptyString(movingOn) ? null : movingOn,
-            collectionAddress || null,
-            collectionCounty || null,
-            collectionCity || null,
-            collectionState || null,
-            collectionPurchaseStatus || null,
-            collectionHouseSize || null,
-            collectionDistance ?? null,
-            collectionVolume ?? null,
-            collectionVolumeUnit || null,
-            deliveryAddress || null,
-            deliveryCounty || null,
-            deliveryCity || null,
-            deliveryState || null,
-            deliveryPurchaseStatus || null,
-            deliveryHouseSize || null,
-            deliveryDistance ?? null,
-            deliveryVolume ?? null,
-            deliveryVolumeUnit || null,
-            customerNotes || null,
-            isEmptyString(referrerId) ? null : referrerId,
-            generatedId,
-            collectionPostcode || null,
-            deliveryPostcode || null
+        logger.info('New Generated ID:', { newGeneratedId });
+
+        // Insert lead
+        await client.query(`
+            INSERT INTO leads (
+                generated_id, referrer_id, customer_id, collection_address_id, delivery_address_id,
+                follow_up_date, moving_on_date, packing_on_date, survey_date,
+                collection_purchase_status, collection_house_size, collection_distance, collection_volume, collection_volume_unit,
+                delivery_purchase_status, delivery_house_size, delivery_distance, delivery_volume, delivery_volume_unit,
+                status, customer_notes, batch, incept_batch, lead_id, lead_date
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
+        `, [
+            newGeneratedId, referrerId, customerId, collectionAddressId, deliveryAddressId,
+            followUpDate, movingOnDate, packingOnDate, surveyDate,
+            collectionPurchaseStatus, collectionHouseSize, collectionDistance, collectionVolume, collectionVolumeUnit,
+            deliveryPurchaseStatus, deliveryHouseSize, deliveryDistance, deliveryVolume, deliveryVolumeUnit,
+            status, customerNotes, batch, inceptBatch, leadId, leadDate
         ]);
+
+        logger.info('Lead added successfully');
+        // Insert log
         await client.query(CREATE_LOG_TABLE);
         await client.query(INSERT_LOG, [
             tenant.id,
@@ -111,12 +162,14 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             'You have added a new lead',
             'LEAD',
             'NEW',
-            result?.rows[0].id
+            newGeneratedId
         ]);
-        await generateEmail('Add Lead', email, { username: name });
-        logger.info('Lead added successfully', { result: result?.rows[0] });
+logger.info('Log added successfully');
+        // Send email notification
+        await generateEmail('Add Lead', customer.email, { username: customer.name });
+logger.info('Email sent successfully');
         await client.query('COMMIT');
-        return result?.rows[0];
+        return { message: 'Lead added successfully' };
     } catch (error: any) {
         await client.query('ROLLBACK');
         logger.error('Failed to add lead', { error });

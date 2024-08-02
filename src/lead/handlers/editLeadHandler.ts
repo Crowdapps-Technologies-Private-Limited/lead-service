@@ -1,9 +1,9 @@
 import { ResponseHandler } from '../../utils/ResponseHandler';
+import { editLead } from '../services';
 import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
-import { updateLead } from '../services';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
-import { editLeadDTO } from '../validator';
+import {  validateEditLeadDTO } from '../validator';
 
 export const editLeadHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -13,25 +13,31 @@ export const editLeadHandler: RouteHandler = async (
         const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
-        const leadId = event?.pathParameters?.id as string;
-        logger.info('Lead ID', { leadId });
+        const user = (event.requestContext as any).user;
+        logger.info('user:', { user });
+        const leadId = event.pathParameters?.leadId;
+        logger.info('leadId:', { leadId });
+
         if (!leadId) {
-            return ResponseHandler.badRequestResponse({ message: `Lead ID not provided` });
+            return ResponseHandler.badRequestResponse({ message: 'Lead ID is required' });
         }
-        await editLeadDTO(payload);
-        const result = await updateLead(payload, leadId, tenant);
-        return ResponseHandler.successResponse({ message: result?.message, data: result?.data });
-    } catch (error: any) {
-        logger.error('Error occurred at get signle lead', { error });
-        if (error?.message?.includes('No data found')) {
-            return ResponseHandler.notFoundResponse({ message: "Lead not found." });
-        } else if(error?.message?.includes('Payload Validation Failed')) {
-            return ResponseHandler.notFoundResponse({ message: error.message });
+
+        // Validate payload
+        validateEditLeadDTO(payload);
+
+        const result = await editLead(leadId, payload, tenant);
+
+        return ResponseHandler.successResponse({ message: 'Lead updated successfully', data: result });
+    }  catch (error: any) {
+        logger.error('Error occurred in edit lead handler', { error });
+        if(error?.message?.includes('Payload Validation Failed')) {
+            return ResponseHandler.badRequestResponse({ message: error.message });
+        } else if (error?.message?.includes('Lead not found')) {
+            return ResponseHandler.notFoundResponse({ message: "Lead not found!" });
         } else if(error?.message?.includes('Tenant is suspended')) {
             return ResponseHandler.badRequestResponse({ message: "Your account is suspended. Kindly ask the admin to reactivate your account!" });
         } else {
-            return ResponseHandler.notFoundResponse({ message: error.message });
-            // return ResponseHandler.internalServerErrorResponse({ message: "Something went wrong. Please try later!" });
+            return ResponseHandler.badRequestResponse({ message: error.message });
         }
     }
 };

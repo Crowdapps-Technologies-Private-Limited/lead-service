@@ -6,7 +6,7 @@ import { getAllReferrers } from './getReferrerListService';
 import { getAllLeads } from './getLeadListService';
 import { getLeadById } from './getLeadByIdService';
 import { getAllLogsByLead } from './getLogListService';
-import { updateLead } from './editLeadService';
+import { editLead } from './editLeadService';
 
 // Removed incomplete import statement
 
@@ -16,7 +16,7 @@ export {
     getAllLeads,
     getLeadById,
     getAllLogsByLead,
-    updateLead,
+    editLead,
     addEstimate,
     getLatestEstimates,
     editEstimate
