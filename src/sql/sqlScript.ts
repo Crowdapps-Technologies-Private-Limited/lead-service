@@ -85,7 +85,6 @@ export const GET_LEAD_COUNT = `
 
 export const GET_LEAD_BY_ID = `
 SELECT 
-    leads.id AS lead_id,
     leads.generated_id,
     leads.referrer_id,
     leads.follow_up_date,
@@ -106,7 +105,6 @@ SELECT
     leads.customer_notes,
     leads.batch,
     leads.incept_batch,
-    leads.lead_id,
     leads.lead_date,
     leads.created_at,
     leads.updated_at,
@@ -141,7 +139,7 @@ LEFT JOIN
 LEFT JOIN 
     addresses AS delivery_addresses ON leads.delivery_address_id = delivery_addresses.id
 WHERE 
-    leads.id = $1;
+    leads.generated_id = $1;
 `;
 
 

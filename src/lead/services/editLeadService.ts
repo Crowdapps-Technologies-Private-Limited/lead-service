@@ -45,7 +45,7 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
 
         // Check if lead exists
         const leadCheckResult = await client.query(`
-            SELECT id FROM leads WHERE id = $1
+            SELECT * FROM leads WHERE generated_id = $1
         `, [leadId]);
 
         if (leadCheckResult.rows.length === 0) {
@@ -140,7 +140,7 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
                 incept_batch = $22,
                 lead_date = $23,
                 updated_at = NOW()
-            WHERE id = $24
+            WHERE generated_id = $24
         `, [
             referrerId, customerId, collectionAddressId, deliveryAddressId,
             followUpDate, movingOnDate, packingOnDate, surveyDate,
@@ -157,12 +157,9 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
             tenant.email,
             'You have edited a lead',
             'LEAD',
-            'EDIT',
+            'NEW',
             leadId
         ]);
-
-        // Send email notification
-        await generateEmail('Edit Lead', customer.email, { username: customer.name });
 
         await client.query('COMMIT');
         return { message: 'Lead updated successfully' };
