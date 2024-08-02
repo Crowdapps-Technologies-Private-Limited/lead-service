@@ -135,9 +135,9 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
             tenant.name,
             tenant.email,
             'You have added a new estimation',
+            'LEAD',
             'ESTIMATE',
-            'NEW',
-            result?.rows[0].id
+            leadId
         ]);
         // await generateEmail('Add Lead', tenant.email, { username: name });
 
