@@ -211,9 +211,9 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
             tenant.name,
             tenant.email,
             'You have updated the estimation',
+            'LEAD',
             'ESTIMATE',
-            'NEW',
-            estimateId
+            leadId
         ]);
 
         await client.query('COMMIT');
