@@ -212,7 +212,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
             tenant.email,
             'You have updated the estimation',
             'LEAD',
-            'ESTIMATE',
+            'ESTIMATES',
             leadId
         ]);
 

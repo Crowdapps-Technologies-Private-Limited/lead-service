@@ -11,7 +11,8 @@ import {
     INSERT_ESTIMATE_GENERAL_INFO,
     INSERT_ESTIMATE_ANCILLARY,
     CREATE_ESTIMATE_AND_RELATED_TABLE,
-    INSERT_LOG
+    INSERT_LOG,
+    UPDATE_LEAD_STATUS
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
@@ -130,13 +131,17 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
             await client.query(INSERT_ESTIMATE_ANCILLARY, [estimateId, ancillaryId]);
         }
 
+         // Update leads status
+         await client.query(UPDATE_LEAD_STATUS, ['ESTIMATES', leadId]);
+         logger.info('Lead status updated successfully');
+
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,
             tenant.email,
             'You have added a new estimation',
             'LEAD',
-            'ESTIMATE',
+            'ESTIMATES',
             leadId
         ]);
         // await generateEmail('Add Lead', tenant.email, { username: name });

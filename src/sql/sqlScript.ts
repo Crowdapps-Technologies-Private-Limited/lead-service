@@ -225,13 +225,14 @@ WHERE id = $29 RETURNING *`;
 export const CREATE_ESTIMATE_AND_RELATED_TABLE = `
 CREATE TABLE IF NOT EXISTS estimates (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    lead_id UUID REFERENCES leads(id) ON DELETE CASCADE,
+    lead_id VARCHAR(10) NOT NULL,
     quote_total NUMERIC,
     cost_total NUMERIC,
     quote_expires_on DATE,
     notes TEXT,
     vat_included BOOLEAN,
     material_price_chargeable BOOLEAN
+    FOREIGN KEY (lead_id) REFERENCES leads(generated_id)
 );
 
 CREATE TABLE IF NOT EXISTS services (
@@ -495,4 +496,8 @@ export const GET_ALL_LEADS = `
     order by generated_id DESC
     `;
 
-
+export const UPDATE_LEAD_STATUS = `
+    UPDATE leads
+    SET status = $1
+    WHERE generated_id = $2;
+`;
