@@ -151,10 +151,10 @@ export const GET_EMAIL_TEMPLATE_BY_EVENT = `
     WHERE event = $1
 `;
 
-export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS audit_trails (
+export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS lead_logs (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     actor_id UUID,
-    lead_id UUID,
+    lead_id VARCHAR(10),
     actor_name VARCHAR(150),
 	actor_email VARCHAR(150),
     action TEXT,
@@ -163,10 +163,10 @@ export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS audit_trails (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (actor_id) REFERENCES public.tenants(id) ON DELETE CASCADE,
-    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
+    FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
 )`;
 
-export const INSERT_LOG = `INSERT INTO audit_trails (
+export const INSERT_LOG = `INSERT INTO lead_logs (
     actor_id,
     actor_name,
     actor_email,
@@ -178,7 +178,7 @@ export const INSERT_LOG = `INSERT INTO audit_trails (
 
 export const GET_LOG_COUNT = `
     SELECT COUNT(*) 
-    FROM audit_trails
+    FROM lead_logs
     WHERE lead_id = $1
 `;
 

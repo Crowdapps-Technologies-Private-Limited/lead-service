@@ -91,7 +91,7 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             ]);
             collectionAddressId = collectionAddressResult.rows[0].id;
         }
-    } catch (error) {
+    } catch (error:any) {
         logger.error('Failed to add collection address', { error });
         throw new Error(`Failed to add collection address: ${error.message}`);
     }

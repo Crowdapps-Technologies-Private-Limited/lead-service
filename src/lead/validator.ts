@@ -14,49 +14,47 @@ const passwordSchema = yup
 
 // Define the add lead schema
 export const addLeadSchema = yup.object().shape({
-    referrer_id: yup.string().nullable(),
-    name: yup.string().required('Name is required').max(100),
-    phone: yup.string().required('Phone is required').max(20),
-    email: yup.string().required('Email is required').email('Invalid email format').max(100),
-    follow_up_date: yup.string().nullable(),
-    moving_on_date: yup.string().nullable(),
-    packing_on_date: yup.string().nullable(),
-    survey_date: yup.string().nullable(),
-    collection_address: yup.object().shape({
+    referrerId: yup.string().nullable(),
+    followUpDate: yup.string().nullable(),
+    movingOnDate: yup.string().nullable(),
+    packingOnDate: yup.string().nullable(),
+    surveyDate: yup.string().nullable(),
+    collectionAddress: yup.object().shape({
         street: yup.string().nullable().max(300),
         town: yup.string().nullable().max(300),
         county: yup.string().nullable().max(300),
         postcode: yup.string().nullable().max(50),
         country: yup.string().nullable().max(100),
     }).required('Collection address is required').default({}),
-    delivery_address: yup.object().shape({
+    deliveryAddress: yup.object().shape({
         street: yup.string().nullable().max(300),
         town: yup.string().nullable().max(300),
         county: yup.string().nullable().max(300),
         postcode: yup.string().nullable().max(50),
         country: yup.string().nullable().max(100),
     }).required('Delivery address is required').default({}),
-    collection_purchase_status: yup.string().nullable().max(100),
-    collection_house_size: yup.string().nullable().max(100),
-    collection_distance: yup.number().nullable().max(99999999.99),
-    collection_volume: yup.number().nullable().max(99999999.99),
-    collection_volume_unit: yup.string().nullable().max(20),
-    delivery_purchase_status: yup.string().nullable().max(100),
-    delivery_house_size: yup.string().nullable().max(100),
-    delivery_distance: yup.number().nullable().max(99999999.99),
-    delivery_volume: yup.number().nullable().max(99999999.99),
-    delivery_volume_unit: yup.string().nullable().max(20),
+    collectionPurchaseStatus: yup.string().nullable().max(100),
+    collectionHouseSize: yup.string().nullable().max(100),
+    collectionDistance: yup.number().nullable().max(99999999.99),
+    collectionVolume: yup.number().nullable().max(99999999.99),
+    collectionVolumeUnit: yup.string().nullable().max(20),
+    deliveryPurchaseStatus: yup.string().nullable().max(100),
+    deliveryHouseSize: yup.string().nullable().max(100),
+    deliveryDistance: yup.number().nullable().max(99999999.99),
+    deliveryVolume: yup.number().nullable().max(99999999.99),
+    deliveryVolumeUnit: yup.string().nullable().max(20),
     status: yup.string().required('Status is required').oneOf(['NEW', 'ESTIMATES', 'SURVEY', 'QUOTE', 'CONFIRMED', 'COMPLETED'], 'Invalid status value'),
-    customer_notes: yup.string().nullable(),
+    customerNotes: yup.string().nullable(),
     batch: yup.string().required('Batch is required'),
-    incept_batch: yup.string().required('Incept Batch is required'),
-    lead_date: yup.string().required('Lead date is required'),
+    inceptBatch: yup.string().required('Incept Batch is required'),
+    leadDate: yup.string().required('Lead date is required'),
     customer: yup.object().shape({
         name: yup.string().nullable().max(100),
         phone: yup.string().required('Customer phone is required').max(20),
         email: yup.string().required('Customer email is required').email('Invalid email format').max(100),
     }).required('Customer information is required').default({}),
 });
+
 
 export const addLeadDTO = async (payload: AddLeadPayload): Promise<void> => {
     try {
