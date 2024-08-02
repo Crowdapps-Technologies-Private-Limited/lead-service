@@ -13,8 +13,6 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         deliveryAddress,
         followUpDate,
         movingOnDate,
-        packingOnDate,
-        surveyDate,
         collectionPurchaseStatus,
         collectionHouseSize,
         collectionDistance,
@@ -151,7 +149,7 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             isEmptyString(movingOnDate) ? null : movingOnDate, 
             collectionPurchaseStatus, collectionHouseSize, toFloat(collectionDistance), toFloat(collectionVolume), collectionVolumeUnit,
             deliveryPurchaseStatus, deliveryHouseSize, toFloat(deliveryDistance), toFloat(deliveryVolume), deliveryVolumeUnit,
-            status, customerNotes, batch, inceptBatch, leadId, leadDate
+            'NEW', customerNotes, batch, inceptBatch, leadId, leadDate
         ]);
 
         logger.info('Lead added successfully');

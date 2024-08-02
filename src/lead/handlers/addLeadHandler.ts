@@ -10,12 +10,13 @@ export const addLeadHandler: RouteHandler = async (
 ): Promise<APIGatewayProxyResult> => {
     logger.info('addLeadHandler event ', { event });  
     try {
-        const payload = JSON.parse(event.body || '{}');
+        let payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
         // Validate payload
+        //payload = { ...payload, status: 'NEW'}
         try {
             await addLeadDTO(payload);
         } catch (error: any) {

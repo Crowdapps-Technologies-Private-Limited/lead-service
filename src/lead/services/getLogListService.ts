@@ -67,7 +67,7 @@ export const getAllLogsByLead = async (
           actor_email,
           actor_id,
           created_at
-      FROM audit_trails
+      FROM lead_logs
       WHERE lead_id = $3
       ORDER BY created_at DESC, ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
       LIMIT $1 

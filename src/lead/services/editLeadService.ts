@@ -14,7 +14,6 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         followUpDate,
         movingOnDate,
         packingOnDate,
-        surveyDate,
         collectionPurchaseStatus,
         collectionHouseSize,
         collectionDistance,
@@ -134,13 +133,12 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
                 delivery_distance = $15,
                 delivery_volume = $16,
                 delivery_volume_unit = $17,
-                status = $18,
-                customer_notes = $19,
-                batch = $20,
-                incept_batch = $21,
-                lead_date = $22,
+                customer_notes = $18,
+                batch = $19,
+                incept_batch = $20,
+                lead_date = $21,
                 updated_at = NOW()
-            WHERE generated_id = $23
+            WHERE generated_id = $22
         `, [
             referrerId, customerId, collectionAddressId, deliveryAddressId,
             isEmptyString(followUpDate) ? null : followUpDate, 
@@ -149,7 +147,7 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
             collectionPurchaseStatus, collectionHouseSize, 
             toFloat(collectionDistance), toFloat(collectionVolume), collectionVolumeUnit,
             deliveryPurchaseStatus, deliveryHouseSize, toFloat(deliveryDistance), toFloat(deliveryVolume), deliveryVolumeUnit,
-            status, customerNotes, batch, inceptBatch, leadDate, leadId
+            customerNotes, batch, inceptBatch, leadDate, leadId
         ]);
 
         // Insert log

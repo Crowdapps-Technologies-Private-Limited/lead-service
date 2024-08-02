@@ -17,7 +17,7 @@ export const getSingleLeadHandler: RouteHandler = async (
             return ResponseHandler.badRequestResponse({ message: `Lead ID not provided` });
         }
         const result = await getLeadById(leadId, tenant);
-        return ResponseHandler.successResponse({ message: 'Lead fetched successfully', data: result });
+        return ResponseHandler.successResponse({ message: 'Lead fetched successfully', data: result?.data });
     } catch (error: any) {
         logger.error('Error occurred at get single lead', { error });
         if (error?.message?.includes('No data found')) {

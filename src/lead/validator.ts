@@ -18,7 +18,7 @@ export const addLeadSchema = yup.object().shape({
     followUpDate: yup.string().nullable(),
     movingOnDate: yup.string().nullable(),
     packingOnDate: yup.string().nullable(),
-    surveyDate: yup.string().nullable(),
+    //surveyDate: yup.string().nullable(),
     collectionAddress: yup.object().shape({
         street: yup.string().nullable().max(300),
         town: yup.string().nullable().max(300),
@@ -43,14 +43,17 @@ export const addLeadSchema = yup.object().shape({
     deliveryDistance: yup.number().nullable().max(99999999.99),
     deliveryVolume: yup.number().nullable().max(99999999.99),
     deliveryVolumeUnit: yup.string().nullable().max(20),
-    status: yup.string().required('Status is required').oneOf(['NEW', 'ESTIMATES', 'SURVEY', 'QUOTE', 'CONFIRMED', 'COMPLETED'], 'Invalid status value'),
+    //status: yup.string().required('Status is required').oneOf(['NEW', 'ESTIMATES', 'SURVEY', 'QUOTE', 'CONFIRMED', 'COMPLETED'], 'Invalid status value'),
     customerNotes: yup.string().nullable(),
     batch: yup.string().required('Batch is required'),
     inceptBatch: yup.string().required('Incept Batch is required'),
     leadDate: yup.string().required('Lead date is required'),
     customer: yup.object().shape({
         name: yup.string().nullable().max(100),
-        phone: yup.string().required('Customer phone is required').max(20),
+        phone: yup.string()
+            .transform((value, originalValue) => originalValue.trim() === '' ? null : value)
+            .matches(/^\d{10, 11}$/, { message: 'Mobile number must be 10 or 11 digits long', excludeEmptyString: true })
+            .nullable(),
         email: yup.string().required('Customer email is required').email('Invalid email format').max(100),
     }).required('Customer information is required').default({}),
 });
