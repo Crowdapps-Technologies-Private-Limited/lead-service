@@ -3,6 +3,7 @@ import logger from '../../utils/logger';
 import { AddLeadPayload } from '../interface';
 import { generateEmail } from '../../utils/generateEmailService';
 import { CREATE_LEAD_TABLE, CREATE_LOG_TABLE, INSERT_LOG, GET_ALL_LEADS } from '../../sql/sqlScript';
+import { isEmptyString, toFloat } from '../../utils/utility';
 
 export const addLead = async (payload: AddLeadPayload, tenant: any) => {
     const {
@@ -139,16 +140,17 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         await client.query(`
             INSERT INTO leads (
                 generated_id, referrer_id, customer_id, collection_address_id, delivery_address_id,
-                follow_up_date, moving_on_date, packing_on_date, survey_date,
+                follow_up_date, moving_on_date,
                 collection_purchase_status, collection_house_size, collection_distance, collection_volume, collection_volume_unit,
                 delivery_purchase_status, delivery_house_size, delivery_distance, delivery_volume, delivery_volume_unit,
                 status, customer_notes, batch, incept_batch, lead_id, lead_date
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
         `, [
             newGeneratedId, referrerId, customerId, collectionAddressId, deliveryAddressId,
-            followUpDate, movingOnDate, packingOnDate, surveyDate,
-            collectionPurchaseStatus, collectionHouseSize, collectionDistance, collectionVolume, collectionVolumeUnit,
-            deliveryPurchaseStatus, deliveryHouseSize, deliveryDistance, deliveryVolume, deliveryVolumeUnit,
+            isEmptyString(followUpDate) ? null : followUpDate, 
+            isEmptyString(movingOnDate) ? null : movingOnDate, 
+            collectionPurchaseStatus, collectionHouseSize, toFloat(collectionDistance), toFloat(collectionVolume), collectionVolumeUnit,
+            deliveryPurchaseStatus, deliveryHouseSize, toFloat(deliveryDistance), toFloat(deliveryVolume), deliveryVolumeUnit,
             status, customerNotes, batch, inceptBatch, leadId, leadDate
         ]);
 

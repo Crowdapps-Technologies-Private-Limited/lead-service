@@ -3,6 +3,7 @@ import logger from '../../utils/logger';
 import { AddLeadPayload } from '../interface';
 import { generateEmail } from '../../utils/generateEmailService';
 import {  CREATE_LOG_TABLE, INSERT_LOG } from '../../sql/sqlScript';
+import { isEmptyString, toFloat } from '../../utils/utility';
 
 export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: any) => {
     const {
@@ -143,9 +144,13 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
             WHERE generated_id = $24
         `, [
             referrerId, customerId, collectionAddressId, deliveryAddressId,
-            followUpDate, movingOnDate, packingOnDate, surveyDate,
-            collectionPurchaseStatus, collectionHouseSize, collectionDistance, collectionVolume, collectionVolumeUnit,
-            deliveryPurchaseStatus, deliveryHouseSize, deliveryDistance, deliveryVolume, deliveryVolumeUnit,
+            isEmptyString(followUpDate) ? null : followUpDate, 
+            isEmptyString(movingOnDate) ? null : packingOnDate, 
+            isEmptyString(packingOnDate) ? null : packingOnDate, , 
+            surveyDate,
+            collectionPurchaseStatus, collectionHouseSize, 
+            toFloat(collectionDistance), toFloat(collectionVolume), collectionVolumeUnit,
+            deliveryPurchaseStatus, deliveryHouseSize, toFloat(deliveryDistance), toFloat(deliveryVolume), deliveryVolumeUnit,
             status, customerNotes, batch, inceptBatch, leadDate, leadId
         ]);
 

@@ -47,7 +47,7 @@ export const getAllLogsByLead = async (
     if(lead.rows.length === 0) {
       throw new Error(`No data found.`);
     }
-    tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'audit_trails']);
+    tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'lead_logs']);
 
     const logsTableExists = tableCheckRes.rows[0].exists;
     if (!logsTableExists) {
