@@ -140,7 +140,7 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
                 updated_at = NOW()
             WHERE generated_id = $22
         `, [
-            referrerId, customerId, collectionAddressId, deliveryAddressId,
+            isEmptyString(referrerId) ? null : referrerId, customerId, collectionAddressId, deliveryAddressId,
             isEmptyString(followUpDate) ? null : followUpDate, 
             isEmptyString(movingOnDate) ? null : packingOnDate, 
             isEmptyString(packingOnDate) ? null : packingOnDate, 

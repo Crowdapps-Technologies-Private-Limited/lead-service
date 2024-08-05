@@ -45,14 +45,14 @@ export const addLeadSchema = yup.object().shape({
     deliveryVolumeUnit: yup.string().nullable().max(20),
     //status: yup.string().required('Status is required').oneOf(['NEW', 'ESTIMATES', 'SURVEY', 'QUOTE', 'CONFIRMED', 'COMPLETED'], 'Invalid status value'),
     customerNotes: yup.string().nullable(),
-    batch: yup.string().required('Batch is required'),
-    inceptBatch: yup.string().required('Incept Batch is required'),
-    leadDate: yup.string().required('Lead date is required'),
+    batch: yup.string().nullable(),
+    inceptBatch: yup.string().nullable(),
+    leadDate: yup.string().nullable(),
     customer: yup.object().shape({
         name: yup.string().nullable().max(100),
         phone: yup.string()
             .transform((value, originalValue) => originalValue.trim() === '' ? null : value)
-            .matches(/^\d{10, 11}$/, { message: 'Mobile number must be 10 or 11 digits long', excludeEmptyString: true })
+            .matches(/^\d{10,11}$/, { message: 'Mobile number must be 10 or 11 digits long', excludeEmptyString: true })
             .nullable(),
         email: yup.string().required('Customer email is required').email('Invalid email format').max(100),
     }).required('Customer information is required').default({}),

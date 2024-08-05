@@ -144,12 +144,13 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
                 status, customer_notes, batch, incept_batch, lead_id, lead_date
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
         `, [
-            newGeneratedId, referrerId, customerId, collectionAddressId, deliveryAddressId,
+            newGeneratedId, 
+            isEmptyString(referrerId) ? null : referrerId, customerId, collectionAddressId, deliveryAddressId,
             isEmptyString(followUpDate) ? null : followUpDate, 
             isEmptyString(movingOnDate) ? null : movingOnDate, 
             collectionPurchaseStatus, collectionHouseSize, toFloat(collectionDistance), toFloat(collectionVolume), collectionVolumeUnit,
             deliveryPurchaseStatus, deliveryHouseSize, toFloat(deliveryDistance), toFloat(deliveryVolume), deliveryVolumeUnit,
-            'NEW', customerNotes, batch, inceptBatch, leadId, leadDate
+            'NEW', customerNotes, batch || null, inceptBatch || null, leadId || null, isEmptyString(leadDate) ? null : leadDate, 
         ]);
 
         logger.info('Lead added successfully');
