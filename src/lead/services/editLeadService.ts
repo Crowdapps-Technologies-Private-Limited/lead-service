@@ -142,7 +142,7 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         `, [
             isEmptyString(referrerId) ? null : referrerId, customerId, collectionAddressId, deliveryAddressId,
             isEmptyString(followUpDate) ? null : followUpDate, 
-            isEmptyString(movingOnDate) ? null : packingOnDate, 
+            isEmptyString(movingOnDate) ? null : movingOnDate, 
             isEmptyString(packingOnDate) ? null : packingOnDate, 
             collectionPurchaseStatus, collectionHouseSize, 
             toFloat(collectionDistance), toFloat(collectionVolume), collectionVolumeUnit,
