@@ -147,7 +147,7 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
             collectionPurchaseStatus, collectionHouseSize, 
             toFloat(collectionDistance), toFloat(collectionVolume), collectionVolumeUnit,
             deliveryPurchaseStatus, deliveryHouseSize, toFloat(deliveryDistance), toFloat(deliveryVolume), deliveryVolumeUnit,
-            customerNotes, batch, inceptBatch, leadDate, leadId
+            customerNotes, batch, inceptBatch, isEmptyString(leadDate) ? null : leadDate, leadId
         ]);
 
         // Insert log
