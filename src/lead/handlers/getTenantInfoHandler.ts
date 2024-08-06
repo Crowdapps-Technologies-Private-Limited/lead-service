@@ -7,7 +7,7 @@ import logger from '../../utils/logger';
 export const getTenantInfoHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('getTenantInfoHandler event ', { event });  
+    logger.info('getTenantInfoHandler event ', { event });
     try {
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
@@ -21,7 +21,7 @@ export const getTenantInfoHandler: RouteHandler = async (
     } catch (error: any) {
         logger.error('Error occurred at get signle lead', { error });
         if (error?.message?.includes('No data found')) {
-            return ResponseHandler.notFoundResponse({ message: "Lead not found." });
+            return ResponseHandler.notFoundResponse({ message: 'Lead not found.' });
         } else {
             return ResponseHandler.notFoundResponse({ message: error.message });
             // return ResponseHandler.internalServerErrorResponse({ message: "Something went wrong. Please try later!" });

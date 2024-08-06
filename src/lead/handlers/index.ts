@@ -19,7 +19,7 @@ const authHandlers = {
     getDistanceHandler,
     addEstimateHandler,
     getLatestEstimatesHandler,
-    editEstimateHandler
+    editEstimateHandler,
 };
 
 export default authHandlers;
