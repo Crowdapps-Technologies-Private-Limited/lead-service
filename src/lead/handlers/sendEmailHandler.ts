@@ -1,6 +1,6 @@
 import { ResponseHandler } from '../../utils/ResponseHandler';
-import { addLeadDTO } from '../validator';
-import { addLead } from '../services';
+import { sendEmailDTO } from '../validator';
+import { sendLeadEmail } from '../services';
 import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
@@ -19,10 +19,10 @@ export const sendEmailHandler: RouteHandler = async (
             return ResponseHandler.badRequestResponse({ message: 'Lead ID is required' });
         }
         // Validate payload
-        await addLeadDTO(payload);
-        const result = await addLead(payload, tenant);
+        await sendEmailDTO(payload);
+        const result = await sendLeadEmail(leadId, payload, tenant);
 
-        return ResponseHandler.createdResponse({ message: 'Lead added successfully' });
+        return ResponseHandler.createdResponse({ message: result.message });
     } catch (error: any) {
         logger.error('Error occurred send lead email handler', { error });
         if (error?.message?.includes('Payload Validation Failed')) {

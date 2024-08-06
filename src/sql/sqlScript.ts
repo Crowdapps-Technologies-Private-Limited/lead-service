@@ -2,6 +2,8 @@ export const SELECT_TENANT = 'SELECT * FROM tenants WHERE cognito_sub = $1';
 
 export const SELECT_COMPANY_INFO = 'SELECT * FROM company_info WHERE tenant_id = $1';
 
+export const SELECT_EMAIL_INFO = 'SELECT * FROM email_info WHERE tenant_id = $1';
+
 export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
 export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS customers (
@@ -483,12 +485,6 @@ export const UPDATE_ANCILLARY = `
     WHERE id = $4
 `;
 
-export const ALTER_LEAD_TABLE_TO_ADD_COLUMNS = `ALTER TABLE leads 
-    ADD COLUMN IF NOT EXISTS collection_type VARCHAR(100),
-    ADD COLUMN IF NOT EXISTS delivery_type VARCHAR(100),
-    ADD COLUMN IF NOT EXISTS lead_date TIMESTAMP
-`;
-
 export const GET_ALL_LEADS = `
     SELECT generated_id
     FROM leads
@@ -499,4 +495,10 @@ export const UPDATE_LEAD_STATUS = `
     UPDATE leads
     SET status = $1
     WHERE generated_id = $2;
+`;
+
+export const GET_EMAIL_TEMPLATE_BY_ID = `
+    SELECT template_id, template_name, subject, salutation, body, links, signature, disclaimer, placeholders
+    FROM public.email_templates 
+    WHERE id = $1
 `;

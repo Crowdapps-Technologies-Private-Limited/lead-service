@@ -298,7 +298,7 @@ export const sendEmailSchema = yup.object().shape({
 }).noUnknown(true, 'Unknown field in payload');
 
 // Validate the send email payload
-export const validateSendEmailPayload = async (payload: SendEmailPayload): Promise<void> => {
+export const sendEmailDTO = async (payload: SendEmailPayload): Promise<void> => {
     try {
         await sendEmailSchema.validate(payload, { abortEarly: false, strict: true });
     } catch (err: any) {

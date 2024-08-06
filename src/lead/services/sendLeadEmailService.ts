@@ -1,158 +1,82 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { SendEmailPayload } from '../interface';
-import { generateEmail } from '../../utils/generateEmailService';
-import {  CREATE_LOG_TABLE, INSERT_LOG } from '../../sql/sqlScript';
+import {  
+    CREATE_LOG_TABLE, 
+    INSERT_LOG, 
+    GET_EMAIL_TEMPLATE_BY_ID,
+    SELECT_EMAIL_INFO
+ } from '../../sql/sqlScript';
 import { isEmptyString, toFloat } from '../../utils/utility';
+import { initializeEmailService } from '../../utils/emailService';
 
-// export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, tenant: any) => {
-//     const {
-//         from,
-//         to,
-//         subject,
-//         body,
-//         templateId,
-//         addClientSignature
-//     } = payload;
+export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, tenant: any) => {
+    const {
+        from,
+        to,
+        subject,
+        body,
+        templateId,
+        addClientSignature
+    } = payload;
 
-//     const client = await connectToDatabase();
-//     const schema = tenant.schema;
+    const client = await connectToDatabase();
+    const schema = tenant.schema;
 
-//     try {
-//         await client.query('BEGIN');
+    try {
+        if (tenant?.is_suspended) {
+            throw new Error('Tenant is suspended');
+        }
 
-//         if (tenant?.is_suspended) {
-//             throw new Error('Tenant is suspended');
-//         }
+        await client.query(`SET search_path TO ${schema}`);
 
-//         await client.query(`SET search_path TO ${schema}`);
+        // Check if lead exists
+        const leadCheckResult = await client.query(`
+            SELECT * FROM leads WHERE generated_id = $1
+        `, [leadId]);
 
-//         // Check if lead exists
-//         const leadCheckResult = await client.query(`
-//             SELECT * FROM leads WHERE generated_id = $1
-//         `, [leadId]);
-
-//         if (leadCheckResult.rows.length === 0) {
-//             throw new Error('Lead not found');
-//         }
-
-//         // Check if customer exists
-//         let customerId;
-//         const customerCheckResult = await client.query(`
-//             SELECT id FROM customers WHERE email = $1 OR phone = $2
-//         `, [customer.email, customer.phone]);
-
-//         if (customerCheckResult.rows.length > 0) {
-//             customerId = customerCheckResult.rows[0].id;
-//         } else {
-//             const customerResult = await client.query(`
-//                 INSERT INTO customers (name, phone, email)
-//                 VALUES ($1, $2, $3) RETURNING id
-//             `, [customer.name, customer.phone, customer.email]);
-//             customerId = customerResult.rows[0].id;
-//         }
-
-//         // Check if collection address exists
-//         let collectionAddressId;
-//         const collectionAddressCheckResult = await client.query(`
-//             SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
-//         `, [collectionAddress.street, collectionAddress.town, collectionAddress.postcode]);
-
-//         if (collectionAddressCheckResult.rows.length > 0) {
-//             collectionAddressId = collectionAddressCheckResult.rows[0].id;
-//         } else {
-//             const collectionAddressResult = await client.query(`
-//                 INSERT INTO addresses (street, town, county, postcode, country)
-//                 VALUES ($1, $2, $3, $4, $5) RETURNING id
-//             `, [
-//                 collectionAddress.street,
-//                 collectionAddress.town,
-//                 collectionAddress.county,
-//                 collectionAddress.postcode,
-//                 collectionAddress.country
-//             ]);
-//             collectionAddressId = collectionAddressResult.rows[0].id;
-//         }
-
-//         // Check if delivery address exists
-//         let deliveryAddressId;
-//         const deliveryAddressCheckResult = await client.query(`
-//             SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
-//         `, [deliveryAddress.street, deliveryAddress.town, deliveryAddress.postcode]);
-
-//         if (deliveryAddressCheckResult.rows.length > 0) {
-//             deliveryAddressId = deliveryAddressCheckResult.rows[0].id;
-//         } else {
-//             const deliveryAddressResult = await client.query(`
-//                 INSERT INTO addresses (street, town, county, postcode, country)
-//                 VALUES ($1, $2, $3, $4, $5) RETURNING id
-//             `, [
-//                 deliveryAddress.street,
-//                 deliveryAddress.town,
-//                 deliveryAddress.county,
-//                 deliveryAddress.postcode,
-//                 deliveryAddress.country
-//             ]);
-//             deliveryAddressId = deliveryAddressResult.rows[0].id;
-//         }
-
-//         // Update lead
-//         await client.query(`
-//             UPDATE leads
-//             SET 
-//                 referrer_id = $1,
-//                 customer_id = $2,
-//                 collection_address_id = $3,
-//                 delivery_address_id = $4,
-//                 follow_up_date = $5,
-//                 moving_on_date = $6,
-//                 packing_on_date = $7,
-//                 collection_purchase_status = $8,
-//                 collection_house_size = $9,
-//                 collection_distance = $10,
-//                 collection_volume = $11,
-//                 collection_volume_unit = $12,
-//                 delivery_purchase_status = $13,
-//                 delivery_house_size = $14,
-//                 delivery_distance = $15,
-//                 delivery_volume = $16,
-//                 delivery_volume_unit = $17,
-//                 customer_notes = $18,
-//                 batch = $19,
-//                 incept_batch = $20,
-//                 lead_date = $21,
-//                 updated_at = NOW()
-//             WHERE generated_id = $22
-//         `, [
-//             isEmptyString(referrerId) ? null : referrerId, customerId, collectionAddressId, deliveryAddressId,
-//             isEmptyString(followUpDate) ? null : followUpDate, 
-//             isEmptyString(movingOnDate) ? null : movingOnDate, 
-//             isEmptyString(packingOnDate) ? null : packingOnDate, 
-//             collectionPurchaseStatus, collectionHouseSize, 
-//             toFloat(collectionDistance), toFloat(collectionVolume), collectionVolumeUnit,
-//             deliveryPurchaseStatus, deliveryHouseSize, toFloat(deliveryDistance), toFloat(deliveryVolume), deliveryVolumeUnit,
-//             customerNotes, batch, inceptBatch, isEmptyString(leadDate) ? null : leadDate, leadId
-//         ]);
-
-//         // Insert log
-//         await client.query(CREATE_LOG_TABLE);
-//         await client.query(INSERT_LOG, [
-//             tenant.id,
-//             tenant.name,
-//             tenant.email,
-//             'You have edited a lead',
-//             'LEAD',
-//             'NEW',
-//             leadId
-//         ]);
-
-//         await client.query('COMMIT');
-//         return { message: 'Lead updated successfully' };
-//     } catch (error: any) {
-//         await client.query('ROLLBACK');
-//         logger.error('Failed to edit lead', { error });
-//         throw new Error(`Failed to edit lead: ${error.message}`);
-//     } finally {
-//         client.end();
-//     }
-// };
+        if (leadCheckResult.rows.length === 0) {
+            throw new Error('Lead not found');
+        }
+        let emailSignature = '';
+        let emailDisclaimer = '';
+        if(addClientSignature) {
+            const emailInfo = await client.query(SELECT_EMAIL_INFO, [tenant.id]);
+            if (emailInfo.rows.length === 0) {
+                throw new Error('Email info not found');
+            }
+            emailSignature = emailInfo.rows[0].email_signature;
+            emailDisclaimer = emailInfo.rows[0].email_disclaimer;
+        } else {
+            const templateRes = await client.query(GET_EMAIL_TEMPLATE_BY_ID, [templateId]);
+            if(templateRes.rows.length === 0) {
+                throw new Error('Email template not found');
+            } 
+            emailSignature = templateRes.rows[0].signature;
+            emailDisclaimer = templateRes.rows[0].disclaimer;
+        }
+        const htmlBody = body + "<br/>" + emailSignature + "<br/>" + emailDisclaimer;
+        const emailService = await initializeEmailService();
+        await emailService.sendEmail(
+            to,
+            subject,
+            body,
+            htmlBody
+        );
+        await client.query(INSERT_LOG, [
+            tenant.id,
+            tenant.name,
+            tenant.email,
+            `Email sent to you with subject: ${subject}`,
+            'LEAD',
+            leadCheckResult.rows[0].status,
+            leadId,
+        ]);
+        return { message: 'Email sent successfully' };
+    } catch (error: any) {
+        logger.error('Failed to send lead email', { error });
+        throw new Error(`Failed to send lead email: ${error.message}`);
+    } finally {
+        client.end();
+    }
+};
