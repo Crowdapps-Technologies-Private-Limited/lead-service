@@ -20,6 +20,7 @@ import { AddEstimatePayload } from '../interface';
 
 export const addEstimate = async (leadId: string, payload: AddEstimatePayload, tenant: any) => {
     logger.info('addEstimate service is running:');
+    logger.info('payload:', { payload });
     logger.info('leadId:', { leadId });
     logger.info('tenant:', { tenant });
     const {
@@ -136,7 +137,7 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
         // Update leads status
         await client.query(UPDATE_LEAD_STATUS, ['ESTIMATES', leadId]);
         logger.info('Lead status updated successfully');
-        logger.info('Log inserted successfully');
+        
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,
@@ -146,8 +147,7 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
             'ESTIMATES',
             leadId,
         ]);
-        // await generateEmail('Add Lead', tenant.email, { username: name });
-        logger.info('Email sent successfully');
+        logger.info('Log inserted successfully');
         await client.query('COMMIT');
         return { message: 'Estimate added successfully', estimateId };
     } catch (error: any) {

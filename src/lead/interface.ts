@@ -146,9 +146,10 @@ export interface AddEstimatePayload {
 }
 
 export interface SendEmailPayload {
-    street: string;
-    town: string;
-    county?: string;
-    postcode: string;
-    country?: string;
+    from: string;
+    to: string;
+    subject: string;
+    body: string;
+    addClientSignature: boolean;
+    templateId: string;
 }

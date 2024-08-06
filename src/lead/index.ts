@@ -13,6 +13,7 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
     PUT: {
         '/leads/{id}': admiinHandlers.editLeadHandler,
         '/leads/{id}/estimates/{estimateId}': admiinHandlers.editEstimateHandler,
+        '/leads/{id}/send-email': admiinHandlers.sendEmailHandler,
     },
     POST: {
         '/leads': admiinHandlers.addLeadHandler,

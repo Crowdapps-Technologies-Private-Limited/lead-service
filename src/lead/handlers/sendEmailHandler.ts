@@ -13,15 +13,18 @@ export const sendEmailHandler: RouteHandler = async (
         let payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
-        const user = (event.requestContext as any).user;
-        logger.info('user:', { user });
+        const leadId = event.pathParameters?.id;
+        logger.info('leadId:', { leadId });
+        if (!leadId) {
+            return ResponseHandler.badRequestResponse({ message: 'Lead ID is required' });
+        }
         // Validate payload
         await addLeadDTO(payload);
         const result = await addLead(payload, tenant);
 
         return ResponseHandler.createdResponse({ message: 'Lead added successfully' });
     } catch (error: any) {
-        logger.error('Error occurred add lead handler', { error });
+        logger.error('Error occurred send lead email handler', { error });
         if (error?.message?.includes('Payload Validation Failed')) {
             return ResponseHandler.notFoundResponse({ message: error.message });
         } else if (error?.message?.includes('Tenant is suspended')) {

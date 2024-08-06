@@ -150,7 +150,7 @@ export const GET_EMAIL_TEMPLATE_BY_EVENT = `
 export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS lead_logs (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     actor_id UUID,
-    lead_id VARCHAR(10),
+    lead_id VARCHAR(20),
     actor_name VARCHAR(150),
 	actor_email VARCHAR(150),
     action TEXT,
@@ -222,13 +222,14 @@ WHERE id = $29 RETURNING *`;
 export const CREATE_ESTIMATE_AND_RELATED_TABLE = `
 CREATE TABLE IF NOT EXISTS estimates (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    lead_id VARCHAR(255) NOT NULL,
+    lead_id VARCHAR(20) NOT NULL,
     quote_total NUMERIC,
     cost_total NUMERIC,
     quote_expires_on DATE,
     notes TEXT,
     vat_included BOOLEAN,
-    material_price_chargeable BOOLEAN
+    material_price_chargeable BOOLEAN,
+    FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS services (

@@ -8,6 +8,7 @@ import { getLeadListHandler } from './getLeadListHandler';
 import { getLogListByLeadHandler } from './getLogListByLeadHandler';
 import { getReferrerListHandler } from './getReferrerListHandler';
 import { getSingleLeadHandler } from './getSingleLeadHandler';
+import { sendEmailHandler } from './sendEmailHandler';
 
 const authHandlers = {
     addLeadHandler,
@@ -20,6 +21,7 @@ const authHandlers = {
     addEstimateHandler,
     getLatestEstimatesHandler,
     editEstimateHandler,
+    sendEmailHandler
 };
 
 export default authHandlers;
