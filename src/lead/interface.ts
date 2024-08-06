@@ -145,3 +145,12 @@ export interface AddEstimatePayload {
     generalInfo: GeneralInfo[];
     ancillaries: Ancillary[];
 }
+
+
+export interface SendEmailPayload {
+    street: string;
+    town: string;
+    county?: string;
+    postcode: string;
+    country?: string;
+}
