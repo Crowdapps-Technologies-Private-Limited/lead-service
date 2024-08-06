@@ -66,7 +66,6 @@ export interface EditLeadPayload {
     leadDate?: string;
 }
 
-
 export interface Service {
     id?: string;
     typeName: string;
@@ -82,7 +81,8 @@ export interface Material {
     chargeQty?: number;
     price?: number;
     total?: number;
-    volumeCost?: number;
+    volume?: number;
+    cost?: number;
 }
 
 export interface Cost {
@@ -130,7 +130,6 @@ export interface EditEstimatePayload {
     ancillaries: Ancillary[];
 }
 
-
 export interface AddEstimatePayload {
     leadId: string;
     quoteTotal: number;
@@ -145,7 +144,6 @@ export interface AddEstimatePayload {
     generalInfo: GeneralInfo[];
     ancillaries: Ancillary[];
 }
-
 
 export interface SendEmailPayload {
     street: string;

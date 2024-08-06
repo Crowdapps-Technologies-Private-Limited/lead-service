@@ -1,4 +1,4 @@
-import { 
+import {
     INSERT_SERVICE,
     UPDATE_SERVICE,
     INSERT_MATERIAL,
@@ -10,7 +10,7 @@ import {
     INSERT_ANCILLARY,
     UPDATE_ANCILLARY,
     UPDATE_ESTIMATE,
-    INSERT_LOG
+    INSERT_LOG,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
@@ -28,9 +28,9 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
         materials,
         costs,
         generalInfo,
-        ancillaries
+        ancillaries,
     } = payload;
-    
+
     const client = await connectToDatabase();
     const schema = tenant.schema;
 
@@ -40,7 +40,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
         if (tenant?.is_suspended) {
             throw new Error('Tenant is suspended');
         }
-        
+
         await client.query(`SET search_path TO ${schema}`);
 
         // Update estimate
@@ -52,7 +52,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
             notes || null,
             vatIncluded,
             materialPriceChargeable,
-            estimateId
+            estimateId,
         ]);
 
         // Update or insert services
@@ -62,7 +62,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                 const result = await client.query(INSERT_SERVICE, [
                     service.typeName,
                     service.description || null,
-                    service.price
+                    service.price,
                 ]);
                 serviceId = result.rows[0].id;
             } else {
@@ -70,14 +70,17 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     service.typeName,
                     service.description || null,
                     service.price,
-                    serviceId
+                    serviceId,
                 ]);
             }
-            await client.query(`
+            await client.query(
+                `
                 INSERT INTO estimate_services (estimate_id, service_id)
                 VALUES ($1, $2)
                 ON CONFLICT (estimate_id, service_id) DO NOTHING
-            `, [estimateId, serviceId]);
+            `,
+                [estimateId, serviceId],
+            );
         }
 
         // Update or insert materials
@@ -91,7 +94,8 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     material.chargeQty || null,
                     material.price || null,
                     material.total || null,
-                    material.volumeCost || null
+                    material.volume || null,
+                    material.cost || null,
                 ]);
                 materialId = result.rows[0].id;
             } else {
@@ -102,15 +106,19 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     material.chargeQty || null,
                     material.price || null,
                     material.total || null,
-                    material.volumeCost || null,
-                    materialId
+                    material.volume || null,
+                    material.cost || null,
+                    materialId,
                 ]);
             }
-            await client.query(`
+            await client.query(
+                `
                 INSERT INTO estimate_materials (estimate_id, material_id)
                 VALUES ($1, $2)
                 ON CONFLICT (estimate_id, material_id) DO NOTHING
-            `, [estimateId, materialId]);
+            `,
+                [estimateId, materialId],
+            );
         }
 
         // Update or insert costs
@@ -124,7 +132,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     cost.vehicleQty || null,
                     cost.vehicleTypeId || null,
                     cost.fuelQty || null,
-                    cost.fuelCharge || null
+                    cost.fuelCharge || null,
                 ]);
                 costId = result.rows[0].id;
             } else {
@@ -136,14 +144,17 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     cost.vehicleTypeId || null,
                     cost.fuelQty || null,
                     cost.fuelCharge || null,
-                    costId
+                    costId,
                 ]);
             }
-            await client.query(`
+            await client.query(
+                `
                 INSERT INTO estimate_costs (estimate_id, cost_id)
                 VALUES ($1, $2)
                 ON CONFLICT (estimate_id, cost_id) DO NOTHING
-            `, [estimateId, costId]);
+            `,
+                [estimateId, costId],
+            );
         }
 
         // Update or insert general info
@@ -158,7 +169,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     info.paymentMethod || null,
                     info.insurance_amount || null,
                     info.insurancePercentage || null,
-                    info.insuranceType || null
+                    info.insuranceType || null,
                 ]);
                 infoId = result.rows[0].id;
             } else {
@@ -171,14 +182,17 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     info.insurance_amount || null,
                     info.insurancePercentage || null,
                     info.insuranceType || null,
-                    infoId
+                    infoId,
                 ]);
             }
-            await client.query(`
+            await client.query(
+                `
                 INSERT INTO estimate_general_info (estimate_id, general_info_id)
                 VALUES ($1, $2)
                 ON CONFLICT (estimate_id, general_info_id) DO NOTHING
-            `, [estimateId, infoId]);
+            `,
+                [estimateId, infoId],
+            );
         }
 
         // Update or insert ancillaries
@@ -188,7 +202,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                 const result = await client.query(INSERT_ANCILLARY, [
                     ancillary.name,
                     ancillary.charge || null,
-                    ancillary.isChargeable || null
+                    ancillary.isChargeable || null,
                 ]);
                 ancillaryId = result.rows[0].id;
             } else {
@@ -196,14 +210,17 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     ancillary.name,
                     ancillary.charge || null,
                     ancillary.isChargeable || null,
-                    ancillaryId
+                    ancillaryId,
                 ]);
             }
-            await client.query(`
+            await client.query(
+                `
                 INSERT INTO estimate_ancillaries (estimate_id, ancillary_id)
                 VALUES ($1, $2)
                 ON CONFLICT (estimate_id, ancillary_id) DO NOTHING
-            `, [estimateId, ancillaryId]);
+            `,
+                [estimateId, ancillaryId],
+            );
         }
 
         await client.query(INSERT_LOG, [
@@ -213,7 +230,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
             'You have updated the estimation',
             'LEAD',
             'ESTIMATES',
-            leadId
+            leadId,
         ]);
 
         await client.query('COMMIT');

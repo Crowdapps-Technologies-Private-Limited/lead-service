@@ -43,7 +43,8 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
                     'charge_qty', m.charge_qty,
                     'material_price', m.price,
                     'material_total', m.total,
-                    'material_volume_cost', m.volume_cost
+                    'material_volume', m.volume,
+                    'material_cost', m.cost
                 ))
                 FROM ${schema}.estimate_materials em
                 JOIN ${schema}.materials m ON em.material_id = m.id

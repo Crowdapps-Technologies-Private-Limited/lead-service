@@ -1,4 +1,4 @@
-import { 
+import {
     INSERT_ESTIMATE,
     INSERT_SERVICE,
     INSERT_MATERIAL,
@@ -12,7 +12,7 @@ import {
     INSERT_ESTIMATE_ANCILLARY,
     CREATE_ESTIMATE_AND_RELATED_TABLE,
     INSERT_LOG,
-    UPDATE_LEAD_STATUS
+    UPDATE_LEAD_STATUS,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
@@ -33,23 +33,24 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
         materials,
         costs,
         generalInfo,
-        ancillaries
+        ancillaries,
     } = payload;
-    
+
     const client = await connectToDatabase();
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
-    
+
     try {
         await client.query('BEGIN');
 
         if (tenant?.is_suspended) {
             throw new Error('Tenant is suspended');
         }
-        
+
         await client.query(`SET search_path TO ${schema}`);
         await client.query(CREATE_ESTIMATE_AND_RELATED_TABLE);
-        
+        logger.info('Estimate and related tables created successfully');
+
         // Insert estimate
         const result = await client.query(INSERT_ESTIMATE, [
             leadId,
@@ -58,22 +59,22 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
             quoteExpiresOn,
             notes || null,
             vatIncluded,
-            materialPriceChargeable
+            materialPriceChargeable,
         ]);
 
         const estimateId = result.rows[0].id;
-
+        logger.info('estimateId:', { estimateId });
         // Insert services
         for (const service of services) {
             const serviceResult = await client.query(INSERT_SERVICE, [
                 service.typeName,
                 service.description || null,
-                service.price
+                service.price,
             ]);
             const serviceId = serviceResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_SERVICE, [estimateId, serviceId]);
         }
-
+        logger.info('Services inserted successfully');
         // Insert materials
         for (const material of materials) {
             const materialResult = await client.query(INSERT_MATERIAL, [
@@ -83,12 +84,13 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
                 material.chargeQty || null,
                 material.price || null,
                 material.total || null,
-                material.volumeCost || null
+                material.volume || null,
+                material.cost || null,
             ]);
             const materialId = materialResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_MATERIAL, [estimateId, materialId]);
         }
-
+        logger.info('Materials inserted successfully');
         // Insert costs
         for (const cost of costs) {
             const costResult = await client.query(INSERT_COST, [
@@ -98,12 +100,12 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
                 cost.vehicleQty || null,
                 cost.vehicleTypeId || null,
                 cost.fuelQty || null,
-                cost.fuelCharge || null
+                cost.fuelCharge || null,
             ]);
             const costId = costResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_COST, [estimateId, costId]);
         }
-
+        logger.info('Costs inserted successfully');
         // Insert general info
         for (const info of generalInfo) {
             const infoResult = await client.query(INSERT_GENERAL_INFO, [
@@ -114,27 +116,27 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
                 info.paymentMethod || null,
                 info.insurance_amount || null,
                 info.insurancePercentage || null,
-                info.insuranceType || null
+                info.insuranceType || null,
             ]);
             const infoId = infoResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_GENERAL_INFO, [estimateId, infoId]);
         }
-
+        logger.info('General info inserted successfully');
         // Insert ancillaries
         for (const ancillary of ancillaries) {
             const ancillaryResult = await client.query(INSERT_ANCILLARY, [
                 ancillary.name,
                 ancillary.charge || null,
-                ancillary.isChargeable || null
+                ancillary.isChargeable || null,
             ]);
             const ancillaryId = ancillaryResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_ANCILLARY, [estimateId, ancillaryId]);
         }
-
-         // Update leads status
-         await client.query(UPDATE_LEAD_STATUS, ['ESTIMATES', leadId]);
-         logger.info('Lead status updated successfully');
-
+        logger.info('Ancillaries inserted successfully');
+        // Update leads status
+        await client.query(UPDATE_LEAD_STATUS, ['ESTIMATES', leadId]);
+        logger.info('Lead status updated successfully');
+        logger.info('Log inserted successfully');
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,
@@ -142,10 +144,10 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
             'You have added a new estimation',
             'LEAD',
             'ESTIMATES',
-            leadId
+            leadId,
         ]);
         // await generateEmail('Add Lead', tenant.email, { username: name });
-
+        logger.info('Email sent successfully');
         await client.query('COMMIT');
         return { message: 'Estimate added successfully', estimateId };
     } catch (error: any) {

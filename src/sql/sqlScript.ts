@@ -58,7 +58,6 @@ CREATE TABLE IF NOT EXISTS leads (
     FOREIGN KEY (referrer_id) REFERENCES public.referrers(id) ON DELETE CASCADE
 );`;
 
-
 export const CHECK_LEAD_BY_EMAIL = `SELECT COUNT(*) FROM leads WHERE email = $1`;
 
 export const CHECK_LEAD_BY_NAME = `SELECT COUNT(*) FROM leads WHERE name = $1`;
@@ -142,7 +141,6 @@ WHERE
     leads.generated_id = $1;
 `;
 
-
 export const GET_EMAIL_TEMPLATE_BY_EVENT = `
     SELECT template_id, template_name, subject, salutation, body, links, signature, disclaimer, placeholders
     FROM public.email_templates 
@@ -221,18 +219,16 @@ SET
     updated_at = NOW()
 WHERE id = $29 RETURNING *`;
 
-
 export const CREATE_ESTIMATE_AND_RELATED_TABLE = `
 CREATE TABLE IF NOT EXISTS estimates (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    lead_id VARCHAR(10) NOT NULL,
+    lead_id VARCHAR(255) NOT NULL,
     quote_total NUMERIC,
     cost_total NUMERIC,
     quote_expires_on DATE,
     notes TEXT,
     vat_included BOOLEAN,
     material_price_chargeable BOOLEAN
-    FOREIGN KEY (lead_id) REFERENCES leads(generated_id)
 );
 
 CREATE TABLE IF NOT EXISTS services (
@@ -252,7 +248,8 @@ CREATE TABLE IF NOT EXISTS materials (
     charge_qty DECIMAL(10, 2),
     price DECIMAL(10, 2),
     total DECIMAL(10, 2),
-    volume_cost DECIMAL(10, 2),
+    volume DECIMAL(10, 2),
+    cost DECIMAL(10, 2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -308,7 +305,6 @@ CREATE TABLE IF NOT EXISTS estimate_materials (
     FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
     FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
 );
-
 CREATE TABLE IF NOT EXISTS estimate_costs (
     estimate_id UUID NOT NULL,
     cost_id UUID NOT NULL,
@@ -383,8 +379,9 @@ export const INSERT_MATERIAL = `INSERT INTO materials (
     charge_qty,
     price,
     total,
-    volume_cost
-) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
+    volume,
+    cost
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`;
 
 export const INSERT_COST = `INSERT INTO costs (
     driver_qty,
@@ -444,8 +441,9 @@ export const UPDATE_MATERIAL = `
         charge_qty = $4,
         price = $5,
         total = $6,
-        volume_cost = $7
-    WHERE id = $8
+        volume = $7
+        cost = $8
+    WHERE id = $9
 `;
 
 export const UPDATE_COST = `
