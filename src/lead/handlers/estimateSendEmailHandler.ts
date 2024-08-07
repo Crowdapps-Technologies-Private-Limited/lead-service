@@ -23,7 +23,7 @@ export const estimateSendEmailHandler: RouteHandler = async (
         }
         const result = await sendEstimateEmail(leadId, estimateId, tenant);
 
-        return ResponseHandler.createdResponse({ message: result.message });
+        return ResponseHandler.createdResponse({ message: result.message, data: result.data });
     } catch (error: any) {
         logger.error('Error occurred send lead email handler', { error });
         if (error?.message?.includes('Payload Validation Failed')) {
