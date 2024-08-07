@@ -1,5 +1,6 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
+import { generatePdfAndUploadToS3 } from './generatePdf';
 
 export const getLatestEstimates = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
