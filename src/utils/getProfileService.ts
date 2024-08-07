@@ -26,6 +26,8 @@ export const getUserProfile = async (userId: string) => {
         user.phoneNumber = company.rows[0].phone_number;
         user.companyName = company.rows[0].company_name;
         user.postCode = company.rows[0].post_code;
+        user.address = company.rows[0].address;
+        user.general_website = company.rows[0].general_website;
         
         logger.info('User profile:', { user });
 

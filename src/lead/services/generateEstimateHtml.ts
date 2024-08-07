@@ -1,10 +1,12 @@
 import logger from '../../utils/logger';
+import dayjs from 'dayjs';
 
-const generateEstimateHtml = async ({ client, lead, estimate }: { client: object; lead: object; estimate: object }) => {
+const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; lead: any; estimate: any }) => {
     logger.info('Generating estimate html');
     logger.info('Client:', { client });
     logger.info('Lead:', { lead });
     logger.info('Estimate:', { estimate });
+
     const {
         estimate_id,
         lead_id,
@@ -20,7 +22,44 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: object
         general_info,
         ancillaries,
     } = estimate;
-    return ` <!DOCTYPE html>
+
+    let collection_addr = '';
+    if(lead?.collection_street) {
+        collection_addr += lead?.collection_street;
+    }
+    if(lead?.collection_town) {
+        collection_addr += `, ${lead?.collection_town}`;
+    }
+    if(lead?.collection_county) {
+        collection_addr += `, ${lead?.collection_county}`;
+    }
+    if(lead?.collection_country) {
+        collection_addr += `, ${lead?.collection_country}`;
+    }
+    if(lead?.collection_postcode) {
+        collection_addr += `, ${lead?.collection_postcode}`;
+    }
+
+    let delivery_addr = '';
+    if(lead?.delivery_street) {
+        delivery_addr += lead?.delivery_street;
+    }
+    if(lead?.delivery_town) {
+        delivery_addr += `, ${lead?.delivery_town}`;
+    }
+    if(lead?.delivery_county) {
+        delivery_addr += `, ${lead?.delivery_county}`;
+    }
+    if(lead?.delivery_country) {
+        delivery_addr += `, ${lead?.delivery_country}`;
+    }
+    if(lead?.delivery_postcode) {
+        delivery_addr += `, ${lead?.delivery_postcode}`;
+    }
+
+    const createdAtFormatted = dayjs(lead?.createdAt).format('DD-MM-YYYY');
+
+    return `<!DOCTYPE html>
     <html>
     <head>
         <style>
@@ -69,28 +108,27 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: object
                 <p>Logo</p>
             </div>
             <div class="company-info">
-                <p>#CoName#</p>
-                <p>#CoAddress#</p>
-                <p>Email: #CoEmail2#</p>
-                <p>Website: #CoWebsite#</p>
+                <p>${client?.name}</p>
+                <p>${client?.address}, ${client?.postCode}</p>
+                <p>Email: ${client?.email}</p>
+                <p>Website: ${client?.general_website}</p>
             </div>
             <h1>E S T I M A T I O N</h1>
-            <p>${estimate_id}</p>
         </div>
     
         <div class="quotation-info">
-            <p><strong>Prepared For:</strong> #CName#</p>
-            <p>#CEmail#</p>
-            <p>Custumer Email: {}</p>
-            <p>#CMobile1#</p>
-            <p><strong>Client ID:</strong> #CID#</p>
-            <p><strong>Date:</strong> #Date#</p>
-            <p><strong>Volume:</strong> #JCuMetres# m<sup>3</sup></p>
+            <p><strong>Prepared For:</strong></p>
+            <p>${lead?.customer_name}</p>
+            <p>${lead?.customer_email}</p>
+            <p>${lead?.customer_phone}</p>
+            <p><strong>Client ID:</strong> ${lead?.generated_id}</p>
+            <p><strong>Date:</strong> ${createdAtFormatted}</p>
+            <p><strong>Volume:</strong> ${lead?.collection_volume} m<sup>3</sup></p>
         </div>
     
         <div class="move-info">
-            <p><strong>Moving From:</strong> #JAddr#</p>
-            <p><strong>Moving To:</strong> #JToAddr#</p>
+            <p><strong>Moving From:</strong> ${collection_addr}</p>
+            <p><strong>Moving To:</strong> ${delivery_addr}</p>
         </div>
     
         <p>Detailed below are prices and services on offer. If you have any questions or comments we would be pleased to take your call.</p>
@@ -163,8 +201,7 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: object
     </div>
     
     </body>
-    </html>    
-    `;
+    </html>`;
 };
 
 export default generateEstimateHtml;

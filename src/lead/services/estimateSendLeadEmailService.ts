@@ -1,7 +1,7 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { SendEmailPayload } from '../interface';
-import { INSERT_LOG, GET_CUSTOMER_BY_ID } from '../../sql/sqlScript';
+import { INSERT_LOG, GET_CUSTOMER_BY_ID, GET_LEAD_BY_ID } from '../../sql/sqlScript';
 import { initializeEmailService } from '../../utils/emailService';
 import { getLatestEstimates } from './getLatestEstimates ';
 import { generatePdfAndUploadToS3 } from './generatePdf';
@@ -19,27 +19,23 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         await client.query(`SET search_path TO ${schema}`);
 
         // Check if lead exists
-        const leadCheckResult = await client.query(
-            `
-            SELECT * FROM leads WHERE generated_id = $1
-        `,
-            [leadId],
-        );
+        const leadCheckResult = await client.query(GET_LEAD_BY_ID, [leadId]);
 
         if (leadCheckResult.rows.length === 0) {
             throw new Error('Lead not found');
         }
+        //const custRes = await client.query(GET_CUSTOMER_BY_ID, [leadCheckResult.rows[0].customer_id]);
         const estimationDoc = 'estimation.pdf';
         const estimateData = await getLatestEstimates(leadId, tenant);
-        const html = await generateEstimateHtml({ client: tenant, lead: leadCheckResult, estimate: estimateData });
+        const html = await generateEstimateHtml({ client: tenant, lead: leadCheckResult.rows[0], estimate: estimateData });
         const pdfUrl = await generatePdfAndUploadToS3({ html, key: estimationDoc });
         const subject = 'Lead Estimate';
 
         const termsDoc = 'terms_and_conditions.pdf';
         const packingGuideDoc = 'trunk_packing_guide.pdf';
-        const custRes = await client.query(GET_CUSTOMER_BY_ID, [leadCheckResult.rows[0].customer_id]);
+        
         const htmlBody = `
-            <p>Dear ${custRes.rows[0]?.name},</p>
+            <p>Dear ${leadCheckResult.rows[0]?.customer_name},</p>
             <p>Reference Number: ${leadId}</p>
             <p>Please click <a href="${pdfUrl}">here</a> to view your estimation. As well as the estimation, you will also find some useful information and FAQ’s that we hope can ease some of the stress around moving.</p>
             <p>We do require you to confirm your job with us online, you can do this by clicking <a href="{ClientLogin}">here</a>. Please note that this DOES NOT secure your booking with us and once you have confirmed online a member of staff will be in touch to agree the date.</p>
@@ -48,7 +44,7 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
             <p>A Guide to Packing Your Property: Click <a href="${packingGuideDoc}">here</a>.</p>
         `;
         const emailService = await initializeEmailService();
-        await emailService.sendEmail(custRes.rows[0].email, subject, '', htmlBody);
+        await emailService.sendEmail(leadCheckResult.rows[0]?.customer_email, subject, '', htmlBody);
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,
