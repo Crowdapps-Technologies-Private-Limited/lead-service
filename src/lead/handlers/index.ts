@@ -2,6 +2,7 @@ import { addLeadHandler } from './addLeadHandler';
 import { editEstimateHandler } from './editEstimateHandler';
 import { editLeadHandler } from './editLeadHandler';
 import { addEstimateHandler } from './estimateHandler';
+import { estimateSendEmailHandler } from './estimateSendEmailHandler';
 import { getDistanceHandler } from './getDistanceHandler';
 import { getLatestEstimatesHandler } from './getLatestEstimatesHandler';
 import { getLeadListHandler } from './getLeadListHandler';
@@ -21,7 +22,8 @@ const authHandlers = {
     addEstimateHandler,
     getLatestEstimatesHandler,
     editEstimateHandler,
-    sendEmailHandler
+    sendEmailHandler,
+    estimateSendEmailHandler,
 };
 
 export default authHandlers;

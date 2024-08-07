@@ -8,6 +8,7 @@ import { getLeadById } from './getLeadByIdService';
 import { getAllLogsByLead } from './getLogListService';
 import { editLead } from './editLeadService';
 import { sendLeadEmail } from './sendLeadEmailService';
+import { sendEstimateEmail } from './estimateSendLeadEmailService';
 
 // Removed incomplete import statement
 
@@ -22,4 +23,5 @@ export {
     getLatestEstimates,
     editEstimate,
     sendLeadEmail,
+    sendEstimateEmail,
 };

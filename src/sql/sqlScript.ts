@@ -2,7 +2,7 @@ export const SELECT_TENANT = 'SELECT * FROM tenants WHERE cognito_sub = $1';
 
 export const SELECT_COMPANY_INFO = 'SELECT * FROM company_info WHERE tenant_id = $1';
 
-export const SELECT_EMAIL_INFO = 'SELECT * FROM email_info WHERE tenant_id = $1';
+export const SELECT_EMAIL_INFO = 'SELECT * FROM public.email_info WHERE tenant_id = $1';
 
 export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
@@ -10,7 +10,7 @@ export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS customers (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(20),
-    email VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT NULL
 );
@@ -500,5 +500,7 @@ export const UPDATE_LEAD_STATUS = `
 export const GET_EMAIL_TEMPLATE_BY_ID = `
     SELECT template_id, template_name, subject, salutation, body, links, signature, disclaimer, placeholders
     FROM public.email_templates 
-    WHERE id = $1
+    WHERE template_id = $1
 `;
+
+export const GET_CUSTOMER_BY_ID = `SELECT * FROM customers WHERE id = $1`;
