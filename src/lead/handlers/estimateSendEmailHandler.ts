@@ -27,7 +27,8 @@ export const estimateSendEmailHandler: RouteHandler = async (
     } catch (error: any) {
         logger.error('Error occurred send lead email handler', { error });
         if (error?.message?.includes('Payload Validation Failed')) {
-            return ResponseHandler.notFoundResponse({ message: error.message });
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '').trim();
+            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         } else if (error?.message?.includes('Tenant is suspended')) {
             return ResponseHandler.badRequestResponse({
                 message: 'Your account is suspended. Kindly ask the admin to reactivate your account!',

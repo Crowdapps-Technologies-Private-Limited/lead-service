@@ -3,6 +3,7 @@ import { RouteHandler } from '../../types/interfaces';
 import { editEstimateDTO } from '../validator';
 import { editEstimate } from '../services';
 import logger from '../../utils/logger';
+import { ResponseHandler } from '../../utils/ResponseHandler';
 
 export const editEstimateHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
@@ -23,11 +24,16 @@ export const editEstimateHandler: RouteHandler = async (
 
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
-        const user = (event.requestContext as any).user;
-        logger.info('user:', { user });
+        // const user = (event.requestContext as any).user;
+        // logger.info('user:', { user });
 
         // Validate payload
-        await editEstimateDTO(payload);
+        try {
+            await editEstimateDTO(payload);(payload);
+        } catch (error: any) {
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
+            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
+        }
 
         const result = await editEstimate(estimateId, leadId, payload, tenant);
 

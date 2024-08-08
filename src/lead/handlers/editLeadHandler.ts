@@ -31,7 +31,8 @@ export const editLeadHandler: RouteHandler = async (
     }  catch (error: any) {
         logger.error('Error occurred in edit lead handler', { error });
         if(error?.message?.includes('Payload Validation Failed')) {
-            return ResponseHandler.badRequestResponse({ message: error.message });
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '').trim();
+            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         } else if (error?.message?.includes('Lead not found')) {
             return ResponseHandler.notFoundResponse({ message: "Lead not found!" });
         } else if(error?.message?.includes('Tenant is suspended')) {

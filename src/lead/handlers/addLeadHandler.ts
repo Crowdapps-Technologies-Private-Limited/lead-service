@@ -20,7 +20,8 @@ export const addLeadHandler: RouteHandler = async (
         try {
             await addLeadDTO(payload);
         } catch (error: any) {
-            return ResponseHandler.notFoundResponse({ message: error.message });
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
+            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         }
       
 
@@ -30,7 +31,9 @@ export const addLeadHandler: RouteHandler = async (
     } catch (error: any) {
         logger.error('Error occurred add lead handler', { error });
         if (error?.message?.includes('Payload Validation Failed')) {
-            return ResponseHandler.notFoundResponse({ message: error.message });
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
+            logger.error('Error occurred add lead handler message', { cleanedMessage });
+            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         } else if (error?.message?.includes('Lead already exists with this name')) {
             return ResponseHandler.notFoundResponse({ message: "Lead already exists with this name!" });
         } else if (error?.message?.includes('Lead already exists with this email')) {

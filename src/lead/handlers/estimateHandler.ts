@@ -29,20 +29,25 @@ export const addEstimateHandler: RouteHandler = async (
 
         // Validate payload
         await addEstimateDTO(payload);
-logger.info('addEstimateDTO success:');
-try {
-        const result = await addEstimate(leadId, payload, tenant);
-logger.info('addEstimate success:', { result });
-        return ResponseHandler.createdResponse({ message: 'Estimate added successfully' });
-}
-catch (error: any) {
-logger.info('addEstimate error:', { error });
-return ResponseHandler.internalServerErrorResponse({ message: error.message });
+        logger.info('addEstimateDTO success:');
+        try {
+            const result = await addEstimate(leadId, payload, tenant);
+            logger.info('addEstimate success:', { result });
+            return ResponseHandler.createdResponse({ message: 'Estimate added successfully' });
+        }
+        catch (error: any) {
+            logger.info('addEstimate error:', { error });
+            return ResponseHandler.internalServerErrorResponse({ message: error.message });
 
-}
+        }
       
     } catch (error: any) {
         logger.error('Error occurred in addEstimateHandler', { error });
-        return ResponseHandler.internalServerErrorResponse({ message: error.message });
+        if(error?.message?.includes('Payload Validation Failed')) {
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '').trim();
+            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
+        } else {
+            return ResponseHandler.badRequestResponse({ message: error.message });
+        }
     }
 };

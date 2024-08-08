@@ -25,13 +25,16 @@ export const generateEmail = async (event: string, to: string, data: any) => {
         logger.info('Placeholders:', { placeholders });
 
         // Replace placeholders in salutation and body
-        let { salutation, body } = template;
+        let { salutation, body, signature, disclaimer } = template;
 
         placeholders.forEach((placeholder: string) => {
-            const regex = new RegExp(`{{${placeholder}}}`, 'g');
-            const value = data[placeholder] || `{{${placeholder}}}`;  // Use provided value or keep the placeholder
+            const ph =placeholder.toLowerCase();  // Convert to lowercase for case-insensitive matching
+            const regex = new RegExp(`{{${ph}}}`, 'gi');  // Added 'i' flag for case-insensitive matching
+            const value = data[ph] || `{{${ph}}}`;  // Use provided value or keep the placeholder
             salutation = salutation ? salutation.replace(regex, value) : salutation;
             body = body.replace(regex, value);
+            signature = signature ? signature.replace(regex, value): signature;
+            disclaimer = salutation ? disclaimer.replace(regex, value): disclaimer;
         });
 
         // Generate the final email content
