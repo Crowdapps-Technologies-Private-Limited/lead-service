@@ -27,9 +27,9 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             (
                 SELECT json_agg(json_build_object(
                     'service_id', s.id,
-                    'service_name', s.service_name,
-                    'service_description', s.description,
-                    'service_price', s.price
+                    'typeName', s.service_name,
+                    'description', s.description,
+                    'price', s.price
                 ))
                 FROM ${schema}.estimate_services es
                 JOIN ${schema}.services s ON es.service_id = s.id
@@ -38,14 +38,14 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             (
                 SELECT json_agg(json_build_object(
                     'material_id', m.id,
-                    'material_name', m.name,
-                    'material_dimensions', m.dimensions,
-                    'surveyed_qty', m.surveyed_qty,
-                    'charge_qty', m.charge_qty,
-                    'material_price', m.price,
-                    'material_total', m.total,
-                    'material_volume', m.volume,
-                    'material_cost', m.cost
+                    'name', m.name,
+                    'dimensions', m.dimensions,
+                    'surveyedQty', m.surveyed_qty,
+                    'chargeQty', m.charge_qty,
+                    'price', m.price,
+                    'total', m.total,
+                    'volume', m.volume,
+                    'cost', m.cost
                 ))
                 FROM ${schema}.estimate_materials em
                 JOIN ${schema}.materials m ON em.material_id = m.id
@@ -54,13 +54,13 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             (
                 SELECT json_agg(json_build_object(
                     'cost_id', c.id,
-                    'driver_qty', c.driver_qty,
-                    'porter_qty', c.porter_qty,
-                    'packer_qty', c.packer_qty,
-                    'vehicle_qty', c.vehicle_qty,
-                    'vehicle_type_id', c.vehicle_type_id,
-                    'fuel_qty', c.fuel_qty,
-                    'fuel_charge', c.fuel_charge
+                    'driverQty', c.driver_qty,
+                    'porterQty', c.porter_qty,
+                    'packerQty', c.packer_qty,
+                    'vehicleQty', c.vehicle_qty,
+                    'vehicleTypeId', c.vehicle_type_id,
+                    'fuelQty', c.fuel_qty,
+                    'fuelCharge', c.fuel_charge
                 ))
                 FROM ${schema}.estimate_costs ec
                 JOIN ${schema}.costs c ON ec.cost_id = c.id
@@ -69,14 +69,14 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             (
                 SELECT json_agg(json_build_object(
                     'general_info_id', gi.id,
-                    'driver_wage', gi.driver_wage,
-                    'porter_wage', gi.porter_wage,
-                    'packer_wage', gi.packer_wage,
-                    'contents_value', gi.contents_value,
-                    'payment_method', gi.payment_method,
-                    'insurance_amount', gi.insurance_amount,
-                    'insurance_percentage', gi.insurance_percentage,
-                    'insurance_type', gi.insurance_type
+                    'driverWage', gi.driver_wage,
+                    'porterWage', gi.porter_wage,
+                    'packerWage', gi.packer_wage,
+                    'contentsValue', gi.contents_value,
+                    'paymentMethod', gi.payment_method,
+                    'insuranceAmount', gi.insurance_amount,
+                    'insurancePercentage', gi.insurance_percentage,
+                    'insuranceType', gi.insurance_type
                 ))
                 FROM ${schema}.estimate_general_info eg
                 JOIN ${schema}.general_information gi ON eg.general_info_id = gi.id
@@ -85,26 +85,27 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             (
                 SELECT json_agg(json_build_object(
                     'ancillary_id', a.id,
-                    'ancillary_name', a.name,
-                    'ancillary_charge', a.charge,
-                    'ancillary_is_chargeable', a.isChargeable
+                    'name', a.name,
+                    'charge', a.charge,
+                    'isChargeable', a.isChargeable
                 ))
                 FROM ${schema}.estimate_ancillaries ea
                 JOIN ${schema}.ancillaries a ON ea.ancillary_id = a.id
                 WHERE ea.estimate_id = e.id
-            ) AS ancillaries
+            ) AS ancillaries,
+            e.created_at
         FROM 
             ${schema}.estimates e
         WHERE 
             e.lead_id = $1
         ORDER BY 
-            e.quote_expires_on DESC
-        LIMIT 10;
+            e.created_at DESC
+        LIMIT 1;
     `;
 
     try {
         const res = await client.query(query, [leadId]);
-        return res.rows;
+        return res.rows[0];
     } catch (error: any) {
         logger.error('Failed to get latest estimates', { error });
         throw new Error(`Failed to get latest estimates: ${error.message}`);

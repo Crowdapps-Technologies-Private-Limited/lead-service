@@ -230,6 +230,8 @@ CREATE TABLE IF NOT EXISTS estimates (
     quote_expires_on DATE,
     notes TEXT,
     vat_included BOOLEAN,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     material_price_chargeable BOOLEAN,
     FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
 );
