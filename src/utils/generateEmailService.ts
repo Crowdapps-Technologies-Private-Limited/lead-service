@@ -5,9 +5,9 @@ import logger from './logger';
 
 export const generateEmail = async (event: string, to: string, data: any) => {
     const client = await connectToDatabase();
-    console.log('generateEmail event', event);
-    console.log('to', to);
-    console.log('data', data);
+    logger.info('generateEmail event', { event });
+    logger.info('to', { to });
+    logger.info('data', { data });
     
     try {
         // Fetch the email template by event
@@ -30,9 +30,11 @@ export const generateEmail = async (event: string, to: string, data: any) => {
         placeholders.forEach((placeholder: string) => {
             const ph =placeholder.toLowerCase();  // Convert to lowercase for case-insensitive matching
             const regex = new RegExp(`{{${ph}}}`, 'gi');  // Added 'i' flag for case-insensitive matching
-            const value = data[ph] || `{{${ph}}}`;  // Use provided value or keep the placeholder
+            const value = data[ph] || `{{${ph}}}`; 
+            logger.info('regex and value   ', { regex, value}); // Use provided value or keep the placeholder
             salutation = salutation ? salutation.replace(regex, value) : salutation;
             body = body.replace(regex, value);
+            logger.info('salutation and body   ', { salutation, body});
             signature = signature ? signature.replace(regex, value): signature;
             disclaimer = salutation ? disclaimer.replace(regex, value): disclaimer;
         });

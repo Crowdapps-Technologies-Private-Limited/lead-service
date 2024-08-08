@@ -51,12 +51,12 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
             'Estimate Email', 
             leadCheckResult.rows[0]?.customer_email, 
             { 
-                username: leadCheckResult.rows[0]?.customer_email,
-                leadId,
-                pdfUrl,
-                clientLogin,
-                termsDoc,
-                packingGuideDoc
+                username: leadCheckResult.rows[0]?.customer_name,
+                leadid: leadId,
+                pdfurl: pdfUrl,
+                clientlogin: clientLogin,
+                termsdoc:  termsDoc,
+                packingguidedoc: packingGuideDoc
             }
         );
         const templateRes = await client.query(GET_EMAIL_TEMPLATE_BY_EVENT, ['Estimate Email']);
