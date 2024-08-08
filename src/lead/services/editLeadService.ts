@@ -84,6 +84,8 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
 
         if (collectionAddressCheckResult.rows.length > 0) {
             collectionAddressId = collectionAddressCheckResult.rows[0].id;
+            await client.query(`UPDATE addresses SET county = $1, country = $2, street = $3, town = $4, postcode = $5 WHERE id = $6`, 
+                [collectionAddress.county, collectionAddress.country, collectionAddress.street, collectionAddress.town, collectionAddress.postcode, collectionAddressId]);
         } else {
             const collectionAddressResult = await client.query(`
                 INSERT INTO addresses (street, town, county, postcode, country)
@@ -106,6 +108,8 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
 
         if (deliveryAddressCheckResult.rows.length > 0) {
             deliveryAddressId = deliveryAddressCheckResult.rows[0].id;
+            await client.query(`UPDATE addresses SET county = $1, country = $2, street = $3, town = $4, postcode = $5 WHERE id = $6`, 
+                [deliveryAddress.county, deliveryAddress.country, deliveryAddress.street, deliveryAddress.town, deliveryAddress.postcode, deliveryAddressId]);
         } else {
             const deliveryAddressResult = await client.query(`
                 INSERT INTO addresses (street, town, county, postcode, country)
