@@ -165,10 +165,10 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             'NEW',
             newGeneratedId
         ]);
-logger.info('Log added successfully');
+        logger.info('Log added successfully');
         // Send email notification
         await generateEmail('Add Lead', customer.email, { username: customer.name });
-logger.info('Email sent successfully');
+        logger.info('Email sent successfully');
         await client.query('COMMIT');
         return { message: 'Lead added successfully' };
     } catch (error: any) {
