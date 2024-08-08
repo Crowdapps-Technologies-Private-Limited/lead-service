@@ -92,7 +92,7 @@ export interface Cost {
     packerQty?: number;
     vehicleQty?: number;
     vehicleTypeId?: string;
-    fuelQty?: number;
+    wageCharge?: number;
     fuelCharge?: number;
 }
 

@@ -230,6 +230,8 @@ CREATE TABLE IF NOT EXISTS estimates (
     quote_expires_on DATE,
     notes TEXT,
     vat_included BOOLEAN,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     material_price_chargeable BOOLEAN,
     FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
 );
@@ -264,7 +266,7 @@ CREATE TABLE IF NOT EXISTS costs (
     packer_qty INT,
     vehicle_qty INT,
     vehicle_type_id UUID,
-    fuel_qty DECIMAL(10, 2),
+    wage_charge DECIMAL(10, 2),
     fuel_charge DECIMAL(10, 2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -392,7 +394,7 @@ export const INSERT_COST = `INSERT INTO costs (
     packer_qty,
     vehicle_qty,
     vehicle_type_id,
-    fuel_qty,
+    wage_charge,
     fuel_charge
 ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
 
@@ -457,7 +459,7 @@ export const UPDATE_COST = `
         packer_qty = $3,
         vehicle_qty = $4,
         vehicle_type_id = $5,
-        fuel_qty = $6,
+        wage_charge = $6,
         fuel_charge = $7
     WHERE id = $8
 `;
