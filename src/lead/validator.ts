@@ -1,10 +1,10 @@
 import * as yup from 'yup';
-import { 
+import {
     AddEstimatePayload,
     AddLeadPayload,
     EditEstimatePayload,
     EditLeadPayload,
-    SendEmailPayload
+    SendEmailPayload,
 } from './interface';
 import logger from '../utils/logger';
 
@@ -154,7 +154,7 @@ export const addEstimateSchema = yup
                     packerQty: yup.number().nullable(),
                     vehicleQty: yup.number().nullable(),
                     vehicleTypeId: yup.string().nullable(),
-                    fuelQty: yup.number().nullable(),
+                    wageCharge: yup.number().nullable(),
                     fuelCharge: yup.number().nullable(),
                 }),
             )
@@ -243,7 +243,7 @@ export const editEstimateSchema = yup
                     packerQty: yup.number().nullable(),
                     vehicleQty: yup.number().nullable(),
                     vehicleTypeId: yup.string().nullable(),
-                    fuelQty: yup.number().nullable(),
+                    wageCharge: yup.number().nullable(),
                     fuelCharge: yup.number().nullable(),
                 }),
             )
@@ -288,14 +288,17 @@ export const editEstimateDTO = async (payload: EditEstimatePayload): Promise<voi
 };
 
 // Define the send email payload schema
-export const sendEmailSchema = yup.object().shape({
-    from: yup.string().email('Invalid email format').required('From email is required'),
-    to: yup.string().email('Invalid email format').required('To email is required'),
-    subject: yup.string().required('Subject is required'),
-    body: yup.string().required('Body is required'),
-    addClientSignature: yup.boolean().required('Client signature status is required'),
-    templateId: yup.string().required('Template ID is required')
-}).noUnknown(true, 'Unknown field in payload');
+export const sendEmailSchema = yup
+    .object()
+    .shape({
+        from: yup.string().email('Invalid email format').required('From email is required'),
+        to: yup.string().email('Invalid email format').required('To email is required'),
+        subject: yup.string().required('Subject is required'),
+        body: yup.string().required('Body is required'),
+        addClientSignature: yup.boolean().required('Client signature status is required'),
+        templateId: yup.string().required('Template ID is required'),
+    })
+    .noUnknown(true, 'Unknown field in payload');
 
 // Validate the send email payload
 export const sendEmailDTO = async (payload: SendEmailPayload): Promise<void> => {
@@ -305,10 +308,3 @@ export const sendEmailDTO = async (payload: SendEmailPayload): Promise<void> => 
         throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
     }
 };
-
-
-
-
-
-
-

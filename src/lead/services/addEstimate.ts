@@ -98,9 +98,9 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
                 cost.driverQty || null,
                 cost.porterQty || null,
                 cost.packerQty || null,
+                cost.wageCharge || null,
                 cost.vehicleQty || null,
                 cost.vehicleTypeId || null,
-                cost.fuelQty || null,
                 cost.fuelCharge || null,
             ]);
             const costId = costResult.rows[0].id;
@@ -137,7 +137,7 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
         // Update leads status
         await client.query(UPDATE_LEAD_STATUS, ['ESTIMATES', leadId]);
         logger.info('Lead status updated successfully');
-        
+
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,

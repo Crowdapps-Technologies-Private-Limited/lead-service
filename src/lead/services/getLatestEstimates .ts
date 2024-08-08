@@ -59,7 +59,6 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
                     'packerQty', c.packer_qty,
                     'vehicleQty', c.vehicle_qty,
                     'vehicleTypeId', c.vehicle_type_id,
-                    'fuelQty', c.fuel_qty,
                     'fuelCharge', c.fuel_charge
                 ))
                 FROM ${schema}.estimate_costs ec

@@ -131,7 +131,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     cost.packerQty || null,
                     cost.vehicleQty || null,
                     cost.vehicleTypeId || null,
-                    cost.fuelQty || null,
+                    cost.wageCharge || null,
                     cost.fuelCharge || null,
                 ]);
                 costId = result.rows[0].id;
@@ -142,7 +142,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     cost.packerQty || null,
                     cost.vehicleQty || null,
                     cost.vehicleTypeId || null,
-                    cost.fuelQty || null,
+                    cost.wageCharge || null,
                     cost.fuelCharge || null,
                     costId,
                 ]);
