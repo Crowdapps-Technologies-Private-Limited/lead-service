@@ -94,16 +94,18 @@ export const addEstimate = async (leadId: string, payload: AddEstimatePayload, t
         logger.info('Materials inserted successfully');
         // Insert costs
         for (const cost of costs) {
+            logger.info('cost:', { cost });
             const costResult = await client.query(INSERT_COST, [
                 cost.driverQty || null,
                 cost.porterQty || null,
                 cost.packerQty || null,
-                cost.wageCharge || null,
                 cost.vehicleQty || null,
                 cost.vehicleTypeId || null,
+                cost.wageCharge || null,
                 cost.fuelCharge || null,
             ]);
             const costId = costResult.rows[0].id;
+            logger.info('costId:', { costId });
             await client.query(INSERT_ESTIMATE_COST, [estimateId, costId]);
         }
         logger.info('Costs inserted successfully');
