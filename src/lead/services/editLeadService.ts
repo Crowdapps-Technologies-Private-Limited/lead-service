@@ -77,13 +77,13 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         }
 
         // Check if collection address exists
-        let collectionAddressId;
-        const collectionAddressCheckResult = await client.query(`
-            SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
-        `, [collectionAddress.street, collectionAddress.town, collectionAddress.postcode]);
+        let collectionAddressId = leadCheckResult.rows[0].collection_address_id;
+        // const collectionAddressCheckResult = await client.query(`
+        //     SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
+        // `, [collectionAddress.street, collectionAddress.town, collectionAddress.postcode]);
 
-        if (collectionAddressCheckResult.rows.length > 0) {
-            collectionAddressId = collectionAddressCheckResult.rows[0].id;
+        if (collectionAddressId) {
+            //collectionAddressId = collectionAddressCheckResult.rows[0].id;
             await client.query(`UPDATE addresses SET county = $1, country = $2, street = $3, town = $4, postcode = $5 WHERE id = $6`, 
                 [collectionAddress.county, collectionAddress.country, collectionAddress.street, collectionAddress.town, collectionAddress.postcode, collectionAddressId]);
         } else {
@@ -101,13 +101,13 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         }
 
         // Check if delivery address exists
-        let deliveryAddressId;
-        const deliveryAddressCheckResult = await client.query(`
-            SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
-        `, [deliveryAddress.street, deliveryAddress.town, deliveryAddress.postcode]);
+        let deliveryAddressId = leadCheckResult.rows[0].delivery_address_id;
+        // const deliveryAddressCheckResult = await client.query(`
+        //     SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
+        // `, [deliveryAddress.street, deliveryAddress.town, deliveryAddress.postcode]);
 
-        if (deliveryAddressCheckResult.rows.length > 0) {
-            deliveryAddressId = deliveryAddressCheckResult.rows[0].id;
+        if (deliveryAddressId) {
+            //deliveryAddressId = deliveryAddressCheckResult.rows[0].id;
             await client.query(`UPDATE addresses SET county = $1, country = $2, street = $3, town = $4, postcode = $5 WHERE id = $6`, 
                 [deliveryAddress.county, deliveryAddress.country, deliveryAddress.street, deliveryAddress.town, deliveryAddress.postcode, deliveryAddressId]);
         } else {

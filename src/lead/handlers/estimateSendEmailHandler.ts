@@ -16,6 +16,7 @@ export const estimateSendEmailHandler: RouteHandler = async (
         const leadId = event.pathParameters?.id;
         const estimateId = event.pathParameters?.estimateId;
         const action = event.queryStringParameters?.action as string;
+        logger.info('action:', { action });
         logger.info('leadId:', { leadId });
         if (!estimateId || !leadId) {
             return ResponseHandler.badRequestResponse({
@@ -23,7 +24,8 @@ export const estimateSendEmailHandler: RouteHandler = async (
             });
         }
         const array = ["pdf", "email"];
-        if (action || !array.includes(action)) {
+        if (action && !array.includes(action)) {
+            logger.error('Invalid action. Please provide valid action (pdf or email)', { action });
             return ResponseHandler.badRequestResponse({
                 message: 'Invalid action. Please provide valid action (pdf or email)',
             });
