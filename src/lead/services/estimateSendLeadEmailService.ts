@@ -8,7 +8,7 @@ import { generatePdfAndUploadToS3 } from './generatePdf';
 import generateEstimateHtml from './generateEstimateHtml';
 import { generateEmail } from '../../utils/generateEmailService';
 
-export const sendEstimateEmail = async (leadId: string, estimateId: string, tenant: any) => {
+export const sendEstimateEmail = async (leadId: string, estimateId: string, tenant: any, action: string) => {
     const client = await connectToDatabase();
     const schema = tenant.schema;
 
@@ -30,6 +30,9 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         const estimateData = await getLatestEstimates(leadId, tenant);
         const html = await generateEstimateHtml({ client: tenant, lead: leadCheckResult.rows[0], estimate: estimateData });
         const pdfUrl = await generatePdfAndUploadToS3({ html, key: estimationDoc });
+        if(action === 'pdf') {
+            return { message: 'PDF generated successfully', data: { pdfUrl } };
+        }
         const clientLogin = 'https://mmym-client-dev.crowdapps.info/'
         const subject = 'Lead Estimate';
 
@@ -69,7 +72,7 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
             leadCheckResult.rows[0].status,
             leadId,
         ]);
-        return { message: 'Email sent successfully', data: { pdfUrl } };
+        return { message: 'Email sent successfully', data: null };
     } catch (error: any) {
         logger.error('Failed to send lead email', { error });
         throw new Error(`Failed to send lead email: ${error.message}`);

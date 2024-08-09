@@ -15,15 +15,22 @@ export const estimateSendEmailHandler: RouteHandler = async (
         logger.info('tenant:', { tenant });
         const leadId = event.pathParameters?.id;
         const estimateId = event.pathParameters?.estimateId;
+        const action = event.queryStringParameters?.action as string;
         logger.info('leadId:', { leadId });
         if (!estimateId || !leadId) {
             return ResponseHandler.badRequestResponse({
                 message: 'Estimate ID and Lead ID are required in path parameters',
             });
         }
-        const result = await sendEstimateEmail(leadId, estimateId, tenant);
+        const array = ["pdf", "email"];
+        if (action || !array.includes(action)) {
+            return ResponseHandler.badRequestResponse({
+                message: 'Invalid action. Please provide valid action (pdf or email)',
+            });
+        }
+        const result = await sendEstimateEmail(leadId, estimateId, tenant, action);
 
-        return ResponseHandler.createdResponse({ message: result.message, data: result.data });
+        return ResponseHandler.createdResponse({ message: result?.message, data: result?.data });
     } catch (error: any) {
         logger.error('Error occurred send lead email handler', { error });
         if (error?.message?.includes('Payload Validation Failed')) {
