@@ -23,7 +23,12 @@ export const editLeadHandler: RouteHandler = async (
         }
 
         // Validate payload
-        validateEditLeadDTO(payload);
+        try {
+            await validateEditLeadDTO(payload);
+        } catch (error: any) {
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
+            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
+        }
 
         const result = await editLead(leadId, payload, tenant);
 
@@ -31,7 +36,7 @@ export const editLeadHandler: RouteHandler = async (
     }  catch (error: any) {
         logger.error('Error occurred in edit lead handler', { error });
         if(error?.message?.includes('Payload Validation Failed')) {
-            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '').trim();
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
             return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         } else if (error?.message?.includes('Lead not found')) {
             return ResponseHandler.notFoundResponse({ message: "Lead not found!" });

@@ -9,6 +9,8 @@ import { getAllLogsByLead } from './getLogListService';
 import { editLead } from './editLeadService';
 import { sendLeadEmail } from './sendLeadEmailService';
 import { sendEstimateEmail } from './estimateSendLeadEmailService';
+import { getAllRooms } from './getRoomListService';
+import { getAllLinkedItems } from './getLinkedItemListService';
 
 // Removed incomplete import statement
 
@@ -24,4 +26,6 @@ export {
     editEstimate,
     sendLeadEmail,
     sendEstimateEmail,
+    getAllRooms,
+    getAllLinkedItems,
 };

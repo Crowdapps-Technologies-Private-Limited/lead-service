@@ -89,11 +89,11 @@ export const addLeadDTO = async (payload: AddLeadPayload): Promise<void> => {
 };
 
 // Validate the edit lead payload
-export const validateEditLeadDTO = async (payload: any): Promise<void> => {
+export const validateEditLeadDTO = async (payload: AddLeadPayload): Promise<void> => {
     try {
         await addLeadSchema.validate(payload, { abortEarly: false, strict: true });
     } catch (err: any) {
-        throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
+        throw new Error(`Payload Validation Failed: ${err?.errors?.join(', ')}`);
     }
 };
 

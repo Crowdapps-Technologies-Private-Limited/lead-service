@@ -506,3 +506,44 @@ export const GET_EMAIL_TEMPLATE_BY_ID = `
 `;
 
 export const GET_CUSTOMER_BY_ID = `SELECT * FROM customers WHERE id = $1`;
+
+export const CREATE_SURVEY_AND_RELATED_TABLE = `
+CREATE TABLE IF NOT EXISTS surveys (
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    lead_id VARCHAR(20) NOT NULL,
+	surveyor_id uuid NOT NULL,
+    notes text,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    material_price_chargeable BOOLEAN,
+    FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE,
+	FOREIGN KEY (surveyor_id) REFERENCES public.users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS survey_items (
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    survey_id UUID NOT NULL,
+	room VARCHAR(100),
+	item VARCHAR(100),
+	ft3	DECIMAL(5,2),
+	quantity INTEGER,
+	isLeave	BOOLEAN,
+	isWeee BOOLEAN,
+	isCust BOOLEAN,
+	isClear BOOLEAN,
+	dismentle_charge DECIMAL(5,2),
+	sort_order INTEGER,
+	linked_item VARCHAR(200)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    material_price_chargeable BOOLEAN,
+    FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE,
+	FOREIGN KEY (room) REFERENCES public.rooms(room_name) ON DELETE CASCADE,
+	FOREIGN KEY (linked_item) REFERENCES public.linked_items(item_name) ON DELETE CASCADE
+);
+
+`;
+
+export const GET_ALL_ROOM_LIST = `SELECT * FROM public.rooms`;
+
+export const GET_ALL_LINKED_ITEM_LIST = `SELECT * FROM public.linked_items`;

@@ -5,6 +5,8 @@ import admiinHandlers from './handlers';
 export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
     GET: {
         '/leads/referrers': admiinHandlers.getReferrerListHandler,
+        '/leads/rooms': admiinHandlers.getRoomListHandler,
+        '/leads/linked-items': admiinHandlers.getLinkedItemListHandler,
         '/leads': admiinHandlers.getLeadListHandler,
         '/leads/{id}': admiinHandlers.getSingleLeadHandler,
         '/leads/{id}/audit': admiinHandlers.getLogListByLeadHandler,
