@@ -69,8 +69,8 @@ export const addLeadSchema = yup.object().shape({
             phone: yup
                 .string()
                 .transform((value, originalValue) => (originalValue.trim() === '' ? null : value))
-                .matches(/^\d{10,11}$/, {
-                    message: 'Mobile number must be 10 or 11 digits long',
+                .matches(/^\d{11}$/, {
+                    message: 'Mobile number must be 11 digits long',
                     excludeEmptyString: true,
                 })
                 .nullable(),
