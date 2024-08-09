@@ -25,7 +25,11 @@ export const getLatestEstimatesHandler: RouteHandler = async (
 
         const result = await getLatestEstimates(leadId, tenant);
         // const url = await generatePdfAndUploadToS3({ html: '<p>Hello, World</p>', key: 'test.pdf' });
-        return ResponseHandler.successResponse({ message: 'Estimate fetched successfully', data: result });
+        if (result) {
+            return ResponseHandler.successResponse({ message: 'Estimate fetched successfully', data: result });
+        } else {
+            return ResponseHandler.notFoundResponse({ message: 'No estimates found' });
+        }
     } catch (error: any) {
         logger.error('Error occurred in getLatestEstimatesHandler', { error });
         return ResponseHandler.failureResponse({ message: error.message });

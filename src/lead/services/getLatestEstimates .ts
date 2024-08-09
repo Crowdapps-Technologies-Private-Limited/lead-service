@@ -1,3 +1,4 @@
+import { GeneralInfo } from './../interface';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 
@@ -15,14 +16,14 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
 
     const query = `
         SELECT 
-            e.id AS estimate_id,
-            e.lead_id,
-            e.quote_total,
-            e.cost_total,
-            e.quote_expires_on,
+            e.id AS estimateId,
+            e.lead_id AS leadId,
+            e.quote_total AS quoteTotal,
+            e.cost_total AS costTotal,
+            e.quote_expires_on AS quoteExpiresOn,
             e.notes,
-            e.vat_included,
-            e.material_price_chargeable,
+            e.vat_included AS vatIncluded,
+            e.material_price_chargeable AS materialPriceChargeable,
             (
                 SELECT json_agg(json_build_object(
                     'service_id', s.id,
@@ -36,7 +37,7 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             ) AS services,
             (
                 SELECT json_agg(json_build_object(
-                    'material_id', m.id,
+                    'materialId', m.id,
                     'name', m.name,
                     'dimensions', m.dimensions,
                     'surveyedQty', m.surveyed_qty,
@@ -52,7 +53,7 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             ) AS materials,
             (
                 SELECT json_agg(json_build_object(
-                    'cost_id', c.id,
+                    'costId', c.id,
                     'driverQty', c.driver_qty,
                     'porterQty', c.porter_qty,
                     'packerQty', c.packer_qty,
@@ -69,7 +70,7 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             ) AS costs,
             (
                 SELECT json_agg(json_build_object(
-                    'general_info_id', gi.id,
+                    'generalInfoId', gi.id,
                     'driverWage', gi.driver_wage,
                     'porterWage', gi.porter_wage,
                     'packerWage', gi.packer_wage,
@@ -82,19 +83,18 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
                 FROM ${schema}.estimate_general_info eg
                 JOIN ${schema}.general_information gi ON eg.general_info_id = gi.id
                 WHERE eg.estimate_id = e.id
-            ) AS general_info,
+            ) AS generalInfo,
             (
                 SELECT json_agg(json_build_object(
                     'ancillary_id', a.id,
                     'name', a.name,
                     'charge', a.charge,
-                    'isChargeable', a.isChargeable
+                    'isChargeable', a.ischargeable
                 ))
                 FROM ${schema}.estimate_ancillaries ea
                 JOIN ${schema}.ancillaries a ON ea.ancillary_id = a.id
                 WHERE ea.estimate_id = e.id
-            ) AS ancillaries,
-            e.created_at
+            ) AS ancillaries
         FROM 
             ${schema}.estimates e
         WHERE 
@@ -106,7 +106,26 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
 
     try {
         const res = await client.query(query, [leadId]);
-        return res.rows[0];
+        // Manually convert string fields to numbers, if necessary
+        const data = res.rows[0];
+        data.quoteTotal = parseFloat(data.quotetotal);
+        data.costTotal = parseFloat(data.costtotal);
+        data.estimateId = data.estimateid;
+        data.leadId = data.leadid;
+        data.quoteExpiresOn = data.quoteexpireson;
+        data.vatIncluded = data.vatincluded;
+        data.materialPriceChargeable = data.materialpricechargeable;
+        data.GeneralInfo = data.generalinfo;
+        delete data.quotetotal;
+        delete data.costtotal;
+        delete data.estimateid;
+        delete data.leadid;
+        delete data.quoteexpireson;
+        delete data.vatincluded;
+        delete data.materialpricechargeable;
+        delete data.generalinfo;
+
+        return data;
     } catch (error: any) {
         logger.error('Failed to get latest estimates', { error });
         throw new Error(`Failed to get latest estimates: ${error.message}`);
