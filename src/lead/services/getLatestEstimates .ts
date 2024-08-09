@@ -1,6 +1,5 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
-import { generatePdfAndUploadToS3 } from './generatePdf';
 
 export const getLatestEstimates = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
@@ -59,11 +58,13 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
                     'packerQty', c.packer_qty,
                     'vehicleQty', c.vehicle_qty,
                     'vehicleTypeId', c.vehicle_type_id,
+                    'vehicleTypeName', vt.type_name,
                     'fuelCharge', c.fuel_charge,
                     'wageCharge', c.wage_charge
                 ))
                 FROM ${schema}.estimate_costs ec
                 JOIN ${schema}.costs c ON ec.cost_id = c.id
+                JOIN public.vehicle_types vt ON c.vehicle_type_id = vt.id
                 WHERE ec.estimate_id = e.id
             ) AS costs,
             (

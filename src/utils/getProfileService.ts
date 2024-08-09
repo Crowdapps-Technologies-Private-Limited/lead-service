@@ -28,14 +28,14 @@ export const getUserProfile = async (userId: string) => {
         user.postCode = company.rows[0].post_code;
         user.address = company.rows[0].address;
         user.general_website = company.rows[0].general_website;
-        
+
         logger.info('User profile:', { user });
 
         if (user.logo) {
             const config = await getconfigSecrets();
 
             // Generate signed URL for the photo
-            user.signedUrl = s3.getSignedUrl('getObject', {
+            user.logo = s3.getSignedUrl('getObject', {
                 Bucket: config.s3BucketName,
                 Key: user.logo,
                 Expires: 60 * 60, // URL expires in 1 hour
