@@ -8,7 +8,7 @@ export const generateEmail = async (event: string, to: string, data: any) => {
     logger.info('generateEmail event', { event });
     logger.info('to', { to });
     logger.info('data', { data });
-    
+
     try {
         // Fetch the email template by event
         const templateRes = await client.query(GET_EMAIL_TEMPLATE_BY_EVENT, [event]);
@@ -28,15 +28,15 @@ export const generateEmail = async (event: string, to: string, data: any) => {
         let { salutation, body, signature, disclaimer } = template;
 
         placeholders.forEach((placeholder: string) => {
-            const ph =placeholder.toLowerCase();  // Convert to lowercase for case-insensitive matching
-            const regex = new RegExp(`{{${ph}}}`, 'gi');  // Added 'i' flag for case-insensitive matching
-            const value = data[ph] || `{{${ph}}}`; 
-            logger.info('regex and value   ', { regex, value}); // Use provided value or keep the placeholder
+            const ph = placeholder.toLowerCase(); // Convert to lowercase for case-insensitive matching
+            const regex = new RegExp(`{{${ph}}}`, 'gi'); // Added 'i' flag for case-insensitive matching
+            const value = data[ph] || `{{${ph}}}`;
+            logger.info('regex and value   ', { regex, value }); // Use provided value or keep the placeholder
             salutation = salutation ? salutation.replace(regex, value) : salutation;
             body = body.replace(regex, value);
-            logger.info('salutation and body   ', { salutation, body});
-            signature = signature ? signature.replace(regex, value): signature;
-            disclaimer = salutation ? disclaimer.replace(regex, value): disclaimer;
+            logger.info('salutation and body   ', { salutation, body });
+            signature = signature ? signature.replace(regex, value) : signature;
+            disclaimer = salutation ? disclaimer.replace(regex, value) : disclaimer;
         });
 
         // Generate the final email content
@@ -46,23 +46,24 @@ export const generateEmail = async (event: string, to: string, data: any) => {
             body: body,
             links: template.links,
             signature: template.signature,
-            disclaimer: template.disclaimer
+            disclaimer: template.disclaimer,
         };
         logger.info('Email content:', { emailContent });
 
-        const htmlBody = (salutation ? salutation + "<br/>" : "") + body + "<br/>" + template.signature + "<br/>" + template.disclaimer;
+        const htmlBody =
+            (salutation ? salutation + '<br/>' : '') +
+            body +
+            '<br/>' +
+            template.signature +
+            '<br/>' +
+            template.disclaimer;
         const emailService = await initializeEmailService();
-        await emailService.sendEmail(
-            to,
-            emailContent.subject,
-            emailContent.body,
-            htmlBody
-        );
+        await emailService.sendEmail(to, emailContent.subject, emailContent.body, htmlBody);
 
         return {
             success: true,
             message: 'Email sent successfully',
-            data: emailContent
+            data: emailContent,
         };
     } catch (error: any) {
         logger.error('Failed to generate email content:', { error });

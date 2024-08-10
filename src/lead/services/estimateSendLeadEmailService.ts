@@ -28,17 +28,21 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         //const custRes = await client.query(GET_CUSTOMER_BY_ID, [leadCheckResult.rows[0].customer_id]);
         const estimationDoc = 'estimation.pdf';
         const estimateData = await getLatestEstimates(leadId, tenant);
-        const html = await generateEstimateHtml({ client: tenant, lead: leadCheckResult.rows[0], estimate: estimateData });
+        const html = await generateEstimateHtml({
+            client: tenant,
+            lead: leadCheckResult.rows[0],
+            estimate: estimateData,
+        });
         const pdfUrl = await generatePdfAndUploadToS3({ html, key: estimationDoc });
-        if(action === 'pdf') {
+        if (action === 'pdf') {
             return { message: 'PDF generated successfully', data: { pdfUrl } };
         }
-        const clientLogin = 'https://mmym-client-dev.crowdapps.info/'
+        const clientLogin = 'https://mmym-client-dev.crowdapps.info/';
         const subject = 'Lead Estimate';
 
         const termsDoc = 'terms_and_conditions.pdf';
         const packingGuideDoc = 'trunk_packing_guide.pdf';
-        
+
         // const htmlBody = `
         //     <p>Dear ${leadCheckResult.rows[0]?.customer_name},</p>
         //     <p>Reference Number: ${leadId}</p>
@@ -50,18 +54,14 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         // `;
         // const emailService = await initializeEmailService();
         // await emailService.sendEmail(leadCheckResult.rows[0]?.customer_email, subject, '', htmlBody);
-        await generateEmail(
-            'Estimate Email', 
-            leadCheckResult.rows[0]?.customer_email, 
-            { 
-                username: leadCheckResult.rows[0]?.customer_name,
-                leadid: leadId,
-                pdfurl: pdfUrl,
-                clientlogin: clientLogin,
-                termsdoc:  termsDoc,
-                packingguidedoc: packingGuideDoc
-            }
-        );
+        await generateEmail('Estimate Email', leadCheckResult.rows[0]?.customer_email, {
+            username: leadCheckResult.rows[0]?.customer_name,
+            leadid: leadId,
+            pdfurl: pdfUrl,
+            clientlogin: clientLogin,
+            termsdoc: termsDoc,
+            packingguidedoc: packingGuideDoc,
+        });
         const templateRes = await client.query(GET_EMAIL_TEMPLATE_BY_EVENT, ['Estimate Email']);
         await client.query(INSERT_LOG, [
             tenant.id,

@@ -45,87 +45,25 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
     const createdAtFormatted = dayjs(lead?.createdAt).format('DD-MM-YYYY');
     const quoteExpiresOnFormatted = dayjs(estimate?.quote_expires_on).format('DD-MM-YYYY');
 
-    const materialsHtml = estimate.materials
-        .map(
+    const materialsHtml = estimate?.materials
+        ?.map(
             (material: Material) => `
         <tr>
             <td>${material.name}</td>
             <td>${material.chargeQty}</td>
-            <td>${material.price}</td>
-            <td>${material.total}</td>
+            <td>£ ${material.price}</td>
+            <td>£ ${material.total}</td>
         </tr>
     `,
         )
         .join('');
 
-    const servicesHtml = estimate.services
-        .map(
+    const servicesHtml = estimate?.services
+        ?.map(
             (service: Service) => `
         <tr>
             <td>${service.typeName}</td>
-            <td>${service.price}</td>
-        </tr>
-    `,
-        )
-        .join('');
-
-    const costsHtml = estimate.costs
-        .map(
-            (cost: Cost) => `
-        <tr>
-            <td>${cost?.vehicleTypeName}</td>
-            <td>${cost.vehicleQty}</td>
-            <td>${cost.driverQty}</td>
-            <td>${cost.packerQty}</td>
-            <td>${cost.porterQty}</td>
-            <td>${cost.fuelCharge}</td>
-            <td>${cost.wageCharge}</td>
-        </tr>
-    `,
-        )
-        .join('');
-
-    const ancillariesHtml = estimate.ancillaries
-        .map(
-            (ancillary: Ancillary) => `
-        <tr>
-            <td>${ancillary.name}</td>
-            <td>${ancillary.charge}</td>
-        </tr>
-    `,
-        )
-        .join('');
-
-    const generalInfoHtml = estimate.general_info
-        .map(
-            (info: GeneralInfo) => `
-        <tr>
-            <td>Contents Value</td>
-            <td>${info.contentsValue}</td>
-        </tr>
-        <tr>
-            <td>Driver Wage</td>
-            <td>${info.driverWage}</td>
-        </tr>
-        <tr>
-            <td>Packer Wage</td>
-            <td>${info.packerWage}</td>
-        </tr>
-        <tr>
-            <td>Porter Wage</td>
-            <td>${info.porterWage}</td>
-        </tr>
-        <tr>
-            <td>Insurance Type</td>
-            <td>${info.insuranceType}</td>
-        </tr>
-        <tr>
-            <td>Insurance Percentage</td>
-            <td>${info.insurancePercentage}%</td>
-        </tr>
-        <tr>
-            <td>Payment Method</td>
-            <td>${info.paymentMethod}</td>
+            <td>£ ${service.price}</td>
         </tr>
     `,
         )
@@ -144,9 +82,10 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
                 width: 100%;
                 padding: 10px;
             }
-            .header, .footer {
+            .header {
                 text-align: center;
             }
+            
             .header {
                 margin-bottom: 20px;
             }
@@ -154,6 +93,9 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
                 margin-top: 20px;
             }
             .logo {
+                text-align: left;
+            }
+            .company-info{
                 text-align: left;
             }
             .company-info, .quotation-info, .move-info {
@@ -222,7 +164,6 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
     
         <p>Detailed below are prices and services on offer. If you have any questions or comments we would be pleased to take your call.</p>
         
-        <h4>Materials</h4>
         <table class="table-container">
             <tr>
                 <th>Description</th>
@@ -233,7 +174,7 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
             ${materialsHtml}
         </table>
 
-        <h4>Services</h4>
+        <h4>We can provide following options:</h4>
         <table class="table-container">
             <tr>
                 <th>Description</th>
@@ -241,37 +182,6 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
             </tr>
             ${servicesHtml}
         </table>
-
-        <h4>Costs</h4>
-        <table class="table-container">
-            <tr>
-                <th>Vehicle Type</th>
-                <th>Vehicle Qty</th>
-                <th>Driver Qty</th>
-                <th>Packer Qty</th>
-                <th>Porter Qty</th>
-                <th>Fuel Charge</th>
-                <th>Wage Charge</th>
-            </tr>
-            ${costsHtml}
-        </table>
-
-        <h4>Ancillaries</h4>
-        <table class="table-container">
-            <tr>
-                <th>Description</th>
-                <th>Charge</th>
-            </tr>
-            ${ancillariesHtml}
-        </table>
-
-        <h4>General Info</h4>
-        <table class="table-container">
-            ${generalInfoHtml}
-        </table>
-
-        <h4>Notes</h4>
-        <p>${estimate.notes}</p>
 
         <div class="footer">
             <p>We aim to provide a first-class professional service to you during the course of any agreement made with us. If there is anything that we can assist you with either now or in the future, please be assured of our very best attention.</p>
