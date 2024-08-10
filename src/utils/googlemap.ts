@@ -1,6 +1,8 @@
+import { INSERT_GENERAL_INFO } from './../sql/sqlScript';
 import axios from 'axios';
 import { getconfigSecrets } from './getConfig';
 import logger from './logger';
+import { Number } from 'aws-sdk/clients/iot';
 
 interface Coordinates {
     lat: number;
@@ -35,17 +37,40 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
     return distance;
 };
 
-// Lambda function to get the distance between two postcodes
-export const getDistanceBetweenPostcodes = async (postcode1: string, postcode2: string): Promise<number | null> => {
+export const getDistanceBetweenPostcodes = async (originPostcode: string, destinationPostcode: string) => {
+    const config = await getconfigSecrets();
+    const baseUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json';
+    const kilometersToMilesConversionFactor = 0.621371;
+
     try {
-        const coords1 = await getCoordinates(postcode1);
-        const coords2 = await getCoordinates(postcode2);
-        logger.info(`Coordinates for ${postcode1}:`, { coords1 });
-        logger.info(`Coordinates for ${postcode2}:`, { coords2 });
-        const distance = calculateDistance(coords1.lat, coords1.lng, coords2.lat, coords2.lng);
-        return distance;
+        const response = await axios.get(baseUrl, {
+            params: {
+                origins: originPostcode,
+                destinations: destinationPostcode,
+                key: config.googlemapapi,
+            },
+        });
+
+        logger.info('Google distance response', { response: response.data });
+
+        if (response.data.status !== 'OK') {
+            throw new Error(`Error with the API request: ${response.data.status}`);
+        }
+
+        const distanceInfo = response.data.rows[0].elements[0];
+
+        if (distanceInfo.status === 'NOT_FOUND') {
+            throw new Error('One or both of the postcodes are invalid or not found.');
+        } else if (distanceInfo.status !== 'OK') {
+            throw new Error(`Error with the distance calculation: ${distanceInfo.status}`);
+        }
+
+        const distanceInKm = parseFloat(distanceInfo.distance.text.split(' ')[0]);
+        const distanceInMiles = distanceInKm * kilometersToMilesConversionFactor;
+
+        return distanceInMiles;
     } catch (error: any) {
-        console.error(error.message);
-        return null;
+        logger.error('Error fetching distance data:', error);
+        throw new Error(`Failed to fetch distance data: ${error.message}`);
     }
 };
