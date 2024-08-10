@@ -312,7 +312,8 @@ export const sendEmailDTO = async (payload: SendEmailPayload): Promise<void> => 
 const addsurveyItemTab1Schema = yup.object().shape({
     room: yup.string().required('Room is required').max(100, 'Room name cannot exceed 100 characters'),
     item: yup.string().required('Item is required').max(100, 'Item name cannot exceed 100 characters'),
-    ft3: yup.number().required('ft3 is required').min(0, 'ft3 must be greater than or equal to 0'),
+    ft3: yup.number().required('ft3 is required')
+        .min(0, 'ft3 must be greater than or equal to 0').max(999.99, 'ft3 must be less than or equal to 999.99'),
     quantity: yup.number().required('Quantity is required')
         .integer('Quantity must be an integer').min(1, 'Quantity must be greater than or equal to 1'),
     isLeave: yup.boolean().required('isLeave is required'),
@@ -341,7 +342,8 @@ const addsurveyItemTab3Schema = yup.object().shape({
     surveyItemId: yup.string().required('Survey item ID is required'),
     room: yup.string().required('Room is required').max(100, 'Room name cannot exceed 100 characters'),
     item: yup.string().required('Item is required').max(100, 'Item name cannot exceed 100 characters'),
-    ft3: yup.number().required('ft3 is required').min(0, 'ft3 must be greater than or equal to 0'),
+    ft3: yup.number().required('ft3 is required')
+        .min(0, 'ft3 must be greater than or equal to 0').max(999.99, 'ft3 must be less than or equal to 999.99'),
     dismantleCharges: yup.number().required('Dismantle Charges is required')
         .min(0, 'Dismantle Charges must be greater than or equal to 0'),
     sortOrder: yup.number().required('Sort Order is required')

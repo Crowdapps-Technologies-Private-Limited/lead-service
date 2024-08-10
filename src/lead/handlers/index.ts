@@ -7,6 +7,7 @@ import { editLeadHandler } from './editLeadHandler';
 import { addEstimateHandler } from './estimateHandler';
 import { estimateSendEmailHandler } from './estimateSendEmailHandler';
 import { getDistanceHandler } from './getDistanceHandler';
+import { getItemListBySurveyHandler } from './getItemListBySurveyHandler';
 import { getLatestEstimatesHandler } from './getLatestEstimatesHandler';
 import { getLeadListHandler } from './getLeadListHandler';
 import { getLinkedItemListHandler } from './getLinkedItemListHandler';
@@ -34,6 +35,7 @@ const authHandlers = {
     addSurveyTab1Handler,
     addSurveyTab2Handler,
     addSurveyTab3Handler,
+    getItemListBySurveyHandler,
 };
 
 export default authHandlers;

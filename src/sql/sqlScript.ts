@@ -529,9 +529,9 @@ CREATE TABLE IF NOT EXISTS survey_items (
 	isWeee BOOLEAN,
 	isCust BOOLEAN,
 	isClear BOOLEAN,
-	dismentle_charges DECIMAL(5,2),
+	dismentle_charges DECIMAL(8,2),
 	sort_order INTEGER,
-	linked_item VARCHAR(200)
+	linked_item VARCHAR(200),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE,
@@ -576,7 +576,7 @@ UPDATE survey_items
         sort_order = $5,
         linked_item = $6,
         updated_at = NOW()
-    WHERE id = $2 
+    WHERE id = $7 
     RETURNING *`;
 
 export const GET_ALL_ROOM_LIST = `SELECT * FROM public.rooms`;

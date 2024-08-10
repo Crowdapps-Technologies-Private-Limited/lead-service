@@ -12,6 +12,7 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/audit': admiinHandlers.getLogListByLeadHandler,
         '/leads/{id}/estimates': admiinHandlers.getLatestEstimatesHandler,
         '/leads/{id}/estimate-send-email/{estimateId}': admiinHandlers.estimateSendEmailHandler,
+        '/leads/{id}/get-items/{surveyId}': admiinHandlers.getItemListBySurveyHandler,
     },
     PUT: {
         '/leads/{id}': admiinHandlers.editLeadHandler,

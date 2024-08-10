@@ -14,6 +14,7 @@ import { getAllLinkedItems } from './getLinkedItemListService';
 import { addSurveyTab1 } from './addSurveyTab1Service';
 import { addSurveyTab2 } from './addSurveyTab2Service';
 import { addSurveyTab3 } from './addSurveyTab3Service';
+import { getSurveyedItems } from './getItemsbySurveyIdService';
 
 // Removed incomplete import statement
 
@@ -34,4 +35,5 @@ export {
     addSurveyTab1,
     addSurveyTab2,
     addSurveyTab3,
+    getSurveyedItems,
 };
