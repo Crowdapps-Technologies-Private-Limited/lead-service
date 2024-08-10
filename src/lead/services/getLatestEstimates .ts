@@ -1,4 +1,3 @@
-import { GeneralInfo } from './../interface';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 
@@ -115,7 +114,7 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
         data.quoteExpiresOn = data.quoteexpireson;
         data.vatIncluded = data.vatincluded;
         data.materialPriceChargeable = data.materialpricechargeable;
-        data.GeneralInfo = data.generalinfo;
+        data.generalInfo = data.generalinfo;
         delete data.quotetotal;
         delete data.costtotal;
         delete data.estimateid;
