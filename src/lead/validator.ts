@@ -5,6 +5,9 @@ import {
     EditEstimatePayload,
     EditLeadPayload,
     SendEmailPayload,
+    AddSurveyTab1Payload,
+    AddSurveyTab2Payload,
+    AddSurveyTab3Payload,
 } from './interface';
 import logger from '../utils/logger';
 
@@ -197,9 +200,7 @@ export const addEstimateDTO = async (payload: AddEstimatePayload): Promise<void>
 };
 
 // Define the edit estimate schema
-export const editEstimateSchema = yup
-    .object()
-    .shape({
+export const editEstimateSchema = yup.object().shape({
         quoteTotal: yup.number().required('Quote total is required'),
         costTotal: yup.number().required('Cost total is required'),
         quoteExpiresOn: yup.string().required('Quote expiry date is required'),
@@ -288,16 +289,14 @@ export const editEstimateDTO = async (payload: EditEstimatePayload): Promise<voi
 };
 
 // Define the send email payload schema
-export const sendEmailSchema = yup
-    .object()
-    .shape({
+export const sendEmailSchema = yup.object().shape({
         from: yup.string().email('Invalid email format').required('From email is required'),
         to: yup.string().email('Invalid email format').required('To email is required'),
         subject: yup.string().required('Subject is required'),
         body: yup.string().required('Body is required'),
         addClientSignature: yup.boolean().required('Client signature status is required'),
         templateId: yup.string().required('Template ID is required'),
-    })
+})
     .noUnknown(true, 'Unknown field in payload');
 
 // Validate the send email payload
@@ -306,5 +305,77 @@ export const sendEmailDTO = async (payload: SendEmailPayload): Promise<void> => 
         await sendEmailSchema.validate(payload, { abortEarly: false, strict: true });
     } catch (err: any) {
         throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
+    }
+};
+
+// Define the validation schema for a single SurveyItem
+const addsurveyItemTab1Schema = yup.object().shape({
+    room: yup.string().required('Room is required').max(100, 'Room name cannot exceed 100 characters'),
+    item: yup.string().required('Item is required').max(100, 'Item name cannot exceed 100 characters'),
+    ft3: yup.number().required('ft3 is required').min(0, 'ft3 must be greater than or equal to 0'),
+    quantity: yup.number().required('Quantity is required')
+        .integer('Quantity must be an integer').min(1, 'Quantity must be greater than or equal to 1'),
+    isLeave: yup.boolean().required('isLeave is required'),
+    isWeee: yup.boolean().required('isWeee is required'),
+    isCust: yup.boolean().required('isCust is required'),
+    isClear: yup.boolean().required('isClear is required'),
+});
+
+// Define the validation schema for the AddSurveyPayload
+export const addSurveyTab1PayloadSchema = yup.object().shape({
+    surveyorId: yup.string().required('Surveyor ID is required'),
+    surveyItems: yup.array().of(addsurveyItemTab1Schema)
+        .required('Survey items are required').min(1, 'There must be at least one survey item')
+});
+
+// Function to validate the payload
+export const validateAddSurveyTab1Payload = async (payload: AddSurveyTab1Payload) => {
+    try {
+        await addSurveyTab1PayloadSchema.validate(payload, { abortEarly: false });
+    } catch (err: any) {
+        throw new Error(`Validation failed: ${err.errors.join(', ')}`);
+    }
+};
+
+const addsurveyItemTab3Schema = yup.object().shape({
+    surveyItemId: yup.string().required('Survey item ID is required'),
+    room: yup.string().required('Room is required').max(100, 'Room name cannot exceed 100 characters'),
+    item: yup.string().required('Item is required').max(100, 'Item name cannot exceed 100 characters'),
+    ft3: yup.number().required('ft3 is required').min(0, 'ft3 must be greater than or equal to 0'),
+    dismantleCharges: yup.number().required('Dismantle Charges is required')
+        .min(0, 'Dismantle Charges must be greater than or equal to 0'),
+    sortOrder: yup.number().required('Sort Order is required')
+        .integer('Quantity must be an integer').min(1, 'Sort Order must be greater than or equal to 1'),
+    linkedItem: yup.string().nullable().max(100, 'Linked Item name cannot exceed 100 characters'),
+});
+
+// Define the validation schema for the AddSurveyPayload
+export const addSurveyTab3PayloadSchema = yup.object().shape({
+    surveyId: yup.string().required('Surveyor ID is required'),
+    surveyItems: yup.array().of(addsurveyItemTab3Schema)
+        .required('Survey items are required').min(1, 'There must be at least one survey item')
+});
+
+// Function to validate the payload
+export const validateAddSurveyTab3Payload = async (payload: AddSurveyTab3Payload) => {
+    try {
+        await addSurveyTab3PayloadSchema.validate(payload, { abortEarly: false });
+    } catch (err: any) {
+        throw new Error(`Validation failed: ${err.errors.join(', ')}`);
+    }
+};
+
+// Define the validation schema for the AddSurveyPayload
+export const addSurveyTab2PayloadSchema = yup.object().shape({
+    surveyId: yup.string().required('Surveyor ID is required'),
+    notes: yup.string().nullable()
+});
+
+// Function to validate the payload
+export const validateAddSurveyTab2Payload = async (payload: AddSurveyTab2Payload) => {
+    try {
+        await addSurveyTab2PayloadSchema.validate(payload, { abortEarly: false });
+    } catch (err: any) {
+        throw new Error(`Validation failed: ${err.errors.join(', ')}`);
     }
 };

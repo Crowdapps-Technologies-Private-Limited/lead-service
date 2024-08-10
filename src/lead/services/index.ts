@@ -11,6 +11,9 @@ import { sendLeadEmail } from './sendLeadEmailService';
 import { sendEstimateEmail } from './estimateSendLeadEmailService';
 import { getAllRooms } from './getRoomListService';
 import { getAllLinkedItems } from './getLinkedItemListService';
+import { addSurveyTab1 } from './addSurveyTab1Service';
+import { addSurveyTab2 } from './addSurveyTab2Service';
+import { addSurveyTab3 } from './addSurveyTab3Service';
 
 // Removed incomplete import statement
 
@@ -28,4 +31,7 @@ export {
     sendEstimateEmail,
     getAllRooms,
     getAllLinkedItems,
+    addSurveyTab1,
+    addSurveyTab2,
+    addSurveyTab3,
 };

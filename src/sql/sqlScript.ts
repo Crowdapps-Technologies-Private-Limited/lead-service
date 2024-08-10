@@ -511,13 +511,11 @@ export const CREATE_SURVEY_AND_RELATED_TABLE = `
 CREATE TABLE IF NOT EXISTS surveys (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     lead_id VARCHAR(20) NOT NULL,
-	surveyor_id uuid NOT NULL,
+	surveyor_id VARCHAR(100),
     notes text,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    material_price_chargeable BOOLEAN,
-    FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE,
-	FOREIGN KEY (surveyor_id) REFERENCES public.users(id) ON DELETE CASCADE
+    FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS survey_items (
@@ -531,18 +529,55 @@ CREATE TABLE IF NOT EXISTS survey_items (
 	isWeee BOOLEAN,
 	isCust BOOLEAN,
 	isClear BOOLEAN,
-	dismentle_charge DECIMAL(5,2),
+	dismentle_charges DECIMAL(5,2),
 	sort_order INTEGER,
 	linked_item VARCHAR(200)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    material_price_chargeable BOOLEAN,
     FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE,
 	FOREIGN KEY (room) REFERENCES public.rooms(room_name) ON DELETE CASCADE,
 	FOREIGN KEY (linked_item) REFERENCES public.linked_items(item_name) ON DELETE CASCADE
 );
-
 `;
+
+export const INSERT_SURVEY_FOR_TAB1 = `INSERT INTO surveys (
+    lead_id,
+    surveyor_id
+) VALUES ($1, $2) RETURNING *`;
+
+
+export const INSERT_SURVEY_ITEM_FOR_TAB1 = `INSERT INTO survey_items (
+    survey_id,
+    room,
+    item,
+    ft3,
+    quantity,
+    isLeave,
+    isWeee,
+    isCust,
+    isClear
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`;
+
+export const GET_SURVEY_BY_ID = `select * from surveys where id = $1`;
+
+export const GET_SURVEY_ITEM_BY_ID = `select * from survey_items where id = $1`;
+
+export const GET_SURVEY_ITEMS_BY_SURVEY_ID = `select * from survey_items where survey_id = $1`;
+
+export const INSERT_SURVEY_FOR_TAB2 = `UPDATE surveys SET notes = $1 WHERE id = $2 RETURNING *`;
+
+export const INSERT_SURVEY_ITEM_FOR_TAB3 = `
+UPDATE survey_items 
+    SET 
+        room = $1,
+        item = $2,
+        ft3 = $3,
+        dismentle_charges = $4,
+        sort_order = $5,
+        linked_item = $6,
+        updated_at = NOW()
+    WHERE id = $2 
+    RETURNING *`;
 
 export const GET_ALL_ROOM_LIST = `SELECT * FROM public.rooms`;
 

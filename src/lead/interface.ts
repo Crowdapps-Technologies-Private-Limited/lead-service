@@ -154,3 +154,39 @@ export interface SendEmailPayload {
     addClientSignature: boolean;
     templateId: string;
 }
+
+export interface AddSurveyItemTab1 {
+    room: string; 
+    item: string; 
+    ft3: number; 
+    quantity: number; 
+    isLeave: boolean; 
+    isWeee: boolean; 
+    isCust: boolean; 
+    isClear: boolean; 
+}
+
+export interface AddSurveyTab1Payload {
+    surveyorId: string;
+    surveyItems: AddSurveyItemTab1[]; 
+}
+
+export interface AddSurveyItemTab3 {
+    surveyItemId: string;
+    room: string; 
+    item: string; 
+    ft3: number; 
+    dismantleCharges: number; 
+    sortOrder: number; 
+    linkedItem?: string | null;
+}
+
+export interface AddSurveyTab2Payload {
+    surveyId: string;
+    notes?: string | null; 
+}
+
+export interface AddSurveyTab3Payload {
+    surveyId: string;
+    surveyItems: AddSurveyItemTab3[]; 
+}
