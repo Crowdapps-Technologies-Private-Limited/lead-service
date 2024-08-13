@@ -320,6 +320,7 @@ const addsurveyItemTab1Schema = yup.object().shape({
     isWeee: yup.boolean().required('isWeee is required'),
     isCust: yup.boolean().required('isCust is required'),
     isClear: yup.boolean().required('isClear is required'),
+    materialId: yup.string().nullable().max(100, 'Material ID cannot exceed 100 characters'),
 });
 
 // Define the validation schema for the AddSurveyPayload

@@ -12,6 +12,7 @@ import { getLatestEstimatesHandler } from './getLatestEstimatesHandler';
 import { getLeadListHandler } from './getLeadListHandler';
 import { getLinkedItemListHandler } from './getLinkedItemListHandler';
 import { getLogListByLeadHandler } from './getLogListByLeadHandler';
+import { getMaterialItemsHandler } from './getMaterialItemsHandler';
 import { getReferrerListHandler } from './getReferrerListHandler';
 import { getRoomListHandler } from './getRoomListHandler';
 import { getSingleLeadHandler } from './getSingleLeadHandler';
@@ -36,6 +37,7 @@ const authHandlers = {
     addSurveyTab2Handler,
     addSurveyTab3Handler,
     getItemListBySurveyHandler,
+    getMaterialItemsHandler,
 };
 
 export default authHandlers;

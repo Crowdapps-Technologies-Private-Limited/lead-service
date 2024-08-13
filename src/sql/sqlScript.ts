@@ -582,3 +582,31 @@ UPDATE survey_items
 export const GET_ALL_ROOM_LIST = `SELECT * FROM public.rooms`;
 
 export const GET_ALL_LINKED_ITEM_LIST = `SELECT * FROM public.linked_items`;
+
+export const GET_MATERIALS_BY_ESTIMATE = `
+WITH latest_estimate AS (
+    SELECT id 
+    FROM estimates 
+    WHERE lead_id = $1 
+    ORDER BY created_at DESC 
+    LIMIT 1
+)
+SELECT 
+    json_agg(json_build_object(
+        'materialId', m.id,
+        'name', m.name,
+        'dimensions', m.dimensions,
+        'surveyedQty', m.surveyed_qty,
+        'chargeQty', m.charge_qty,
+        'price', m.price,
+        'total', m.total,
+        'volume', m.volume,
+        'cost', m.cost
+    )) AS materials
+FROM 
+    estimate_materials em
+JOIN 
+    materials m ON em.material_id = m.id
+WHERE 
+    em.estimate_id = (SELECT id FROM latest_estimate);
+`;

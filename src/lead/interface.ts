@@ -164,6 +164,7 @@ export interface AddSurveyItemTab1 {
     isWeee: boolean; 
     isCust: boolean; 
     isClear: boolean; 
+    materialId?: string | null;
 }
 
 export interface AddSurveyTab1Payload {
