@@ -12,6 +12,7 @@ export const getAllSurveyors = async (tenant: any) => {
     if (tenant?.is_suspended) {
       throw new Error('Tenant is suspended');
     }
+    await client.query(`SET search_path TO ${schema}`);
     // Fetch list
     const res = await client.query(GET_ALL_SURVEYORS, ['Surveyor']);
     return res.rows || [];

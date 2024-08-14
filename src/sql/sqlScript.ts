@@ -512,12 +512,13 @@ CREATE TABLE IF NOT EXISTS surveys (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     lead_id VARCHAR(20) NOT NULL,
 	surveyor_id VARCHAR(100),
-    surveyType VARCHAR(100),
+    survey_type VARCHAR(100),
     notes text,
     remarks text,
-    startTime TIMESTAMP default NULL,
-    endTime TIMESTAMP default NULL,
+    start_time TIMESTAMP default NULL,
+    end_time TIMESTAMP default NULL,
     description text,
+    status VARCHAR(100) NOT NULL CHECK (status IN ('PENDING', 'STARTED', 'COMPLETED')) DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
@@ -546,10 +547,10 @@ CREATE TABLE IF NOT EXISTS survey_items (
 export const INSERT_SURVEY = `INSERT INTO surveys (
     lead_id,
     surveyor_id,
-    surveyType,
+    survey_type,
     remarks,
-    startTime,
-    endTime,
+    start_time,
+    end_time,
     description
 ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
 

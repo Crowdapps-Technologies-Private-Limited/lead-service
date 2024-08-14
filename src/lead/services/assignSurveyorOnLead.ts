@@ -1,5 +1,6 @@
 import {
     CHECK_TABLE_EXISTS,
+    CREATE_SURVEY_AND_RELATED_TABLE,
     INSERT_LOG,
     INSERT_SURVEY
 } from '../../sql/sqlScript';
@@ -47,6 +48,8 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         if (leadCheckResult.rows.length === 0) {
             throw new Error('Lead not found');
         }
+        await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
+        logger.info('Survey and related tables created successfully');
         // Assign Surveyor
         await client.query(INSERT_SURVEY, [
             leadId,
