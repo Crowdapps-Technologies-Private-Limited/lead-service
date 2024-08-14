@@ -41,8 +41,8 @@ export const getMaterialItems = async (leadId: string, tenant: any) => {
         };
     } catch (error: any) {
         await client.query('ROLLBACK');
-        logger.error('Failed to get survey', { error });
-        throw new Error(`Failed to get survey: ${error.message}`);
+        logger.error('Failed to get materials', { error });
+        throw new Error(`Failed to get materials: ${error.message}`);
     } finally {
         try {
             await client.end();

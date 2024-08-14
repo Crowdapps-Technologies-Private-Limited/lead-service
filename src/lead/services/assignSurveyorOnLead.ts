@@ -1,21 +1,26 @@
 import {
-    INSERT_SURVEY_FOR_TAB2,
-    INSERT_LOG,
     CHECK_TABLE_EXISTS,
-    GET_SURVEY_BY_ID
+    INSERT_LOG,
+    INSERT_SURVEY
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
-import { AddSurveyTab2Payload } from '../interface';
+import { toFloat } from '../../utils/utility';
+import { AssignSurveyorPayload } from '../interface';
 
-export const addSurveyTab2 = async (leadId: string, payload: AddSurveyTab2Payload, tenant: any) => {
+export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayload, tenant: any) => {
     logger.info('addSurvey service is running:');
     logger.info('payload:', { payload });
+    logger.info('leadId:', { leadId });
     logger.info('tenant:', { tenant });
 
     const {
-        surveyId,
-        notes
+        surveyorId,
+        surveyType,
+        remarks,
+        startTime,
+        endTime,
+        description
     } = payload;
 
     const client = await connectToDatabase();
@@ -28,6 +33,7 @@ export const addSurveyTab2 = async (leadId: string, payload: AddSurveyTab2Payloa
         if (tenant?.is_suspended) {
             throw new Error('Tenant is suspended');
         }
+        // Insert survey items
         await client.query(`SET search_path TO ${schema}`);
         let tableCheckRes: any;
         tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);
@@ -41,23 +47,29 @@ export const addSurveyTab2 = async (leadId: string, payload: AddSurveyTab2Payloa
         if (leadCheckResult.rows.length === 0) {
             throw new Error('Lead not found');
         }
-       // Check if leads table exists
-        tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'surveys']);
-        if (!tableCheckRes.rows[0].exists) {
-            logger.info('Surveys table does not exist');
-            throw new Error('Survey not found');
-        }
-        const surveyRes = await client.query(GET_SURVEY_BY_ID, [surveyId]);
-        if (surveyRes.rows.length === 0) {
-            logger.info('Survey not found');
-            throw new Error('Survey not found');
-        }
-        // Update survey
-        await client.query(INSERT_SURVEY_FOR_TAB2, [notes, surveyId]);
+        // Assign Surveyor
+        await client.query(INSERT_SURVEY, [
+            leadId,
+            surveyorId,
+            surveyType,
+            remarks || null,
+            startTime,
+            endTime,
+            description || null
+        ]);
+
+        await client.query(INSERT_LOG, [
+            tenant.id,
+            tenant.name,
+            tenant.email,
+            'Surveyor assigned',
+            'LEAD',
+            'ESTIMATES',
+            leadId
+        ]);
         await client.query('COMMIT');
         return { 
-            message: 'Survey notes added successfully',
-            data: { surveyId}
+            message: 'Surveyor assigned successfully'
         };
     } catch (error: any) {
         await client.query('ROLLBACK');

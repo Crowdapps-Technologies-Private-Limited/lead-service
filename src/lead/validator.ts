@@ -8,6 +8,7 @@ import {
     AddSurveyTab1Payload,
     AddSurveyTab2Payload,
     AddSurveyTab3Payload,
+    AssignSurveyorPayload
 } from './interface';
 import logger from '../utils/logger';
 
@@ -321,6 +322,7 @@ const addsurveyItemTab1Schema = yup.object().shape({
     isCust: yup.boolean().required('isCust is required'),
     isClear: yup.boolean().required('isClear is required'),
     materialId: yup.string().nullable().max(100, 'Material ID cannot exceed 100 characters'),
+    price: yup.number().nullable().min(0, 'Price must be greater than or equal to 0'),
 });
 
 // Define the validation schema for the AddSurveyPayload
@@ -378,6 +380,23 @@ export const addSurveyTab2PayloadSchema = yup.object().shape({
 export const validateAddSurveyTab2Payload = async (payload: AddSurveyTab2Payload) => {
     try {
         await addSurveyTab2PayloadSchema.validate(payload, { abortEarly: false });
+    } catch (err: any) {
+        throw new Error(`Validation failed: ${err.errors.join(', ')}`);
+    }
+};
+
+const assignSurveyorPayloadSchema = yup.object().shape({
+    surveyorId: yup.string().required('Surveyor ID is required'),
+    surveyType: yup.string().required('Survey type is required'),
+    remarks: yup.string().nullable(),
+    startTime: yup.string().required('Start time is required'),
+    endTime: yup.string().required('End time is required'),
+    description: yup.string().nullable(),
+});
+
+export const assignSurveyorDTO = async (payload: AssignSurveyorPayload) => {
+    try {
+        await assignSurveyorPayloadSchema.validate(payload, { abortEarly: false });
     } catch (err: any) {
         throw new Error(`Validation failed: ${err.errors.join(', ')}`);
     }

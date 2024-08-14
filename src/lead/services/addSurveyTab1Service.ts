@@ -1,21 +1,21 @@
 import {
-    INSERT_SURVEY_FOR_TAB1,
     INSERT_SURVEY_ITEM_FOR_TAB1,
     CREATE_SURVEY_AND_RELATED_TABLE,
     INSERT_LOG,
+    UPDATE_MATERIAL_BY_SURVEY
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
+import { toFloat } from '../../utils/utility';
 import { AddSurveyTab1Payload } from '../interface';
 
-export const addSurveyTab1 = async (leadId: string, payload: AddSurveyTab1Payload, tenant: any) => {
+export const addSurveyTab1 = async (surveyId: string, payload: AddSurveyTab1Payload, tenant: any) => {
     logger.info('addSurvey service is running:');
     logger.info('payload:', { payload });
-    logger.info('leadId:', { leadId });
+    logger.info('surveyId:', { surveyId });
     logger.info('tenant:', { tenant });
 
     const {
-        surveyorId,
         surveyItems,
     } = payload;
 
@@ -29,28 +29,23 @@ export const addSurveyTab1 = async (leadId: string, payload: AddSurveyTab1Payloa
         if (tenant?.is_suspended) {
             throw new Error('Tenant is suspended');
         }
-
-        await client.query(`SET search_path TO ${schema}`);
-        const leadCheckResult = await client.query(`
-            SELECT * FROM leads WHERE generated_id = $1
-        `, [leadId]);
-        if (leadCheckResult.rows.length === 0) {
-            throw new Error('Lead not found');
-        }
-        await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
-        logger.info('Survey and related tables created successfully');
-
-        // Insert survey
-        const surveyResult = await client.query(INSERT_SURVEY_FOR_TAB1, [
-            leadId,
-            surveyorId
-        ]);
-
-        const surveyId = surveyResult.rows[0].id;
-        logger.info('surveyId:', { surveyId });
-
         // Insert survey items
         for (const item of surveyItems) {
+            if(!item.isLeave || !item.isWeee || !item.isCust || !item.isClear) {
+                throw new Error('One radio button should be selected');
+            }
+            if(item.room?.toLowerCase() === 'materials') {
+                if(!item.materialId || !item.quantity || !item.ft3 || !item.price) {
+                    throw new Error('Material details are required');
+                }
+                const materialResult = await client.query(UPDATE_MATERIAL_BY_SURVEY, [
+                    item.quantity,
+                    item.ft3,
+                    toFloat(item.price) * parseInt(item.quantity?.toString()),
+                    item.materialId
+                ]);
+                logger.info('Material updated:', { materialId: materialResult.rows[0].id });
+            }
             const surveyItemResult = await client.query(INSERT_SURVEY_ITEM_FOR_TAB1, [
                 surveyId,
                 item.room,
@@ -65,18 +60,6 @@ export const addSurveyTab1 = async (leadId: string, payload: AddSurveyTab1Payloa
             logger.info('Survey item inserted:', { surveyItemId: surveyItemResult.rows[0].id });
         }
         logger.info('Survey items inserted successfully');
-
-        // Insert log
-        // await client.query(INSERT_LOG, [
-        //     tenant.id,
-        //     tenant.name,
-        //     tenant.email,
-        //     'You have added a new survey',
-        //     'LEAD',
-        //     'SURVEY',
-        //     leadId,
-        // ]);
-        // logger.info('Log inserted successfully');
 
         await client.query('COMMIT');
         return { 

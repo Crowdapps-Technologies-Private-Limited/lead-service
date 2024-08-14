@@ -70,18 +70,6 @@ export const addSurveyTab3 = async (leadId: string, payload: AddSurveyTab3Payloa
         }
         logger.info('Survey items inserted successfully');
 
-        // Insert log
-        // await client.query(INSERT_LOG, [
-        //     tenant.id,
-        //     tenant.name,
-        //     tenant.email,
-        //     'You have added a new survey',
-        //     'LEAD',
-        //     'SURVEY',
-        //     leadId,
-        // ]);
-        // logger.info('Log inserted successfully');
-
         await client.query('COMMIT');
         return { 
             message: 'Survey added successfully',

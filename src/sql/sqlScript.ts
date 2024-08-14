@@ -512,7 +512,12 @@ CREATE TABLE IF NOT EXISTS surveys (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     lead_id VARCHAR(20) NOT NULL,
 	surveyor_id VARCHAR(100),
+    surveyType VARCHAR(100),
     notes text,
+    remarks text,
+    startTime TIMESTAMP default NULL,
+    endTime TIMESTAMP default NULL,
+    description text,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
@@ -534,16 +539,19 @@ CREATE TABLE IF NOT EXISTS survey_items (
 	linked_item VARCHAR(200),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE,
-	FOREIGN KEY (room) REFERENCES public.rooms(room_name) ON DELETE CASCADE,
-	FOREIGN KEY (linked_item) REFERENCES public.linked_items(item_name) ON DELETE CASCADE
+    FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
 );
 `;
 
-export const INSERT_SURVEY_FOR_TAB1 = `INSERT INTO surveys (
+export const INSERT_SURVEY = `INSERT INTO surveys (
     lead_id,
-    surveyor_id
-) VALUES ($1, $2) RETURNING *`;
+    surveyor_id,
+    surveyType,
+    remarks,
+    startTime,
+    endTime,
+    description
+) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
 
 
 export const INSERT_SURVEY_ITEM_FOR_TAB1 = `INSERT INTO survey_items (
@@ -610,3 +618,15 @@ JOIN
 WHERE 
     em.estimate_id = (SELECT id FROM latest_estimate);
 `;
+
+export const UPDATE_MATERIAL_BY_SURVEY = `
+UPDATE materials
+SET
+    surveyed_qty = $1,
+    volume = $2,
+    cost = $3,
+    updated_at = NOW()
+WHERE id = $9
+`;
+
+export const GET_ALL_SURVEYORS = `SELECT * FROM staffs WHERE role = $1`;

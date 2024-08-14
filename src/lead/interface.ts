@@ -165,10 +165,10 @@ export interface AddSurveyItemTab1 {
     isCust: boolean; 
     isClear: boolean; 
     materialId?: string | null;
+    price?: number | null;
 }
 
 export interface AddSurveyTab1Payload {
-    surveyorId: string;
     surveyItems: AddSurveyItemTab1[]; 
 }
 
@@ -190,4 +190,13 @@ export interface AddSurveyTab2Payload {
 export interface AddSurveyTab3Payload {
     surveyId: string;
     surveyItems: AddSurveyItemTab3[]; 
+}
+
+export interface AssignSurveyorPayload {
+    surveyorId: string;
+    surveyType: string;
+    remarks?: string | null;
+    startTime: string;
+    endTime: string;
+    description?: string | null;
 }

@@ -16,6 +16,8 @@ import { addSurveyTab2 } from './addSurveyTab2Service';
 import { addSurveyTab3 } from './addSurveyTab3Service';
 import { getSurveyedItems } from './getItemsbySurveyIdService';
 import { getMaterialItems } from './getMaterialItemsOfEstimate';
+import { assignSurveyor } from './assignSurveyorOnLead';
+import { getAllSurveyors } from './getSurveyorListService';
 
 // Removed incomplete import statement
 
@@ -38,4 +40,6 @@ export {
     addSurveyTab3,
     getSurveyedItems,
     getMaterialItems,
+    assignSurveyor,
+    getAllSurveyors,
 };
