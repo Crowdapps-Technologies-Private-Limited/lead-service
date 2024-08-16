@@ -565,7 +565,6 @@ CREATE TABLE IF NOT EXISTS survey_services (
     survey_id UUID NOT NULL,
     service_name VARCHAR(100),
     is_accepted BOOLEAN,
-    is_declined BOOLEAN,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
