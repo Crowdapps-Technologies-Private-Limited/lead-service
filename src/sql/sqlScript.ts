@@ -519,6 +519,21 @@ CREATE TABLE IF NOT EXISTS surveys (
     end_time TIMESTAMP default NULL,
     description text,
     status VARCHAR(100) NOT NULL CHECK (status IN ('PENDING', 'STARTED', 'COMPLETED')) DEFAULT 'PENDING',
+    moving_from_paces INTEGER,
+    moving_from_flight_of_stairs INTEGER,
+    moving_from_lift_availability VARCHAR(100),
+    moving_from_bedrooms INTEGER,
+    moving_from_floors INTEGER,
+    is_moving_from_postcode_verified BOOLEAN,
+    moving_to_paces INTEGER,
+    moving_to_flight_of_stairs INTEGER,
+    moving_to_lift_availability VARCHAR(100),
+    moving_to_bedrooms INTEGER,
+    moving_to_floors INTEGER,
+    is_moving_to_postcode_verified BOOLEAN,
+    is_confirmed BOOLEAN,
+    is_provisional BOOLEAN,
+    is_not_taking BOOLEAN,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
@@ -538,6 +553,17 @@ CREATE TABLE IF NOT EXISTS survey_items (
 	dismentle_charges DECIMAL(8,2),
 	sort_order INTEGER,
 	linked_item VARCHAR(200),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS survey_services (
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    survey_id UUID NOT NULL,
+    service_name VARCHAR(100),
+    is_accepted BOOLEAN,
+    is_declined BOOLEAN,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
