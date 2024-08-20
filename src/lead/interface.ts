@@ -197,6 +197,7 @@ export interface AssignSurveyorPayload {
     surveyType: string;
     remarks?: string | null;
     startTime: string;
-    endTime: string;
-    description?: string | null;
+    endTime?: string | null;
+    surveyDate?: string | null;
+    description: string;
 }

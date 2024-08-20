@@ -3,25 +3,11 @@ import { connectToDatabase } from '../../utils/database';
 import { setPaginationData } from '../../utils/utility';
 import logger from '../../utils/logger';
 
-const allowedOrderFields: { [key: string]: string } = {
-  generated_id: 'generated_id',
-  customer_name: 'customer_name',
-  created_at: 'created_at' // Assuming created_at is in leads table
-};
-
-export const getAllLeads = async (
-  pageSize: number, 
-  pageNumber: number, 
-  orderBy: string,
-  orderIn: string,
-  search: string,
+export const getAllLeadsForSurvey = async (
   tenant: any // New search parameter
 ) => {
   // Connect to PostgreSQL database
   const client = await connectToDatabase();
-  const offset = pageSize * (pageNumber - 1);
-  const searchQuery = `%${search}%`; // For partial matching
-  logger.info('Fetching lead list', { pageSize, pageNumber, orderBy, orderIn, searchQuery, offset });
   
   try {
     await client.query('BEGIN');
@@ -39,8 +25,7 @@ export const getAllLeads = async (
     if (!leadsTableExists) {
       logger.info('Leads table does not exist');
       return {
-        list: [],
-        pagination: setPaginationData(0, pageSize, 0, pageNumber)
+        list: []
       };
     }
 
@@ -68,18 +53,9 @@ export const getAllLeads = async (
         customers c ON l.customer_id = c.id
       LEFT JOIN 
         addresses ca ON l.collection_address_id = ca.id
-      LEFT JOIN 
-        addresses da ON l.delivery_address_id = da.id
-      WHERE 
-        (c.name ILIKE $3 OR l.status ILIKE $3 OR l.generated_id::TEXT ILIKE $3) -- Search condition
-      ORDER BY ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
-      LIMIT $1 
-      OFFSET $2`, [pageSize, offset, searchQuery]);
-
-    const pagination = setPaginationData(resultCount.rows[0].count, pageSize, res?.rows?.length, pageNumber);
+      WHERE l.status = 'ESTIMATES'`);
     const result = {
-      list: res?.rows || [],
-      pagination
+      list: res?.rows || []
     };
     return result;
   } catch (error: any) {

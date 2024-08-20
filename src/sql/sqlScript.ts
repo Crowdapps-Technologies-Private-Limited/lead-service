@@ -515,8 +515,9 @@ CREATE TABLE IF NOT EXISTS surveys (
     survey_type VARCHAR(100),
     notes text,
     remarks text,
-    start_time TIMESTAMP default NULL,
+    start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP default NULL,
+    survey_date TIMESTAMP default NULL,
     description text,
     status VARCHAR(100) NOT NULL CHECK (status IN ('PENDING', 'STARTED', 'COMPLETED')) DEFAULT 'PENDING',
     moving_from_paces INTEGER,
@@ -578,8 +579,17 @@ export const INSERT_SURVEY = `INSERT INTO surveys (
     remarks,
     start_time,
     end_time,
-    description
-) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
+    description,
+    survey_date
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`;
+
+export const CHECK_SURVEY = `
+SELECT * FROM surveys 
+WHERE 
+    lead_id = $1 AND 
+    survey_date = $2 AND 
+    start_time = $3 AND 
+    end_time = $4`;
 
 
 export const INSERT_SURVEY_ITEM_FOR_TAB1 = `INSERT INTO survey_items (

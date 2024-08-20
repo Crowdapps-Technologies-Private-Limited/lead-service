@@ -10,6 +10,7 @@ import { estimateSendEmailHandler } from './estimateSendEmailHandler';
 import { getDistanceHandler } from './getDistanceHandler';
 import { getItemListBySurveyHandler } from './getItemListBySurveyHandler';
 import { getLatestEstimatesHandler } from './getLatestEstimatesHandler';
+import { getLeadListForSurveyHandler } from './getLeadListForSurveyHandler';
 import { getLeadListHandler } from './getLeadListHandler';
 import { getLinkedItemListHandler } from './getLinkedItemListHandler';
 import { getLogListByLeadHandler } from './getLogListByLeadHandler';
@@ -42,6 +43,7 @@ const authHandlers = {
     getMaterialItemsHandler,
     assignSurveyorHandler,
     getSurveyorListHandler,
+    getLeadListForSurveyHandler
 };
 
 export default authHandlers;

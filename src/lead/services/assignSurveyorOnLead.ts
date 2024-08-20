@@ -2,7 +2,8 @@ import {
     CHECK_TABLE_EXISTS,
     CREATE_SURVEY_AND_RELATED_TABLE,
     INSERT_LOG,
-    INSERT_SURVEY
+    INSERT_SURVEY,
+    CHECK_SURVEY
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
@@ -18,6 +19,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
     const {
         surveyorId,
         surveyType,
+        surveyDate,
         remarks,
         startTime,
         endTime,
@@ -50,6 +52,11 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         }
         await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
         logger.info('Survey and related tables created successfully');
+        //Check if survey exists
+        const surveyCheckResult = await client.query(CHECK_SURVEY, [leadId, surveyDate, startTime, endTime]);
+        if (surveyCheckResult.rows.length > 0) {
+            throw new Error('Survey already exists');
+        }
         // Assign Surveyor
         await client.query(INSERT_SURVEY, [
             leadId,
@@ -57,8 +64,9 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             surveyType,
             remarks || null,
             startTime,
-            endTime,
-            description || null
+            endTime || null,
+            description,
+            surveyDate || null
         ]);
 
         await client.query(INSERT_LOG, [

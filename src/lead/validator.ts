@@ -390,8 +390,9 @@ const assignSurveyorPayloadSchema = yup.object().shape({
     surveyType: yup.string().required('Survey type is required'),
     remarks: yup.string().nullable(),
     startTime: yup.string().required('Start time is required'),
-    endTime: yup.string().required('End time is required'),
-    description: yup.string().nullable(),
+    endTime: yup.string().nullable(),
+    description: yup.string().required('Description is required'),
+    surveyDate: yup.string().nullable()
 });
 
 export const assignSurveyorDTO = async (payload: AssignSurveyorPayload) => {
