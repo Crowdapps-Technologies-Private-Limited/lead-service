@@ -670,3 +670,32 @@ WHERE id = $9
 `;
 
 export const GET_ALL_SURVEYORS = `SELECT * FROM staffs WHERE role = $1`;
+
+
+export const DELETE_ESTIMATE_SERVICES = `
+    DELETE FROM estimate_services
+    WHERE estimate_id = $1;
+`;
+
+export const DELETE_ESTIMATE_MATERIALS = `
+    DELETE FROM estimate_materials
+    WHERE estimate_id = $1;
+`;
+
+
+export const DELETE_ESTIMATE_COSTS = `
+    DELETE FROM estimate_costs
+    WHERE estimate_id = $1;
+`;
+
+
+export const DELETE_ESTIMATE_GENERAL_INFO = `
+    DELETE FROM estimate_general_info
+    WHERE estimate_id = $1;
+`;
+
+
+export const DELETE_ESTIMATE_ANCILLARIES = `
+    DELETE FROM estimate_ancillaries
+    WHERE estimate_id = $1;
+`;

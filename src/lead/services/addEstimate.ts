@@ -2,15 +2,10 @@ import {
     INSERT_ESTIMATE,
     UPDATE_ESTIMATE,
     INSERT_SERVICE,
-    UPDATE_SERVICE,
     INSERT_MATERIAL,
-    UPDATE_MATERIAL,
     INSERT_COST,
-    UPDATE_COST,
     INSERT_GENERAL_INFO,
-    UPDATE_GENERAL_INFO,
     INSERT_ANCILLARY,
-    UPDATE_ANCILLARY,
     INSERT_ESTIMATE_SERVICE,
     INSERT_ESTIMATE_MATERIAL,
     INSERT_ESTIMATE_COST,
@@ -19,6 +14,11 @@ import {
     CREATE_ESTIMATE_AND_RELATED_TABLE,
     INSERT_LOG,
     UPDATE_LEAD_STATUS,
+    DELETE_ESTIMATE_SERVICES,
+    DELETE_ESTIMATE_MATERIALS,
+    DELETE_ESTIMATE_COSTS,
+    DELETE_ESTIMATE_GENERAL_INFO,
+    DELETE_ESTIMATE_ANCILLARIES,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
@@ -44,15 +44,15 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         ancillaries,
     } = payload;
 
-    const estimateId =  payload.estimateId;  // Correctly referenced estimateId from payload
+    const estimateId = payload.estimateId;
     logger.info('estimateId:', { estimateId });
-    logger.info('payload', { payload });
+
     const client = await connectToDatabase();
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
 
     try {
-        await client.query('BEGIN');
+        await client.query('BEGIN'); // Start transaction
 
         if (tenant?.is_suspended) {
             throw new Error('Tenant is suspended');
@@ -77,6 +77,14 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
                 estimateId
             ]);
             logger.info('Estimate updated successfully', { estimateId });
+
+            // Delete existing services, materials, costs, general info, and ancillaries
+            await client.query(DELETE_ESTIMATE_SERVICES, [estimateId]);
+            await client.query(DELETE_ESTIMATE_MATERIALS, [estimateId]);
+            await client.query(DELETE_ESTIMATE_COSTS, [estimateId]);
+            await client.query(DELETE_ESTIMATE_GENERAL_INFO, [estimateId]);
+            await client.query(DELETE_ESTIMATE_ANCILLARIES, [estimateId]);
+            logger.info('Existing services, materials, costs, general info, and ancillaries deleted successfully');
         } else {
             // Insert new estimate
             const result = await client.query(INSERT_ESTIMATE, [
@@ -94,134 +102,75 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
 
         // Handle Services
         for (const service of services) {
-            if (service.serviceId && finalEstimateId) {
-                await client.query(UPDATE_SERVICE, [
-                    service.typeName,
-                    service.description || null,
-                    service.price,
-                    service.serviceId
-                ]);
-            } else {
-                const serviceResult = await client.query(INSERT_SERVICE, [
-                    service.typeName,
-                    service.description || null,
-                    service.price,
-                ]);
-                const serviceId = serviceResult.rows[0].id;
-                await client.query(INSERT_ESTIMATE_SERVICE, [finalEstimateId, serviceId]);
-            }
+            const serviceResult = await client.query(INSERT_SERVICE, [
+                service.typeName,
+                service.description || null,
+                service.price,
+            ]);
+            const serviceId = serviceResult.rows[0].id;
+            await client.query(INSERT_ESTIMATE_SERVICE, [finalEstimateId, serviceId]);
         }
         logger.info('Services processed successfully');
 
         // Handle Materials
         for (const material of materials) {
-            if (material.materialId) {
-                await client.query(UPDATE_MATERIAL, [
-                    material.name,
-                    material.dimensions || null,
-                    material.surveyedQty || null,
-                    material.chargeQty || null,
-                    material.price || null,
-                    material.total || null,
-                    material.volume || null,
-                    material.cost || null,
-                    material.materialId
-                ]);
-            } else {
-                const materialResult = await client.query(INSERT_MATERIAL, [
-                    material.name,
-                    material.dimensions || null,
-                    material.surveyedQty || null,
-                    material.chargeQty || null,
-                    material.price || null,
-                    material.total || null,
-                    material.volume || null,
-                    material.cost || null,
-                ]);
-                const materialId = materialResult.rows[0].id;
-                await client.query(INSERT_ESTIMATE_MATERIAL, [finalEstimateId, materialId]);
-            }
+            const materialResult = await client.query(INSERT_MATERIAL, [
+                material.name,
+                material.dimensions || null,
+                material.surveyedQty || null,
+                material.chargeQty || null,
+                material.price || null,
+                material.total || null,
+                material.volume || null,
+                material.cost || null,
+            ]);
+            const materialId = materialResult.rows[0].id;
+            await client.query(INSERT_ESTIMATE_MATERIAL, [finalEstimateId, materialId]);
         }
         logger.info('Materials processed successfully');
 
         // Handle Costs
         for (const cost of costs) {
-            if (cost.costId && finalEstimateId) {
-                await client.query(UPDATE_COST, [
-                    cost.driverQty || null,
-                    cost.porterQty || null,
-                    cost.packerQty || null,
-                    cost.vehicleQty || null,
-                    cost.vehicleTypeId || null,
-                    cost.wageCharge || null,
-                    cost.fuelCharge || null,
-                    cost.costId
-                ]);
-            } else {
-                const costResult = await client.query(INSERT_COST, [
-                    cost.driverQty || null,
-                    cost.porterQty || null,
-                    cost.packerQty || null,
-                    cost.vehicleQty || null,
-                    cost.vehicleTypeId || null,
-                    cost.wageCharge || null,
-                    cost.fuelCharge || null,
-                ]);
-                const costId = costResult.rows[0].id;
-                await client.query(INSERT_ESTIMATE_COST, [finalEstimateId, costId]);
-            }
+            const costResult = await client.query(INSERT_COST, [
+                cost.driverQty || null,
+                cost.porterQty || null,
+                cost.packerQty || null,
+                cost.vehicleQty || null,
+                cost.vehicleTypeId || null,
+                cost.wageCharge || null,
+                cost.fuelCharge || null,
+            ]);
+            const costId = costResult.rows[0].id;
+            await client.query(INSERT_ESTIMATE_COST, [finalEstimateId, costId]);
         }
         logger.info('Costs processed successfully');
 
         // Handle General Info
         for (const info of generalInfo) {
-            if (info.generalInfoId && finalEstimateId) {
-                await client.query(UPDATE_GENERAL_INFO, [
-                    info.driverWage || null,
-                    info.porterWage || null,
-                    info.packerWage || null,
-                    info.contentsValue || null,
-                    info.paymentMethod || null,
-                    info.insurance_amount || null,
-                    info.insurancePercentage || null,
-                    info.insuranceType || null,
-                    info.generalInfoId
-                ]);
-            } else {
-                const infoResult = await client.query(INSERT_GENERAL_INFO, [
-                    info.driverWage || null,
-                    info.porterWage || null,
-                    info.packerWage || null,
-                    info.contentsValue || null,
-                    info.paymentMethod || null,
-                    info.insurance_amount || null,
-                    info.insurancePercentage || null,
-                    info.insuranceType || null,
-                ]);
-                const infoId = infoResult.rows[0].id;
-                await client.query(INSERT_ESTIMATE_GENERAL_INFO, [finalEstimateId, infoId]);
-            }
+            const infoResult = await client.query(INSERT_GENERAL_INFO, [
+                info.driverWage || null,
+                info.porterWage || null,
+                info.packerWage || null,
+                info.contentsValue || null,
+                info.paymentMethod || null,
+                info.insurance_amount || null,
+                info.insurancePercentage || null,
+                info.insuranceType || null,
+            ]);
+            const infoId = infoResult.rows[0].id;
+            await client.query(INSERT_ESTIMATE_GENERAL_INFO, [finalEstimateId, infoId]);
         }
         logger.info('General Info processed successfully');
 
         // Handle Ancillaries
         for (const ancillary of ancillaries) {
-            if (ancillary.ancillaryId && finalEstimateId) {
-                await client.query(UPDATE_ANCILLARY, [
-                    ancillary.name,
-                    ancillary.charge || null,
-                    ancillary.isChargeable || null,
-                    ancillary.ancillaryId
-                ]);
-            } else {
-                const ancillaryResult = await client.query(INSERT_ANCILLARY, [
-                    ancillary.name,
-                    ancillary.charge || null,
-                    ancillary.isChargeable || null,
-                ]);
-                const ancillaryId = ancillaryResult.rows[0].id;
-                await client.query(INSERT_ESTIMATE_ANCILLARY, [finalEstimateId, ancillaryId]);
-            }
+            const ancillaryResult = await client.query(INSERT_ANCILLARY, [
+                ancillary.name,
+                ancillary.charge || null,
+                ancillary.isChargeable || null,
+            ]);
+            const ancillaryId = ancillaryResult.rows[0].id;
+            await client.query(INSERT_ESTIMATE_ANCILLARY, [finalEstimateId, ancillaryId]);
         }
         logger.info('Ancillaries processed successfully');
 
@@ -241,10 +190,10 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         ]);
         logger.info('Log entry created successfully');
 
-        await client.query('COMMIT');
+        await client.query('COMMIT'); // Commit transaction
         return { message: estimateId ? 'Estimate updated successfully' : 'Estimate added successfully', estimateId: finalEstimateId };
     } catch (error: any) {
-        await client.query('ROLLBACK');
+        await client.query('ROLLBACK'); // Rollback transaction on error
         logger.error('Failed to process estimate', { error });
         throw new Error(`Failed to process estimate: ${error.message}`);
     } finally {
