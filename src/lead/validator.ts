@@ -130,7 +130,7 @@ export const addEstimateSchema = yup
             .array()
             .of(
                 yup.object().shape({
-                    service_id: yup.string().nullable(),
+                    serviceId: yup.string().nullable(),
                     typeName: yup.string().required('Service type name is required'),
                     description: yup.string().nullable(),
                     price: yup.number().required('Service price is required'),
@@ -188,7 +188,7 @@ export const addEstimateSchema = yup
             .array()
             .of(
                 yup.object().shape({
-                    ancillary_id: yup.string().nullable(),
+                    ancillaryId: yup.string().nullable(),
                     name: yup.string().required('Ancillary name is required'),
                     charge: yup.number().nullable(),
                     isChargeable: yup.boolean().nullable(),
