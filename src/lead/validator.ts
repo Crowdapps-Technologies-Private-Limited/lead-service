@@ -118,6 +118,7 @@ export const getDistanceDTO = async (payload: { postcode1: string; postcode2: st
 export const addEstimateSchema = yup
     .object()
     .shape({
+        estimateId: yup.string().nullable(),
         quoteTotal: yup.number().required('Quote total is required'),
         costTotal: yup.number().required('Cost total is required'),
         quoteExpiresOn: yup.string().required('Quote expiry date is required'),

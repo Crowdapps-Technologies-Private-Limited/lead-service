@@ -132,6 +132,7 @@ export interface EditEstimatePayload {
 }
 
 export interface AddEstimatePayload {
+    estimateId?: string;
     leadId: string;
     quoteTotal: number;
     costTotal: number;

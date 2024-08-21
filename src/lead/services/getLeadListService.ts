@@ -4,9 +4,9 @@ import { setPaginationData } from '../../utils/utility';
 import logger from '../../utils/logger';
 
 const allowedOrderFields: { [key: string]: string } = {
-  generated_id: 'generated_id',
-  customer_name: 'customer_name',
-  created_at: 'created_at' // Assuming created_at is in leads table
+  generated_id: 'l.generated_id',
+  customer_name: 'c.name',
+  created_at: 'l.created_at' // Assuming created_at is in the leads table
 };
 
 export const getAllLeads = async (
@@ -61,7 +61,8 @@ export const getAllLeads = async (
         ca.county AS collection_county,
         ca.postcode AS collection_postcode,
         ca.country AS collection_country,
-        l.status
+        l.status,
+        l.created_at -- Include created_at in SELECT if needed
       FROM 
         leads l
       LEFT JOIN 

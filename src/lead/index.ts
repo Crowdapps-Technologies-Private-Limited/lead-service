@@ -18,8 +18,9 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/list-to-survey': admiinHandlers.getLeadListForSurveyHandler,
     },
     PUT: {
+        // '/leads/{id}': admiinHandlers.editLeadHandler,
         '/leads/{id}': admiinHandlers.editLeadHandler,
-        '/leads/{id}/estimates/{estimateId}': admiinHandlers.editEstimateHandler,
+        '/leads/estimates/{estimateId}': admiinHandlers.editEstimateHandler,
         '/leads/{id}/estimates': admiinHandlers.editEstimateHandler,
         '/leads/{id}/send-email': admiinHandlers.sendEmailHandler,
     },

@@ -15,7 +15,7 @@ export const editEstimateHandler: RouteHandler = async (
         const estimateId = event.pathParameters?.estimateId;
         const leadId = event.pathParameters?.id;
 
-        if (!estimateId || !leadId) {
+        if ( !leadId) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ message: 'Estimate ID and Lead ID are required in path parameters' }),
@@ -35,7 +35,7 @@ export const editEstimateHandler: RouteHandler = async (
             return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         }
 
-        const result = await editEstimate(estimateId, leadId, payload, tenant);
+        const result = await editEstimate("80c8cf6c-b810-4809-8ecd-1395b0303fbf", leadId, payload, tenant);
         return ResponseHandler.successResponse({ message: 'Estimate  updated successfully', data: null });
     } catch (error: any) {
         logger.error('Error occurred in editEstimateHandler', { error });
