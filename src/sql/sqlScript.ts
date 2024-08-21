@@ -590,11 +590,20 @@ export const INSERT_SURVEY = `INSERT INTO surveys (
 export const CHECK_SURVEY = `
 SELECT * FROM surveys 
 WHERE 
-    lead_id = $1 AND 
-    survey_date = $2 AND 
-    start_time = $3 AND 
-    end_time = $4`;
+    lead_id = $1 AND status <> 'COMPLETED'`;
 
+export const CHECK_SURVEYOR_AVAILABILITY = `
+SELECT 
+    COUNT(*) > 0 AS has_conflict
+FROM 
+    surveys
+WHERE 
+    surveyor_id = $1
+    AND (
+        (start_time <= $2 AND end_time >= $2) OR
+        (start_time <= $3 AND end_time >= $3) OR
+        (start_time >= $2 AND end_time <= $3)
+    );`;
 
 export const INSERT_SURVEY_ITEM_FOR_TAB1 = `INSERT INTO survey_items (
     survey_id,

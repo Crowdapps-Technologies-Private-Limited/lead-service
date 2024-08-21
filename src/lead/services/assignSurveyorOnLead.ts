@@ -3,7 +3,8 @@ import {
     CREATE_SURVEY_AND_RELATED_TABLE,
     INSERT_LOG,
     INSERT_SURVEY,
-    CHECK_SURVEY
+    CHECK_SURVEY,
+    CHECK_SURVEYOR_AVAILABILITY
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
@@ -53,9 +54,18 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
         logger.info('Survey and related tables created successfully');
         //Check if survey exists
-        const surveyCheckResult = await client.query(CHECK_SURVEY, [leadId, surveyDate, startTime, endTime]);
+        const surveyCheckResult = await client.query(CHECK_SURVEY, [leadId]);
         if (surveyCheckResult.rows.length > 0) {
             throw new Error('Survey already exists');
+        }
+        // Check if the surveyor is available in the given time range
+        const surveyorAvailabilityResult = await client.query(CHECK_SURVEYOR_AVAILABILITY, [
+            surveyorId,
+            startTime,
+            endTime
+        ]);
+        if (surveyorAvailabilityResult.rows[0].has_conflict) {
+            throw new Error('Surveyor already has a survey in the given time range');
         }
         // Assign Surveyor
         await client.query(INSERT_SURVEY, [
