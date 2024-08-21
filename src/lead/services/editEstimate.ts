@@ -167,7 +167,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     info.packerWage || null,
                     info.contentsValue || null,
                     info.paymentMethod || null,
-                    info.insurance_amount || null,
+                    info.insuranceAmount || null,
                     info.insurancePercentage || null,
                     info.insuranceType || null,
                 ]);
@@ -179,7 +179,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
                     info.packerWage || null,
                     info.contentsValue || null,
                     info.paymentMethod || null,
-                    info.insurance_amount || null,
+                    info.insuranceAmount || null,
                     info.insurancePercentage || null,
                     info.insuranceType || null,
                     infoId,

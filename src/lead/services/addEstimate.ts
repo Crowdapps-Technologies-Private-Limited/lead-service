@@ -153,7 +153,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
                 info.packerWage || null,
                 info.contentsValue || null,
                 info.paymentMethod || null,
-                info.insurance_amount || null,
+                info.insuranceAmount || null,
                 info.insurancePercentage || null,
                 info.insuranceType || null,
             ]);
