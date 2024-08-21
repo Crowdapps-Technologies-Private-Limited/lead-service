@@ -522,6 +522,8 @@ CREATE TABLE IF NOT EXISTS surveys (
     survey_date TIMESTAMP default NULL,
     description text,
     status VARCHAR(100) NOT NULL CHECK (status IN ('PENDING', 'STARTED', 'COMPLETED')) DEFAULT 'PENDING',
+    is_cancelled BOOLEAN DEFAULT FALSE,
+    reason_to_cancel TEXT,
     moving_from_paces INTEGER,
     moving_from_flight_of_stairs INTEGER,
     moving_from_lift_availability VARCHAR(100),
