@@ -119,6 +119,7 @@ export const addEstimateSchema = yup
     .object()
     .shape({
         estimateId: yup.string().nullable(),
+        leadId: yup.string().nullable(),
         quoteTotal: yup.number().required('Quote total is required'),
         costTotal: yup.number().required('Cost total is required'),
         quoteExpiresOn: yup.string().required('Quote expiry date is required'),
@@ -129,6 +130,7 @@ export const addEstimateSchema = yup
             .array()
             .of(
                 yup.object().shape({
+                    service_id: yup.string().nullable(),
                     typeName: yup.string().required('Service type name is required'),
                     description: yup.string().nullable(),
                     price: yup.number().required('Service price is required'),
@@ -139,6 +141,7 @@ export const addEstimateSchema = yup
             .array()
             .of(
                 yup.object().shape({
+                    materialId: yup.string().nullable(),
                     name: yup.string().required('Material name is required'),
                     dimensions: yup.string().nullable(),
                     surveyedQty: yup.number().nullable(),
@@ -154,6 +157,7 @@ export const addEstimateSchema = yup
             .array()
             .of(
                 yup.object().shape({
+                    costId: yup.string().nullable(),
                     driverQty: yup.number().nullable(),
                     porterQty: yup.number().nullable(),
                     packerQty: yup.number().nullable(),
@@ -168,6 +172,7 @@ export const addEstimateSchema = yup
             .array()
             .of(
                 yup.object().shape({
+                    generalInfoId: yup.string().nullable(),
                     driverWage: yup.number().nullable(),
                     porterWage: yup.number().nullable(),
                     packerWage: yup.number().nullable(),
@@ -183,6 +188,7 @@ export const addEstimateSchema = yup
             .array()
             .of(
                 yup.object().shape({
+                    ancillary_id: yup.string().nullable(),
                     name: yup.string().required('Ancillary name is required'),
                     charge: yup.number().nullable(),
                     isChargeable: yup.boolean().nullable(),

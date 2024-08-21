@@ -67,14 +67,14 @@ export interface EditLeadPayload {
 }
 
 export interface Service {
-    id?: string;
+    serviceId?: string;
     typeName: string;
     description?: string;
     price: number;
 }
 
 export interface Material {
-    id?: string;
+    materialId?: string;
     name: string;
     dimensions?: string;
     surveyedQty?: number;
@@ -86,7 +86,7 @@ export interface Material {
 }
 
 export interface Cost {
-    id?: string;
+    costId?: string;
     driverQty?: number;
     porterQty?: number;
     packerQty?: number;
@@ -98,7 +98,7 @@ export interface Cost {
 }
 
 export interface GeneralInfo {
-    id?: string;
+    generalInfoId?: string;
     driverWage?: number;
     porterWage?: number;
     packerWage?: number;
@@ -110,7 +110,7 @@ export interface GeneralInfo {
 }
 
 export interface Ancillary {
-    id?: string;
+    ancillaryId?: string;
     name: string;
     charge?: number;
     isChargeable?: boolean;

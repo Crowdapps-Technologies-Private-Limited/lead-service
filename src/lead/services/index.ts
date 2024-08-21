@@ -1,6 +1,6 @@
 import { getLatestEstimates } from './getLatestEstimates ';
 import { editEstimate } from './editEstimate';
-import { addEstimate } from './addEstimate';
+import { addOrUpdateEstimate } from './addEstimate';
 import { addLead } from './addLeadService';
 import { getAllReferrers } from './getReferrerListService';
 import { getAllLeads } from './getLeadListService';
@@ -29,7 +29,7 @@ export {
     getLeadById,
     getAllLogsByLead,
     editLead,
-    addEstimate,
+    addOrUpdateEstimate,
     getLatestEstimates,
     editEstimate,
     sendLeadEmail,

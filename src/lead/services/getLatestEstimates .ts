@@ -25,7 +25,7 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             e.material_price_chargeable AS materialPriceChargeable,
             (
                 SELECT json_agg(json_build_object(
-                    'service_id', s.id,
+                    'serviceId', s.id,
                     'typeName', s.service_name,
                     'description', s.description,
                     'price', s.price
@@ -85,7 +85,7 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
             ) AS generalInfo,
             (
                 SELECT json_agg(json_build_object(
-                    'ancillary_id', a.id,
+                    'ancillaryId', a.id,
                     'name', a.name,
                     'charge', a.charge,
                     'isChargeable', a.ischargeable

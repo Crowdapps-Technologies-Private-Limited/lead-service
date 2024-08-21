@@ -1,9 +1,9 @@
 import { APIGatewayProxyEventBase, APIGatewayProxyResult, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { RouteHandler } from '../../types/interfaces';
 import { addEstimateDTO } from '../validator';
-import { addEstimate } from '../services';
 import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
+import { addOrUpdateEstimate } from '../services';
 
 export const addEstimateHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
@@ -12,6 +12,7 @@ export const addEstimateHandler: RouteHandler = async (
     
     try {
         const payload = JSON.parse(event.body || '{}');
+        logger.info('payload:', { payload });
         const leadId = event.pathParameters?.id;
         logger.info('leadId:', { leadId });
         
@@ -31,9 +32,14 @@ export const addEstimateHandler: RouteHandler = async (
         await addEstimateDTO(payload);
         logger.info('addEstimateDTO success:');
         try {
-            const result = await addEstimate(leadId, payload, tenant);
+            const result = await addOrUpdateEstimate(leadId, payload, tenant);
             logger.info('addEstimate success:', { result });
+            if(payload?.estimateId){
+                return ResponseHandler.successResponse({ message: 'Estimate updated successfully' });
+            }
+            else {
             return ResponseHandler.createdResponse({ message: 'Estimate added successfully' });
+        }
         }
         catch (error: any) {
             logger.info('addEstimate error:', { error });

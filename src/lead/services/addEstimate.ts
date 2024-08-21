@@ -44,7 +44,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         ancillaries,
     } = payload;
 
-    const estimateId = "80c8cf6c-b810-4809-8ecd-1395b0303fbf" // payload.estimateId;  // Correctly referenced estimateId from payload
+    const estimateId =  payload.estimateId;  // Correctly referenced estimateId from payload
     logger.info('estimateId:', { estimateId });
     logger.info('payload', { payload });
     const client = await connectToDatabase();
@@ -94,12 +94,12 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
 
         // Handle Services
         for (const service of services) {
-            if (service.id) {
+            if (service.serviceId && finalEstimateId) {
                 await client.query(UPDATE_SERVICE, [
                     service.typeName,
                     service.description || null,
                     service.price,
-                    service.id
+                    service.serviceId
                 ]);
             } else {
                 const serviceResult = await client.query(INSERT_SERVICE, [
@@ -115,7 +115,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
 
         // Handle Materials
         for (const material of materials) {
-            if (material.id) {
+            if (material.materialId) {
                 await client.query(UPDATE_MATERIAL, [
                     material.name,
                     material.dimensions || null,
@@ -125,7 +125,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
                     material.total || null,
                     material.volume || null,
                     material.cost || null,
-                    material.id
+                    material.materialId
                 ]);
             } else {
                 const materialResult = await client.query(INSERT_MATERIAL, [
@@ -146,7 +146,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
 
         // Handle Costs
         for (const cost of costs) {
-            if (cost.id) {
+            if (cost.costId && finalEstimateId) {
                 await client.query(UPDATE_COST, [
                     cost.driverQty || null,
                     cost.porterQty || null,
@@ -155,7 +155,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
                     cost.vehicleTypeId || null,
                     cost.wageCharge || null,
                     cost.fuelCharge || null,
-                    cost.id
+                    cost.costId
                 ]);
             } else {
                 const costResult = await client.query(INSERT_COST, [
@@ -175,7 +175,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
 
         // Handle General Info
         for (const info of generalInfo) {
-            if (info.id) {
+            if (info.generalInfoId && finalEstimateId) {
                 await client.query(UPDATE_GENERAL_INFO, [
                     info.driverWage || null,
                     info.porterWage || null,
@@ -185,7 +185,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
                     info.insurance_amount || null,
                     info.insurancePercentage || null,
                     info.insuranceType || null,
-                    info.id
+                    info.generalInfoId
                 ]);
             } else {
                 const infoResult = await client.query(INSERT_GENERAL_INFO, [
@@ -206,12 +206,12 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
 
         // Handle Ancillaries
         for (const ancillary of ancillaries) {
-            if (ancillary.id) {
+            if (ancillary.ancillaryId && finalEstimateId) {
                 await client.query(UPDATE_ANCILLARY, [
                     ancillary.name,
                     ancillary.charge || null,
                     ancillary.isChargeable || null,
-                    ancillary.id
+                    ancillary.ancillaryId
                 ]);
             } else {
                 const ancillaryResult = await client.query(INSERT_ANCILLARY, [

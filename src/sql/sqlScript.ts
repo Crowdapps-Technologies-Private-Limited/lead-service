@@ -437,6 +437,8 @@ export const UPDATE_SERVICE = `
     WHERE id = $4
 `;
 
+
+
 export const UPDATE_MATERIAL = `
     UPDATE materials
     SET
@@ -446,7 +448,7 @@ export const UPDATE_MATERIAL = `
         charge_qty = $4,
         price = $5,
         total = $6,
-        volume = $7
+        volume = $7,
         cost = $8
     WHERE id = $9
 `;
