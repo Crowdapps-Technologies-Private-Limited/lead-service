@@ -7,6 +7,7 @@ import { editEstimateHandler } from './editEstimateHandler';
 import { editLeadHandler } from './editLeadHandler';
 import { addEstimateHandler } from './estimateHandler';
 import { estimateSendEmailHandler } from './estimateSendEmailHandler';
+import { getAllSurveysHandler } from './getAllSurveysHandler';
 import { getDistanceHandler } from './getDistanceHandler';
 import { getItemListBySurveyHandler } from './getItemListBySurveyHandler';
 import { getLatestEstimatesHandler } from './getLatestEstimatesHandler';
@@ -18,6 +19,7 @@ import { getMaterialItemsHandler } from './getMaterialItemsHandler';
 import { getReferrerListHandler } from './getReferrerListHandler';
 import { getRoomListHandler } from './getRoomListHandler';
 import { getSingleLeadHandler } from './getSingleLeadHandler';
+import { getSurveyByIdHandler } from './getSurveyByIdHandler';
 import { getSurveyorListHandler } from './getSurveyorListHandler';
 import { sendEmailHandler } from './sendEmailHandler';
 
@@ -43,7 +45,9 @@ const authHandlers = {
     getMaterialItemsHandler,
     assignSurveyorHandler,
     getSurveyorListHandler,
-    getLeadListForSurveyHandler
+    getLeadListForSurveyHandler, 
+    getAllSurveysHandler,
+    getSurveyByIdHandler,
 };
 
 export default authHandlers;

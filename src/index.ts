@@ -41,7 +41,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const userPayload = await verifyToken(token, userPoolId, region);
         const user: any = await getUserBySub({ userPoolId: config.cognitoUserPoolId, sub: userPayload.sub });
         logger.info('user:', { user });
-
+        if (!user || user.role === 'SUPER_ADMIN') {
+            return {
+                statusCode: 403,
+                headers: defaultHeaders,
+                body: JSON.stringify({ message: 'Forbidden' })
+            };
+        }
         if (user.role === 'TENANT') {
             logger.info(' In if TenantAdmin:', { user });
             const clientDetail= await getTenantProfile(user.tenant_id);

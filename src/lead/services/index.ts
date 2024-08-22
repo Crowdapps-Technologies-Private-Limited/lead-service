@@ -11,14 +11,13 @@ import { sendLeadEmail } from './sendLeadEmailService';
 import { sendEstimateEmail } from './estimateSendLeadEmailService';
 import { getAllRooms } from './getRoomListService';
 import { getAllLinkedItems } from './getLinkedItemListService';
-import { addSurveyTab1 } from './addSurveyTab1Service';
-import { addSurveyTab2 } from './addSurveyTab2Service';
-import { addSurveyTab3 } from './addSurveyTab3Service';
 import { getSurveyedItems } from './getItemsbySurveyIdService';
 import { getMaterialItems } from './getMaterialItemsOfEstimate';
 import { assignSurveyor } from './assignSurveyorOnLead';
 import { getAllSurveyors } from './getSurveyorListService';
 import { getAllLeadsForSurvey } from './getLeadListForSurveyService';
+import { getSurveyById } from './getSurveyByIdSrevice';
+import { getAllSurveys } from './getAllSurveysService';
 
 // Removed incomplete import statement
 
@@ -36,12 +35,11 @@ export {
     sendEstimateEmail,
     getAllRooms,
     getAllLinkedItems,
-    addSurveyTab1,
-    addSurveyTab2,
-    addSurveyTab3,
     getSurveyedItems,
     getMaterialItems,
     assignSurveyor,
     getAllSurveyors,
     getAllLeadsForSurvey,
+    getSurveyById,
+    getAllSurveys,
 };

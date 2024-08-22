@@ -625,7 +625,86 @@ export const INSERT_SURVEY_ITEM_FOR_TAB1 = `INSERT INTO survey_items (
     isClear
 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`;
 
-export const GET_SURVEY_BY_ID = `select * from surveys where id = $1`;
+export const GET_SURVEY_BY_ID = `select * from surveys where id = $1 AND is_cancelled = false`;
+
+export const GET_SURVEY_DETAILS = `
+    SELECT 
+        s.id,
+        s.lead_id AS "leadId",
+        l.generated_id AS "leadGeneratedId",
+        l.customer_id AS "customerId",
+        c.name AS "customerName",
+        c.phone AS "customerPhone",
+        c.email AS "customerEmail",
+        s.surveyor_id,
+        st.name AS "surveyorName",
+        st.email AS "surveyorEmail",
+        st.phone AS "surveyorPhone",
+        s.survey_type,
+        s.remarks,
+        s.start_time,
+        s.end_time,
+        s.description,
+        s.status
+    FROM 
+        surveys s
+    LEFT JOIN leads l ON s.lead_id = l.generated_id
+    LEFT JOIN customers c ON l.customer_id = c.id
+    LEFT JOIN staffs st ON s.surveyor_id = st.staff_id
+    WHERE 
+        s.id = $1
+`;
+
+export const GET_SURVEYS_LIST_BASE = `
+    SELECT 
+        s.id,
+        s.lead_id AS "leadId",
+        l.generated_id AS "leadGeneratedId",
+        l.customer_id AS "customerId",
+        c.name AS "customerName",
+        c.phone AS "customerPhone",
+        c.email AS "customerEmail",
+        s.surveyor_id,
+        st.name AS "surveyorName",
+        st.email AS "surveyorEmail",
+        st.phone AS "surveyorPhone",
+        s.survey_type,
+        s.remarks,
+        s.start_time,
+        s.end_time,
+        s.description,
+        s.status
+    FROM 
+        surveys s
+    LEFT JOIN leads l ON s.lead_id = l.generated_id
+    LEFT JOIN customers c ON l.customer_id = c.id
+    LEFT JOIN staffs st ON s.surveyor_id = st.staff_id
+    WHERE 
+        s.lead_id IS NOT NULL
+        AND s.status = $1
+`;
+
+
+export const GET_SURVEYS_COUNT = `
+    SELECT 
+        COUNT(*) 
+    FROM 
+        surveys s
+    WHERE 
+        s.lead_id IS NOT NULL
+        AND s.status = $1
+`;
+
+export const GET_SURVEYS_COUNT_SURVEYOR = `
+    SELECT 
+        COUNT(*) 
+    FROM 
+        surveys s
+    WHERE 
+        s.lead_id IS NOT NULL
+        AND s.status = $1
+        AND s.surveyor_id = $2
+`;
 
 export const GET_SURVEY_ITEM_BY_ID = `select * from survey_items where id = $1`;
 
