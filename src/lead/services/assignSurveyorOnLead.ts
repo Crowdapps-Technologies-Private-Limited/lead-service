@@ -7,6 +7,7 @@ import {
     CHECK_SURVEYOR_AVAILABILITY
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
+import { generateEmail } from '../../utils/generateEmailService';
 import logger from '../../utils/logger';
 import { toFloat } from '../../utils/utility';
 import { AssignSurveyorPayload } from '../interface';
@@ -33,27 +34,42 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
 
     try {
         await client.query('BEGIN');
-
+        // Check if tenant is suspended
         if (tenant?.is_suspended) {
             throw new Error('Tenant is suspended');
         }
-        // Insert survey items
         await client.query(`SET search_path TO ${schema}`);
         let tableCheckRes: any;
+        // Check if leads table exists
         tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);
         if (!tableCheckRes.rows[0].exists) {
             logger.info('Leads table does not exist');
             throw new Error('Lead not found');
         }
+        // CHECK IF LEAD EXISTS
         const leadCheckResult = await client.query(`
             SELECT * FROM leads WHERE generated_id = $1
         `, [leadId]);
         if (leadCheckResult.rows.length === 0) {
             throw new Error('Lead not found');
         }
+        // Check if surveyor table exists
+        tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'staffs']);
+        if (!tableCheckRes.rows[0].exists) {
+            logger.info('Staffs table does not exist');
+            throw new Error('Surveyor not found');
+        }
+        // CHECK IF SURVEYOR EXISTS
+        const surveyorCheckResult = await client.query(`
+            SELECT * FROM staffs WHERE staff_id = $1
+        `, [surveyorId]);
+        if (surveyorCheckResult.rows.length === 0) {
+            throw new Error('Surveyor not found');
+        }
         await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
         logger.info('Survey and related tables created successfully');
-        //Check if survey exists
+
+        //Check if an incomplete survey exists for that lead
         const surveyCheckResult = await client.query(CHECK_SURVEY, [leadId]);
         if (surveyCheckResult.rows.length > 0) {
             throw new Error('Survey already exists');
@@ -78,7 +94,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             description,
             surveyDate || null
         ]);
-
+        // Insert log
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,
@@ -88,6 +104,8 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             'ESTIMATES',
             leadId
         ]);
+        // Send nofitication to surveyor on email
+        await generateEmail('Assign Survey', surveyorCheckResult?.rows[0]?.email, { username: surveyorCheckResult?.rows[0]?.name });
         await client.query('COMMIT');
         return { 
             message: 'Surveyor assigned successfully'
