@@ -1,6 +1,5 @@
 import { addLeadHandler } from './addLeadHandler';
 import { assignSurveyorHandler } from './assignSurveyorHandler';
-import { editEstimateHandler } from './editEstimateHandler';
 import { editLeadHandler } from './editLeadHandler';
 import { addEstimateHandler } from './estimateHandler';
 import { estimateSendEmailHandler } from './estimateSendEmailHandler';
@@ -21,17 +20,16 @@ const authHandlers = {
     getLeadListHandler,
     getSingleLeadHandler,
     getLogListByLeadHandler,
-    editLeadHandler,
     getDistanceHandler,
     addEstimateHandler,
     getLatestEstimatesHandler,
-    editEstimateHandler,
     sendEmailHandler,
     estimateSendEmailHandler,
     assignSurveyorHandler,
     getSurveyorListHandler,
     getAllSurveysHandler,
     getSurveyByIdHandler,
+    editLeadHandler
 };
 
 export default authHandlers;

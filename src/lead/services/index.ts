@@ -1,5 +1,4 @@
 import { getLatestEstimates } from './getLatestEstimates ';
-import { editEstimate } from './editEstimate';
 import { addOrUpdateEstimate } from './addEstimate';
 import { addLead } from './addLeadService';
 import { getAllReferrers } from './getReferrerListService';
@@ -25,7 +24,6 @@ export {
     editLead,
     addOrUpdateEstimate,
     getLatestEstimates,
-    editEstimate,
     sendLeadEmail,
     sendEstimateEmail,
     assignSurveyor,
