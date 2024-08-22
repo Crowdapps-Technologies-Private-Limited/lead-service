@@ -16,7 +16,6 @@ export const addLeadHandler: RouteHandler = async (
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
         // Validate payload
-        //payload = { ...payload, status: 'NEW'}
         try {
             await addLeadDTO(payload);
         } catch (error: any) {

@@ -1,7 +1,4 @@
 import { addLeadHandler } from './addLeadHandler';
-import { addSurveyTab1Handler } from './addSurveyTab1Handler';
-import { addSurveyTab2Handler } from './addSurveyTab2Handler';
-import { addSurveyTab3Handler } from './addSurveyTab3Handler';
 import { assignSurveyorHandler } from './assignSurveyorHandler';
 import { editEstimateHandler } from './editEstimateHandler';
 import { editLeadHandler } from './editLeadHandler';
@@ -38,9 +35,6 @@ const authHandlers = {
     estimateSendEmailHandler,
     getRoomListHandler,
     getLinkedItemListHandler,
-    addSurveyTab1Handler,
-    addSurveyTab2Handler,
-    addSurveyTab3Handler,
     getItemListBySurveyHandler,
     getMaterialItemsHandler,
     assignSurveyorHandler,
