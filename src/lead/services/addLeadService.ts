@@ -50,8 +50,8 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         // Check if customer exists
         let customerId;
         const customerCheckResult = await client.query(`
-            SELECT id FROM customers WHERE email = $1 OR phone = $2
-        `, [customer?.email, customer?.phone]);
+            SELECT id FROM customers WHERE email = $1
+        `, [customer?.email]);
 
         if (customerCheckResult.rows.length > 0) {
             customerId = customerCheckResult.rows[0].id;
