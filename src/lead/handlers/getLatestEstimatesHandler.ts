@@ -4,6 +4,7 @@ import { getLatestEstimates } from '../services';
 import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { generatePdfAndUploadToS3 } from '../services/generatePdf';
+import { checkPermission } from '../../utils/checkPermission';
 
 export const getLatestEstimatesHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -23,6 +24,15 @@ export const getLatestEstimatesHandler: RouteHandler = async (
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
 
+        const user = (event.requestContext as any).user;
+        logger.info('user:', { user });
+
+        
+        const hasPermission = await checkPermission(user.role, 'Estimate', 'read', tenant.schema);
+        logger.info('hasPermission: -----------', { hasPermission });
+        if (!hasPermission) {
+            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+        }
         const result = await getLatestEstimates(leadId, tenant);
         // const url = await generatePdfAndUploadToS3({ html: '<p>Hello, World</p>', key: 'test.pdf' });
         if (result) {

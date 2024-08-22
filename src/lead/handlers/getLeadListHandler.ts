@@ -3,6 +3,7 @@ import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefault
 import { getAllLeads } from '../services';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
+import { checkPermission } from '../../utils/checkPermission';
 
 export const getLeadListHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -10,6 +11,12 @@ export const getLeadListHandler: RouteHandler = async (
     logger.info('getLeadListHandler event ', { event });  
     try {
         const tenant = (event.requestContext as any).tenant;
+        const user = (event.requestContext as any).user;
+        const hasPermission = await checkPermission(user.role, 'Lead', 'read', tenant.schema);
+        logger.info('hasPermission: -----------', { hasPermission });
+        if (!hasPermission) {
+            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+        }
         const queryParams = event.queryStringParameters;
         const pageNumber = queryParams?.page ? parseInt(queryParams?.page as string) : 1;
         const pageSize = queryParams?.limit ? parseInt(queryParams?.limit as string) : 10;
