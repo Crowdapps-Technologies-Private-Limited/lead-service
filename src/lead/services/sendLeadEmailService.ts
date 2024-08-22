@@ -17,7 +17,7 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
         subject,
         body,
         templateId,
-        addClientSignature
+        addClientSignature // Add client's signature to email
     } = payload;
 
     const client = await connectToDatabase();
@@ -48,6 +48,7 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
             emailSignature = emailInfo.rows[0].email_signature;
             emailDisclaimer = emailInfo.rows[0].email_disclaimer;
         } else {
+            // default signature and disclaimer
             const templateRes = await client.query(GET_EMAIL_TEMPLATE_BY_ID, [templateId]);
             if(templateRes.rows.length === 0) {
                 throw new Error('Email template not found');
@@ -56,6 +57,7 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
             emailDisclaimer = templateRes.rows[0].disclaimer;
         }
         const htmlBody = body + "<br/>" + emailSignature + "<br/>" + emailDisclaimer;
+        // Send email
         const emailService = await initializeEmailService();
         await emailService.sendEmail(
             to,
@@ -63,6 +65,7 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
             body,
             htmlBody
         );
+        // Insert log
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,

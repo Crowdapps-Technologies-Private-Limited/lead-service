@@ -23,17 +23,14 @@ export const getAllLogsByLead = async (
   const offset = pageSize * (pageNumber - 1);
   try {
     await client.query('BEGIN');
-    // if(tenant?.is_suspended){
-    //   throw new Error('Tenant is suspended');
-    // }
     const schema = tenant?.schema || tenant?.tenant?.schema;
     logger.info('Schema:', { schema });
     await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
     logger.info('Schema created successfully');
     await client.query(`SET search_path TO ${schema}`);
     logger.info('Schema set successfully');
+    // Check if leads table exists
     let tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);
-
     const leadsTableExists = tableCheckRes.rows[0].exists;
     if (!leadsTableExists) {
       logger.info('Leads table does not exist');
@@ -42,11 +39,12 @@ export const getAllLogsByLead = async (
         pagination: setPaginationData(0, pageSize, 0, pageNumber)
       };
     }
-    // Fetch user count
+    // Check if lead exists
     let lead = await client.query(GET_LEAD_BY_ID,[leadId]);
     if(lead.rows.length === 0) {
       throw new Error(`No data found.`);
     }
+    // Check if logs table exists
     tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'lead_logs']);
 
     const logsTableExists = tableCheckRes.rows[0].exists;
@@ -57,8 +55,9 @@ export const getAllLogsByLead = async (
         pagination: setPaginationData(0, pageSize, 0, pageNumber)
       };
     }
+    // Fetch total count of logs
     const resultCount = await client.query(GET_LOG_COUNT, [leadId]);
-    // Fetch user list
+    // Fetch log list
     let res: any;
         res = await client.query(`SELECT 
           id,
@@ -72,7 +71,7 @@ export const getAllLogsByLead = async (
       ORDER BY created_at DESC, ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
       LIMIT $1 
       OFFSET $2`, [pageSize, offset, leadId]);
-
+    // Set pagination data
     const pagination = setPaginationData(resultCount.rows[0].count, pageSize, res?.rows?.length, pageNumber);
     const result = {
       list: res.rows || [],
