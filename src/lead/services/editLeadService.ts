@@ -52,21 +52,17 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
             throw new Error('Lead not found');
         }
         // Check if email or phone is used by another customer
-        const uniqueCustomerCheckResult = await client.query(`
-            SELECT id FROM customers WHERE (email = $1 OR phone = $2) AND id != $3
-        `, [customer?.email, customer?.phone, leadCheckResult.rows[0].customer_id]);
+        // const uniqueCustomerCheckResult = await client.query(`
+        //     SELECT id FROM customers WHERE (email = $1 OR phone = $2) AND id <> $3
+        // `, [customer?.email, customer?.phone, leadCheckResult.rows[0].customer_id]);
 
-        if (uniqueCustomerCheckResult.rows.length > 0) {
-            throw new Error('Email or phone number is already in use by another customer');
-        }
+        // if (uniqueCustomerCheckResult.rows.length > 0) {
+        //     throw new Error('Email or phone number is already in use by another customer');
+        // }
+
         // Check if customer exists
-        let customerId;
-        const customerCheckResult = await client.query(`
-            SELECT id FROM customers WHERE email = $1 OR phone = $2
-        `, [customer.email, customer.phone]);
-
-        if (customerCheckResult.rows.length > 0) {
-            customerId = customerCheckResult.rows[0].id;
+        let customerId = leadCheckResult.rows[0].customer_id;
+        if (customerId) {
             await client.query(`UPDATE customers SET name = $1, phone = $2, email = $3 WHERE id = $4`, [customer.name, customer.phone, customer.email, customerId]);
         } else {
             const customerResult = await client.query(`
