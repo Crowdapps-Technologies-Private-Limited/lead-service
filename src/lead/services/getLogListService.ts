@@ -26,7 +26,7 @@ export const getAllLogsByLead = async (
     // if(tenant?.is_suspended){
     //   throw new Error('Tenant is suspended');
     // }
-    const schema = tenant.schema;
+    const schema = tenant?.schema || tenant?.tenant?.schema;
     logger.info('Schema:', { schema });
     await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
     logger.info('Schema created successfully');

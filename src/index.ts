@@ -8,6 +8,7 @@ import { ResponseHandler } from './utils/ResponseHandler';
 import { getUserBySub } from './utils/getCognitoUserBySub';
 import logger from './utils/logger';
 import { getUserProfile } from './utils/getProfileService';
+import { getTenantProfile } from './utils/getTenantProfile';
 
 const routes = merge(adminRoutes);
 
@@ -31,7 +32,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 body: JSON.stringify({ message: 'Unauthorized' }),
             };
         }
-
+        
         const config: Config = await getconfigSecrets();
 
         // Validate the token and extract user payload
@@ -40,47 +41,91 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const userPayload = await verifyToken(token, userPoolId, region);
         const user: any = await getUserBySub({ userPoolId: config.cognitoUserPoolId, sub: userPayload.sub });
         logger.info('user:', { user });
-        if (!user || user['custom:role'] !== 'TENANT') {
-            return {
-                statusCode: 403,
-                headers: defaultHeaders,
-                body: JSON.stringify({ message: 'Forbidden' }),
-            };
-        }
-        const clientDetail = await getUserProfile(user.sub);
-        logger.info('clientDetail:', { clientDetail });
-        if (clientDetail.is_deleted === true) {
-            return {
-                statusCode: 403,
-                headers: defaultHeaders,
-                body: JSON.stringify({
-                    message: 'Your account is deleted. Kindly ask the admin to reactivate your account!',
-                }),
-            };
-        }
-        if (clientDetail.is_active === false && clientDetail.status !== 'PENDING') {
-            return {
-                statusCode: 403,
-                headers: defaultHeaders,
-                body: JSON.stringify({
-                    message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!',
-                }),
-            };
-        }
-        if (clientDetail.is_suspended === true) {
-            return {
-                statusCode: 403,
-                headers: defaultHeaders,
-                body: JSON.stringify({
-                    message: 'Your account is suspended. Kindly ask the admin to reactivate your account!',
-                }),
-            };
-        }
 
-        // Attach userPayload to the request context
-        (event.requestContext as any).user = user;
-        (event.requestContext as any).tenant = clientDetail;
+        if (user.role === 'TENANT') {
+            logger.info(' In if TenantAdmin:', { user });
+            const clientDetail= await getTenantProfile(user.tenant_id);
+            logger.info('TenantAdminDetail:', { clientDetail });
+            if(clientDetail.is_deleted === true){   
+                return {
+                    statusCode: 403,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is deleted. Kindly ask the admin to reactivate your account!' })
+                };
+            }
+            if(clientDetail.is_active === false && clientDetail.status !== 'PENDING'){   
+                return {
+                    statusCode: 403,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!' })
+                };
+            }
+            if(clientDetail.is_suspended === true){   
+                return {
+                    statusCode: 403,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' })
+                };
+            }
+
+            // Attach userPayload to the request context
+            (event.requestContext as any).user = user;
+            (event.requestContext as any).tenant = clientDetail;
+            (event.requestContext as any).isTenant = true;
+    
+        }
+        else {
+            const clientDetail = await getUserProfile(user.tenant_id, user.sub);
+            logger.info('clientStaffDetail:', { clientDetail });
+            if(clientDetail.tenant.is_deleted === true){   
+                return {
+                    statusCode: 403,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is deleted. Kindly ask the admin to reactivate your account!' })
+                };
+            }
+            if(clientDetail.tenant.is_active === false && clientDetail.tenant.status !== 'PENDING'){   
+                return {
+                    statusCode: 403,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!' })
+                };
+            }
+            if(clientDetail.tenant.is_suspended === true){   
+                return {
+                    statusCode: 403,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' })
+                };
+            }
+
+            if (clientDetail.status === 'PENDING' && user.email_verified === true) {
+                return {
+                    statusCode: 403,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({
+                        message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!',
+                    }),
+                };
+            }
+            if (clientDetail.status === 'PENDING' && user.email_verified === false) {
+                return {
+                    statusCode: 403,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({
+                        message: 'please activate your acount',
+                    }),
+                };
+            }
+
+            // Attach userPayload to the request context
+            (event.requestContext as any).user = user;
+            (event.requestContext as any).tenant = clientDetail;
+            (event.requestContext as any).isTenant = false;
+        }
+        
     } catch (error: any) {
+        logger.error('Token not verified', { error });
         return {
             statusCode: 401,
             headers: defaultHeaders,

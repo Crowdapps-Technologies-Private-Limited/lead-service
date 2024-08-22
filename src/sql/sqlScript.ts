@@ -4,6 +4,14 @@ export const SELECT_COMPANY_INFO = 'SELECT * FROM company_info WHERE tenant_id =
 
 export const SELECT_EMAIL_INFO = 'SELECT * FROM public.email_info WHERE tenant_id = $1';
 
+export const GET_STAFF_BY_SUB = `
+    SELECT * 
+    FROM staffs 
+    WHERE cognito_sub = $1;
+`;
+
+export const GET_TENANT_BY_ID = 'SELECT * FROM public.tenants WHERE id = $1';
+
 export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
 export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS customers (

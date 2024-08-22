@@ -1,48 +1,54 @@
-import { SELECT_TENANT, SELECT_COMPANY_INFO } from '../sql/sqlScript';
+import { SELECT_COMPANY_INFO, GET_TENANT_BY_ID, GET_STAFF_BY_SUB } from '../sql/sqlScript';
 import { connectToDatabase } from './database';
 import AWS from 'aws-sdk';
 import { getconfigSecrets } from './getConfig';
 import logger from './logger';
-import { log } from 'console';
 
 const s3 = new AWS.S3();
 
-export const getUserProfile = async (userId: string) => {
-    logger.info('Fetching user profile', { userId });
+export const getUserProfile = async (tenantId: string, userSub: string) => {
+    logger.info('tenantId', { tenantId });
     const client = await connectToDatabase();
 
     try {
-        const result = await client.query(SELECT_TENANT, [userId]);
-        logger.info('User profile fetched successfully', { result });
+        const result = await client.query(GET_TENANT_BY_ID, [tenantId]);
+        logger.info('User profile fetched successfully', { result: result.rows[0] });
         if (result.rows.length === 0) {
-            throw new Error('User not found');
+            throw new Error('Tenant not found');
         }
-        const user = result.rows[0];
+        const tenant = result.rows[0];
         const company = await client.query(SELECT_COMPANY_INFO, [result.rows[0].id]);
         if (company.rows.length === 0) {
-            throw new Error('User company not found');
+            throw new Error('Tenant company not found');
         }
-        user.logo = company.rows[0].logo;
-        user.phoneNumber = company.rows[0].phone_number;
-        user.companyName = company.rows[0].company_name;
-        user.postCode = company.rows[0].post_code;
-        user.address = company.rows[0].address;
-        user.general_website = company.rows[0].general_website;
+        tenant.logo = company.rows[0].logo;
+        tenant.phoneNumber = company.rows[0].phone_number;
+        tenant.companyName = company.rows[0].company_name;
+        tenant.postCode = company.rows[0].post_code;
+        tenant.address = company.rows[0].address;
+        tenant.general_website = company.rows[0].general_website;
 
-        logger.info('User profile:', { user });
+        logger.info('Tenant profile:', { tenant });
 
-        if (user.logo) {
+        if (tenant.logo) {
             const config = await getconfigSecrets();
 
             // Generate signed URL for the photo
-            user.logo = s3.getSignedUrl('getObject', {
+            tenant.logo = s3.getSignedUrl('getObject', {
                 Bucket: config.s3BucketName,
-                Key: user.logo,
+                Key: tenant.logo,
                 Expires: 60 * 60, // URL expires in 1 hour
             });
         }
-        logger.info('User profile final  :', { user });
-        return user;
+        logger.info('Tenant profile final  :', { tenant });
+        await client.query(`SET search_path TO ${result.rows[0].schema}`);
+        const staffCheck = await client.query(GET_STAFF_BY_SUB, [userSub]);
+        const staff = staffCheck.rows[0] ;
+        logger.info('Staff:', { staff });
+        return {
+            tenant,
+            ...staff
+        };
     } catch (error: any) {
         logger.error('Failed to fetch user profile', { error });
         throw new Error(`Failed to fetch user profile: ${error.message}`);

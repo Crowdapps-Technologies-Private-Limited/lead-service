@@ -18,8 +18,9 @@ const transformUser = (inputUser: InputUser): OutputUser => {
       email: attributes['email'],
       email_verified: attributes['email_verified'],
       name: attributes['name'],
-      'custom:role': attributes['custom:role'],
-      sub: attributes['sub']
+      role: attributes['custom:role'],
+      sub: attributes['sub'],
+      tenant_id: attributes['custom:tenant_id'],
     };
   };
 

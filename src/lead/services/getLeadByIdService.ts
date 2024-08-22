@@ -7,7 +7,7 @@ export const getLeadById = async (leadId: string, tenant: any) => {
   const client = await connectToDatabase();
   try {
     await client.query('BEGIN');
-    const schema = tenant.schema;
+    const schema = tenant?.schema || tenant?.tenant?.schema;
     logger.info('Schema:', { schema });
     await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
     logger.info('Schema created successfully');

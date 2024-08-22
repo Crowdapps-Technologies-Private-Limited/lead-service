@@ -62,8 +62,9 @@ export interface OutputUser {
     email: string;
     email_verified: string;
     name: string;
-    'custom:role': string;
+    role: string;
     sub: string;
+    tenant_id: string;
 }
 
 
