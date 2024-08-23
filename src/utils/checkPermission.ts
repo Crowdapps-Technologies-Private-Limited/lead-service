@@ -11,6 +11,9 @@ export const checkPermission = async (
 
     let role = userRole === 'TENANT' ? 'Admin' : userRole;
     logger.info('Role:', { role });
+    if (role === 'Admin') {
+        return true;
+    }
 
     const client = await connectToDatabase();
     logger.info('Schema:', { schema });
