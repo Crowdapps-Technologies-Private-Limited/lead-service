@@ -13,7 +13,7 @@ export const getSingleLeadHandler: RouteHandler = async (
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
-        const hasPermission = await checkPermission(user.role, 'Lead', 'read', tenant.schema);
+        const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });

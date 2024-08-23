@@ -18,7 +18,7 @@ export const estimateSendEmailHandler: RouteHandler = async (
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
 
-        const hasPermission = await checkPermission(user.role, 'Estimate', 'create', tenant.schema);
+        const hasPermission = await checkPermission(user.role, 'Estimate', 'create', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });

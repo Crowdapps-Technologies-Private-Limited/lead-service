@@ -23,5 +23,6 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/estimates': admiinHandlers.addEstimateHandler,
         '/leads/distance': admiinHandlers.getDistanceHandler,
         '/leads/{id}/assign-surveyor': admiinHandlers.assignSurveyorHandler,
+        '/leads/{id}/quotes': admiinHandlers.addQuoteHandler,
     },
 };

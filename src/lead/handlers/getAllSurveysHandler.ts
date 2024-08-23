@@ -16,7 +16,7 @@ export const getAllSurveysHandler: RouteHandler = async (
     const user = (event.requestContext as any).user;
     logger.info('user:', { user });
 
-    const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant.schema);
+    const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant?.schema || tenant?.tenant?.schema);
     logger.info('hasPermission: -----------', { hasPermission });
     if (!hasPermission) {
         return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
@@ -24,15 +24,10 @@ export const getAllSurveysHandler: RouteHandler = async (
 
     try {
         const queryParams = event.queryStringParameters;
-        const pageNumber = queryParams?.page ? parseInt(queryParams.page as string) : 1;
-        const pageSize = queryParams?.limit ? parseInt(queryParams.limit as string) : 10;
-        const orderBy = queryParams?.orderBy as string || 'start_time';
-        const orderIn = queryParams?.orderIn as string || 'DESC';
-        const search = queryParams?.search || '';  // New search parameter
-        const status = queryParams?.status || 'PENDING';  // New search parameter
+        const filterBy = queryParams?.filterBy || 'monthly';  // New search parameter
 
         // Fetch surveys list
-        const result = await getAllSurveys(pageSize, pageNumber, orderBy, orderIn, search,status, tenant, isTenant);
+        const result = await getAllSurveys(tenant, isTenant, filterBy);
 
         return ResponseHandler.successResponse({ message: 'Surveys list fetched successfully', data: result });
     } catch (error: any) {

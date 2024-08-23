@@ -13,7 +13,7 @@ export const getSurveyByIdHandler: RouteHandler = async (
     const surveyId = event.pathParameters?.id;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
-    const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant.schema);
+    const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant?.schema || tenant?.tenant?.schema);
     logger.info('hasPermission: -----------', { hasPermission });
     if (!hasPermission) {
         return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });

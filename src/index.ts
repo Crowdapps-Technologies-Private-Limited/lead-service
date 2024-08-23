@@ -126,7 +126,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
             // Attach userPayload to the request context
             (event.requestContext as any).user = user;
-            (event.requestContext as any).tenant = clientDetail.tenant;
+            (event.requestContext as any).tenant = clientDetail;
             (event.requestContext as any).isTenant = false;
         }
         

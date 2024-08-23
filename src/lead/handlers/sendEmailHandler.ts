@@ -4,6 +4,7 @@ import { sendLeadEmail } from '../services';
 import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
+import { checkPermission } from '../../utils/checkPermission';
 
 export const sendEmailHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -15,8 +16,14 @@ export const sendEmailHandler: RouteHandler = async (
         logger.info('tenant:', { tenant });
         const leadId = event.pathParameters?.id;
         logger.info('leadId:', { leadId });
+        const user = (event.requestContext as any).user;
         if (!leadId) {
             return ResponseHandler.badRequestResponse({ message: 'Lead ID is required' });
+        }
+        const hasPermission = await checkPermission(user.role, 'Estimate', 'create', tenant?.schema || tenant?.tenant?.schema);
+        logger.info('hasPermission: -----------', { hasPermission });
+        if (!hasPermission) {
+            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
         }
         // Validate payload
         await sendEmailDTO(payload);

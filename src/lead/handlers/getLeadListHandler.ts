@@ -12,7 +12,7 @@ export const getLeadListHandler: RouteHandler = async (
     try {
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
-        const hasPermission = await checkPermission(user.role, 'Lead', 'read', tenant.schema);
+        const hasPermission = await checkPermission(user.role, 'Lead', 'read', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });

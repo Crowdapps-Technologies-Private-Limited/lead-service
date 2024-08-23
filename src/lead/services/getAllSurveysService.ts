@@ -1,30 +1,14 @@
-import { connectToDatabase } from '../../utils/database';
-import logger from '../../utils/logger';
-import { GET_SURVEYS_LIST_BASE, GET_SURVEYS_COUNT, GET_SURVEYS_COUNT_SURVEYOR } from '../../sql/sqlScript';
-import { setPaginationData } from '../../utils/utility';
-import { escape } from 'querystring';
-
-const allowedOrderFields: { [key: string]: string } = {
-    start_time: 's.start_time',
-    end_time: 's.end_time',
-    survey_type: 's.survey_type',
-    status: 's.status',
-};
+import { GET_SURVEYS_COUNT, GET_SURVEYS_COUNT_SURVEYOR, GET_SURVEYS_LIST_BASE } from "../../sql/sqlScript";
+import { connectToDatabase } from "../../utils/database";
+import logger from "../../utils/logger";
 
 export const getAllSurveys = async (
-    pageSize: number,
-    pageNumber: number,
-    orderBy: string,
-    orderIn: string,
-    search: string,
-    status: string,   // Status parameter
     tenant: any,
-    isTenant: boolean
+    isTenant: boolean,
+    filterBy: string
 ) => {
     const client = await connectToDatabase();
-    const offset = pageSize * (pageNumber - 1);
-    const searchQuery = `%${search}%`; // For partial matching
-
+    
     try {
         if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
             throw new Error('Tenant is suspended');
@@ -33,68 +17,59 @@ export const getAllSurveys = async (
         const schema = tenant?.schema || tenant?.tenant?.schema;
         logger.info('Schema:', { schema });
         await client.query(`SET search_path TO ${schema}`);
+
+        // Define time filter conditions
+        let timeFilter = '';
+        if (filterBy === 'monthly') {
+            timeFilter = `AND date_trunc('month', s.start_time) = date_trunc('month', current_date)`;
+        } else if (filterBy === 'weekly') {
+            timeFilter = `AND date_trunc('week', s.start_time) = date_trunc('week', current_date)`;
+        } else if (filterBy === 'daily') {
+            timeFilter = `AND date_trunc('day', s.start_time) = current_date`;
+        }
+
         let result: any;
-        let pagination: any;
-        if(isTenant) {
+        
+        if (isTenant) {
             // Logic for client
 
             // Fetch surveys count
-            const resultCount = await client.query(GET_SURVEYS_COUNT, [status]);
+            const resultCount = await client.query(`${GET_SURVEYS_COUNT} ${timeFilter}`);
 
-            // Validate orderBy and orderIn, and construct the ORDER BY clause
-            const orderField = allowedOrderFields[orderBy] || allowedOrderFields['start_time'];
-            const orderDirection = orderIn.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-
-            // Construct the final query
+            // Construct the final query with time filter
             const finalQuery = `
                 ${GET_SURVEYS_LIST_BASE}
-                AND (s.survey_type ILIKE $2 OR s.remarks ILIKE $2 OR c.name ILIKE $2)
-                ORDER BY ${orderField} ${orderDirection}
-                LIMIT $3 
-                OFFSET $4
+                ${timeFilter}
             `;
 
             // Fetch surveys list
-            const res = await client.query(finalQuery, [status, searchQuery, pageSize, offset]);
+            const res = await client.query(finalQuery);
 
             logger.info('Fetching surveys list');
 
-            pagination = setPaginationData(resultCount.rows[0].count, pageSize, res.rows.length, pageNumber);
-
             result = {
-                list: res.rows || [],
-                pagination,
+                list: res.rows || []
             };
         } else {
             // Logic for surveyor
-            
+
             // Fetch surveys count
-            const resultCount = await client.query(GET_SURVEYS_COUNT_SURVEYOR, [status, tenant?.staff_id]);
+            const resultCount = await client.query(`${GET_SURVEYS_COUNT_SURVEYOR} ${timeFilter}`, [tenant?.staff_id]);
 
-            // Validate orderBy and orderIn, and construct the ORDER BY clause
-            const orderField = allowedOrderFields[orderBy] || allowedOrderFields['start_time'];
-            const orderDirection = orderIn.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-
-            // Construct the final query
+            // Construct the final query with time filter
             const finalQuery = `
                 ${GET_SURVEYS_LIST_BASE}
-                AND s.surveyor_id = $5
-                AND (s.survey_type ILIKE $2 OR s.remarks ILIKE $2 OR c.name ILIKE $2)
-                ORDER BY ${orderField} ${orderDirection}
-                LIMIT $3 
-                OFFSET $4
+                AND s.surveyor_id = $1
+                ${timeFilter}
             `;
 
             // Fetch surveys list
-            const res = await client.query(finalQuery, [status, searchQuery, pageSize, offset, tenant?.staff_id]);
+            const res = await client.query(finalQuery, [tenant?.staff_id]);
 
             logger.info('Fetching surveys list');
 
-            pagination = setPaginationData(resultCount.rows[0].count, pageSize, res.rows.length, pageNumber);
-
             result = {
-                list: res.rows || [],
-                pagination,
+                list: res.rows || []
             };
         }
         return result;

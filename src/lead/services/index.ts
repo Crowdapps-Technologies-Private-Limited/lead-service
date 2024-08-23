@@ -12,6 +12,8 @@ import { assignSurveyor } from './assignSurveyorOnLead';
 import { getAllSurveyors } from './getSurveyorListService';
 import { getSurveyById } from './getSurveyByIdSrevice';
 import { getAllSurveys } from './getAllSurveysService';
+import { addOrUpdateQuote } from './addQuote';
+import { getLatestQuote } from './getLatestQuotes';
 
 // Removed incomplete import statement
 
@@ -30,4 +32,6 @@ export {
     getAllSurveyors,
     getSurveyById,
     getAllSurveys,
+    addOrUpdateQuote,
+    getLatestQuote,
 };

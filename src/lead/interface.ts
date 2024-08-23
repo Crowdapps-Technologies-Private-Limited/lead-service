@@ -202,3 +202,19 @@ export interface AssignSurveyorPayload {
     surveyDate?: string | null;
     description: string;
 }
+
+export interface AddQuotePayload {
+    quoteId?: string;
+    leadId: string;
+    quoteTotal: number;
+    costTotal: number;
+    quoteExpiresOn: string; // Use string for date to simplify JSON parsing
+    notes?: string;
+    vatIncluded: boolean;
+    materialPriceChargeable: boolean;
+    services: Service[];
+    materials: Material[];
+    costs: Cost[];
+    generalInfo: GeneralInfo[];
+    ancillaries: Ancillary[];
+}

@@ -16,7 +16,7 @@ export const editLeadHandler: RouteHandler = async (
         logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
-        const hasPermission = await checkPermission(user.role, 'Lead', 'update', tenant.schema);
+        const hasPermission = await checkPermission(user.role, 'Lead', 'update', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });

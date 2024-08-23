@@ -1,4 +1,5 @@
 import { addLeadHandler } from './addLeadHandler';
+import { addQuoteHandler } from './addQuoteHandler';
 import { assignSurveyorHandler } from './assignSurveyorHandler';
 import { editLeadHandler } from './editLeadHandler';
 import { addEstimateHandler } from './estimateHandler';
@@ -29,7 +30,8 @@ const authHandlers = {
     getSurveyorListHandler,
     getAllSurveysHandler,
     getSurveyByIdHandler,
-    editLeadHandler
+    editLeadHandler,
+    addQuoteHandler
 };
 
 export default authHandlers;

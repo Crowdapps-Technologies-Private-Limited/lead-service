@@ -17,7 +17,7 @@ export const assignSurveyorHandler: RouteHandler = async (
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
 
-        const hasPermission = await checkPermission(user.role, 'Survey', 'create', tenant.schema);
+        const hasPermission = await checkPermission(user.role, 'Survey', 'create', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
