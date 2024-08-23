@@ -59,8 +59,8 @@ export const getAllSurveys = async (
             // Construct the final query with time filter
             const finalQuery = `
                 ${GET_SURVEYS_LIST_BASE}
-                AND s.surveyor_id = $1
                 ${timeFilter}
+                AND s.surveyor_id = $1
             `;
 
             // Fetch surveys list

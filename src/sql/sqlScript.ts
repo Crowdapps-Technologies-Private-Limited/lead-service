@@ -700,7 +700,7 @@ export const GET_SURVEYS_COUNT_SURVEYOR = `
         surveys s
     WHERE 
         s.lead_id IS NOT NULL
-        AND s.surveyor_id = $2
+        AND s.surveyor_id = $1
 `;
 
 export const GET_SURVEY_ITEM_BY_ID = `select * from survey_items where id = $1`;
