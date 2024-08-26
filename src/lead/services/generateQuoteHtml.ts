@@ -2,11 +2,11 @@ import dayjs from '../../utils/dayjs';
 import logger from '../../utils/logger';
 import { Material, Cost, Service, Ancillary, GeneralInfo } from '../interface';
 
-const generateQuoteHtml = async ({ client, lead, estimate }: { client: any; lead: any; estimate: any }) => {
-    logger.info('Generating estimate html');
+const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: any; quote: any }) => {
+    logger.info('Generating quote html');
     logger.info('Client:', { client });
     logger.info('Lead:', { lead });
-    logger.info('Estimate:', { estimate });
+    logger.info('Quote:', { quote });
 
     let collection_addr = '';
     if (lead?.collection_street) {
@@ -43,9 +43,9 @@ const generateQuoteHtml = async ({ client, lead, estimate }: { client: any; lead
     }
 
     const createdAtFormatted = dayjs(lead?.createdAt).format('DD-MM-YYYY');
-    const quoteExpiresOnFormatted = dayjs(estimate?.quote_expires_on).format('DD-MM-YYYY');
+    const quoteExpiresOnFormatted = dayjs(quote?.quote_expires_on).format('DD-MM-YYYY');
 
-    const materialsHtml = estimate?.materials
+    const materialsHtml = quote?.materials
         ?.map(
             (material: Material) => `
         <tr>
@@ -58,7 +58,7 @@ const generateQuoteHtml = async ({ client, lead, estimate }: { client: any; lead
         )
         .join('');
 
-    const servicesHtml = estimate?.services
+    const servicesHtml = quote?.services
         ?.map(
             (service: Service) => `
         <tr>
@@ -139,7 +139,7 @@ const generateQuoteHtml = async ({ client, lead, estimate }: { client: any; lead
                 <p>Website: ${client?.general_website}</p>
             </div>
         </div>
-            <h1>E S T I M A T I O N</h1>
+            <h1>Q U O T A T I O N</h1>
         </div>
     
         <div class="quotation-info">

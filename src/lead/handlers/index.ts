@@ -7,12 +7,15 @@ import { estimateSendEmailHandler } from './estimateSendEmailHandler';
 import { getAllSurveysHandler } from './getAllSurveysHandler';
 import { getDistanceHandler } from './getDistanceHandler';
 import { getLatestEstimatesHandler } from './getLatestEstimatesHandler';
+import { getLatestQuotesHandler } from './getLatestQuotesHandler';
 import { getLeadListHandler } from './getLeadListHandler';
 import { getLogListByLeadHandler } from './getLogListByLeadHandler';
 import { getReferrerListHandler } from './getReferrerListHandler';
+import { getSecondLatestQuotesHandler } from './getSecondLatestQuotesHandler';
 import { getSingleLeadHandler } from './getSingleLeadHandler';
 import { getSurveyByIdHandler } from './getSurveyByIdHandler';
 import { getSurveyorListHandler } from './getSurveyorListHandler';
+import { quoteSendEmailHandler } from './quoteSendEmailHandler';
 import { sendEmailHandler } from './sendEmailHandler';
 
 const authHandlers = {
@@ -31,7 +34,10 @@ const authHandlers = {
     getAllSurveysHandler,
     getSurveyByIdHandler,
     editLeadHandler,
-    addQuoteHandler
+    addQuoteHandler,
+    getLatestQuotesHandler,
+    quoteSendEmailHandler,
+    getSecondLatestQuotesHandler,
 };
 
 export default authHandlers;

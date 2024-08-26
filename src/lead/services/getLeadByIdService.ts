@@ -15,7 +15,7 @@ export const getLeadById = async (leadId: string, tenant: any) => {
     logger.info('Schema set successfully');
     
     // Check if the leads table exists
-    const tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);
+    let tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);
     const leadsTableExists = tableCheckRes.rows[0].exists;
     if (!leadsTableExists) {
       logger.info('Leads table does not exist');
@@ -28,12 +28,19 @@ export const getLeadById = async (leadId: string, tenant: any) => {
     // Get the lead by ID
     const leadResult = await client.query(GET_LEAD_BY_ID, [leadId]);
     const lead = leadResult.rows[0] || {};
-
-    //Get survey by lead id
-    const surveyResult = await client.query(GET_SURVEY_BY_LEAD, [leadId]);
     let surveyId = null;
-    if(surveyResult.rows.length > 0) {
-      surveyId = surveyResult.rows[0].id;
+    // Check survey table exists
+    tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'surveys']);
+    const checkTableExists = tableCheckRes.rows[0].exists;
+    if (!checkTableExists) {
+      logger.info('Leads table does not exist');
+      surveyId = null;
+    } else {
+      //Get survey by lead id
+      const surveyResult = await client.query(GET_SURVEY_BY_LEAD, [leadId]);
+      if(surveyResult.rows.length > 0) {
+        surveyId = surveyResult.rows[0].id;
+      }
     }
     lead.survey_id = surveyId;
     // Get the referrer by ID

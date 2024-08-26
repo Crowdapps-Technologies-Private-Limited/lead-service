@@ -1,15 +1,15 @@
 import { APIGatewayProxyEventBase, APIGatewayProxyResult, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { RouteHandler } from '../../types/interfaces';
-import { getLatestQuote } from '../services';
+import { downloadSecondLatestQuote } from '../services';
 import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { generatePdfAndUploadToS3 } from '../services/generatePdf';
 import { checkPermission } from '../../utils/checkPermission';
 
-export const getLatestQuotesHandler: RouteHandler = async (
+export const getSecondLatestQuotesHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('getLatestQuotesHandler event', { event });
+    logger.info('getSecondLatestQuotesHandler event', { event });
 
     try {
         const leadId = event.pathParameters?.id;
@@ -31,9 +31,9 @@ export const getLatestQuotesHandler: RouteHandler = async (
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
         }
-        const result = await getLatestQuote(leadId, tenant);
+        const result = await downloadSecondLatestQuote(leadId, tenant);
         if (result) {
-            return ResponseHandler.successResponse({ message: 'Quote fetched successfully', data: result });
+            return ResponseHandler.successResponse({ message: result?.message, data: result?.data });
         } else {
             return ResponseHandler.notFoundResponse({ message: 'No quote found' });
         }

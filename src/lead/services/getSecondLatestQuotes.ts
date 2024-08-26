@@ -1,7 +1,10 @@
+import { GET_LEAD_BY_ID } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
+import { generatePdfAndUploadToS3 } from './generatePdf';
+import generateQuoteHtml from './generateQuoteHtml';
 
-export const getLatestQuote = async (leadId: string, tenant: any) => {
+export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
     if (tenant?.is_suspended) {
         throw new Error('Tenant is suspended');
@@ -100,35 +103,54 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
             e.lead_id = $1
         ORDER BY 
             e.created_at DESC
+        OFFSET 1
         LIMIT 1;
     `;
 
     try {
+        // Check if lead exists
+        const leadCheckResult = await client.query(GET_LEAD_BY_ID, [leadId]);
+        if (leadCheckResult.rows.length === 0) {
+            throw new Error('Lead not found');
+        }
+        const quotationDoc = 'Quote_previous.pdf';
         const res = await client.query(query, [leadId]);
         // Manually convert string fields to numbers, if necessary
+        if(res.rows.length === 0) {
+            throw new Error('No previous quote found');
+        }
         const data = res.rows[0];
-        data.quoteId = data.quoteid;
-        data.quoteTotal = parseFloat(data.quotetotal);
-        data.costTotal = parseFloat(data.costtotal);
-        data.quoteId = data.quoteid;
-        data.leadId = data.leadid;
-        data.quoteExpiresOn = data.quoteexpireson;
-        data.vatIncluded = data.vatincluded;
-        data.materialPriceChargeable = data.materialpricechargeable;
-        data.generalInfo = data.generalinfo;
-        delete data.quotetotal;
-        delete data.costtotal;
-        delete data.quoteid;
-        delete data.leadid;
-        delete data.quoteexpireson;
-        delete data.vatincluded;
-        delete data.materialpricechargeable;
-        delete data.generalinfo;
+        data.quoteId = data?.quoteid;
+        data.quoteTotal = parseFloat(data?.quotetotal);
+        data.costTotal = parseFloat(data?.costtotal);
+        data.quoteId = data?.quoteid;
+        data.leadId = data?.leadid;
+        data.quoteExpiresOn = data?.quoteexpireson;
+        data.vatIncluded = data?.vatincluded;
+        data.materialPriceChargeable = data?.materialpricechargeable;
+        data.generalInfo = data?.generalinfo;
+        delete data?.quotetotal;
+        delete data?.costtotal;
+        delete data?.quoteid;
+        delete data?.leadid;
+        delete data?.quoteexpireson;
+        delete data?.vatincluded;
+        delete data?.materialpricechargeable;
+        delete data?.generalinfo;
 
-        return data;
+        logger.info('quoteData:', { data });
+        const html = await generateQuoteHtml({
+            client: tenant,
+            lead: leadCheckResult.rows[0],
+            quote: data,
+        });
+        logger.info('html:', { html });
+        // Generate PDF
+        const pdfUrl = await generatePdfAndUploadToS3({ html, key: quotationDoc });
+        return { message: 'Previous Lead PDF generated successfully', data: { pdfUrl } };
     } catch (error: any) {
-        logger.error('Failed to get latest quote', { error });
-        throw new Error(`Failed to get latest quote: ${error.message}`);
+        logger.error('Failed to download prevoius quote', { error });
+        throw new Error(`${error.message}`);
     } finally {
         client.end();
     }

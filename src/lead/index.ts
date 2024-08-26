@@ -13,6 +13,9 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/surveyors': admiinHandlers.getSurveyorListHandler,
         '/leads/surveys': admiinHandlers.getAllSurveysHandler,
         '/leads/surveys/{id}': admiinHandlers.getSurveyByIdHandler,
+        '/leads/{id}/quotes': admiinHandlers.getLatestQuotesHandler,
+        '/leads/{id}/previous-quotes': admiinHandlers.getSecondLatestQuotesHandler,
+        '/leads/{id}/quote-send-email/{quoteId}': admiinHandlers.quoteSendEmailHandler,
     },
     PUT: {
         '/leads/{id}': admiinHandlers.editLeadHandler,

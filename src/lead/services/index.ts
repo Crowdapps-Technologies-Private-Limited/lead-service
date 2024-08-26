@@ -14,6 +14,8 @@ import { getSurveyById } from './getSurveyByIdSrevice';
 import { getAllSurveys } from './getAllSurveysService';
 import { addOrUpdateQuote } from './addQuote';
 import { getLatestQuote } from './getLatestQuotes';
+import { sendQuoteEmailOrPdf } from './quoteSendLeadEmailOrPdfService';
+import { downloadSecondLatestQuote } from './getSecondLatestQuotes';
 
 // Removed incomplete import statement
 
@@ -34,4 +36,6 @@ export {
     getAllSurveys,
     addOrUpdateQuote,
     getLatestQuote,
+    sendQuoteEmailOrPdf,
+    downloadSecondLatestQuote,
 };
