@@ -4,7 +4,8 @@ import {
     INSERT_LOG,
     INSERT_SURVEY,
     CHECK_SURVEY,
-    CHECK_SURVEYOR_AVAILABILITY
+    CHECK_SURVEYOR_AVAILABILITY,
+    UPDATE_LEAD_STATUS
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { generateEmail } from '../../utils/generateEmailService';
@@ -94,16 +95,20 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             description,
             surveyDate || null
         ]);
+        // Update lead status
+        await client.query(UPDATE_LEAD_STATUS, ['SURVEY', leadId]);
+        logger.info('Lead status updated successfully');
         // Insert log
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,
             tenant.email,
-            'Surveyor assigned',
+            `You have added a survey for lead ${leadId}`,
             'LEAD',
-            'ESTIMATES',
-            leadId
+            'SURVEY',
+            leadId,
         ]);
+        logger.info('Log inserted successfully');
         // Send nofitication to surveyor on email
         await generateEmail('Assign Survey', surveyorCheckResult?.rows[0]?.email, { username: surveyorCheckResult?.rows[0]?.name });
         await client.query('COMMIT');

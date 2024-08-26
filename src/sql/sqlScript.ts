@@ -151,6 +151,13 @@ WHERE
     leads.generated_id = $1;
 `;
 
+export const GET_SURVEY_BY_LEAD = `
+SELECT id, lead_id
+FROM surveys 
+WHERE lead_id = $1
+ORDER BY created_at DESC 
+LIMIT 1`;
+
 export const GET_EMAIL_TEMPLATE_BY_EVENT = `
     SELECT template_id, template_name, subject, salutation, body, links, signature, disclaimer, placeholders
     FROM public.email_templates 

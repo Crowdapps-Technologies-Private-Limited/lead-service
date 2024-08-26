@@ -30,7 +30,7 @@ export const addQuoteHandler: RouteHandler = async (
         logger.info('user:', { user });
         
         const hasPermission = await checkPermission(
-            user.role, 'Lead', 
+            user.role, 'Quotation', 
             'create', tenant?.schema || tenant?.tenant?.schema
         );
         logger.info('hasPermission: -----------', { hasPermission });

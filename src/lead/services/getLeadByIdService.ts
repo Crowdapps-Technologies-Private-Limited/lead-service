@@ -1,4 +1,4 @@
-import { GET_LEAD_BY_ID, GET_REFERRER_BY_ID, CHECK_TABLE_EXISTS } from '../../sql/sqlScript';
+import { GET_LEAD_BY_ID, GET_REFERRER_BY_ID, CHECK_TABLE_EXISTS, GET_SURVEY_BY_LEAD } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 
@@ -28,7 +28,14 @@ export const getLeadById = async (leadId: string, tenant: any) => {
     // Get the lead by ID
     const leadResult = await client.query(GET_LEAD_BY_ID, [leadId]);
     const lead = leadResult.rows[0] || {};
-    
+
+    //Get survey by lead id
+    const surveyResult = await client.query(GET_SURVEY_BY_LEAD, [leadId]);
+    let surveyId = null;
+    if(surveyResult.rows.length > 0) {
+      surveyId = surveyResult.rows[0].id;
+    }
+    lead.survey_id = surveyId;
     // Get the referrer by ID
     const referrerResult = await client.query(GET_REFERRER_BY_ID, [lead.referrer_id]);
     const referrer = referrerResult.rows[0] || {};
