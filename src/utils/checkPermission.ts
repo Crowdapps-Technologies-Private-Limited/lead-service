@@ -11,6 +11,8 @@ export const checkPermission = async (
 
     let role = userRole === 'TENANT' ? 'Admin' : userRole;
     logger.info('Role:', { role });
+
+    // Admin has all permissions
     if (role === 'Admin') {
         return true;
     }
@@ -27,15 +29,17 @@ export const checkPermission = async (
                 EXISTS (
                     SELECT 1 
                     FROM 
-                        staff_role_permissions 
+                        staff_role_permissions srp
                     JOIN 
-                        modules ON staff_role_permissions.module_id = modules.module_id 
+                        modules m ON srp.module_id = m.module_id 
                     JOIN 
-                        permissions ON staff_role_permissions.permission_id = permissions.permission_id 
+                        permissions p ON srp.permission_id = p.permission_id 
+                    JOIN
+                        staff_roles sr ON sr.id = srp.role_id
                     WHERE 
-                        staff_role_permissions.role = $1 
-                        AND modules.module_name ILIKE $2 
-                        AND permissions.permission_name = $3
+                        sr.role = $1
+                        AND m.module_name ILIKE $2 
+                        AND p.permission_name = $3
                 ) AS has_permission
         `;
 
