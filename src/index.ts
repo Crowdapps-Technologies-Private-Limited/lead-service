@@ -133,12 +133,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         
     } catch (error: any) {
         logger.error('Token not verified', { error });
-        return ResponseHandler.unauthorizedResponse({ message: 'Token not verified', details: error.message });
-        // return {
-        //     statusCode: 401,
-        //     headers: defaultHeaders,
-        //     body: JSON.stringify({ message: 'Token not verified', details: error.message }),
-        // };
+        return {
+            statusCode: 401,
+            headers: defaultHeaders,
+            body: JSON.stringify({ message: 'Token not verified', details: error.message }),
+        };
     }
 
     try {
