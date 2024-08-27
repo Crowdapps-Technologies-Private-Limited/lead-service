@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS leads (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     generated_id VARCHAR(10) NOT NULL UNIQUE,
     referrer_id UUID,
-    customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
-    collection_address_id UUID REFERENCES addresses(id) ON DELETE CASCADE,
-    delivery_address_id UUID REFERENCES addresses(id) ON DELETE CASCADE,
+    customer_id UUID REFERENCES customers(id) ON DELETE SET NULL,
+    collection_address_id UUID REFERENCES addresses(id),
+    delivery_address_id UUID REFERENCES addresses(id),
     follow_up_date TIMESTAMP,
     moving_on_date TIMESTAMP,
     packing_on_date TIMESTAMP DEFAULT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS leads (
     incept_batch VARCHAR(20),
     lead_id VARCHAR(10),
     lead_date TIMESTAMP,
-    FOREIGN KEY (referrer_id) REFERENCES public.referrers(id) ON DELETE CASCADE
+    FOREIGN KEY (referrer_id) REFERENCES public.referrers(id) ON DELETE SET NULL
 );`;
 
 export const CHECK_LEAD_BY_EMAIL = `SELECT COUNT(*) FROM leads WHERE email = $1`;
