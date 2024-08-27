@@ -79,10 +79,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 return ResponseHandler.unauthorizedResponse({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' });
             }
 
-            if (clientDetail.staff.status === 'PENDING' && user.email_verified === "true") {
+            if (clientDetail.status === 'PENDING' && user.email_verified === "true") {
                 return ResponseHandler.unauthorizedResponse({ message: 'Your account is deactivated. Kindly ask the admin to reactivate your account!' });
             }
-            if (clientDetail.staff.status === 'PENDING' && user.email_verified === "false") {
+            if (clientDetail.status === 'PENDING' && user.email_verified === "false") {
                 return ResponseHandler.unauthorizedResponse({ message: 'Please activate your acount' });
             }
 
