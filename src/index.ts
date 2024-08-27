@@ -41,6 +41,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const userPayload = await verifyToken(token, userPoolId, region);
         const user: any = await getUserBySub({ userPoolId: config.cognitoUserPoolId, sub: userPayload.sub });
         logger.info('user:', { user });
+        
         if (!user || user.role === 'SUPER_ADMIN') {
             return ResponseHandler.forbiddenResponse({ message: 'You are not allowed!' });
         }
