@@ -43,23 +43,37 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         logger.info('user:', { user });
         
         if (!user || user.role === 'SUPER_ADMIN') {
-            return ResponseHandler.forbiddenResponse({ message: 'You are not allowed!' });
+            return {
+                statusCode: 401,
+                headers: defaultHeaders,
+                body: JSON.stringify({ message: 'Forbidden' })
+            };
         }
 
         if (user.role === 'TENANT') {
             logger.info(' In if TenantAdmin:', { user });
             const clientDetail= await getTenantProfile(user.tenant_id);
             logger.info('TenantAdminDetail:', { clientDetail });
-            if (clientDetail?.is_deleted) {
-                return ResponseHandler.unauthorizedResponse({ message: 'Your account is deleted. Kindly ask the admin!' });
+            if(clientDetail.is_deleted === true){   
+                return {
+                    statusCode: 401,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is deleted. Kindly ask the admin to reactivate your account!' })
+                };
             }
-
-            if (!clientDetail?.is_active && clientDetail.status !== 'PENDING') {
-                return ResponseHandler.unauthorizedResponse({ message: 'Your account is deactivated. Kindly ask the admin to reactivate your account!' });
+            if(clientDetail.is_active === false ){   
+                return {
+                    statusCode: 401,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!' })
+                };
             }
-
-            if (clientDetail?.is_suspended) {
-                return ResponseHandler.unauthorizedResponse({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' });
+            if(clientDetail.is_suspended === true){   
+                return {
+                    statusCode: 401,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' })
+                };
             }
             // Attach userPayload to the request context
             (event.requestContext as any).user = user;
@@ -71,20 +85,44 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             const clientDetail = await getUserProfile(user.tenant_id, user.sub);
             logger.info('clientStaffDetail:', { clientDetail });
             if(clientDetail.tenant.is_deleted === true){   
-                return ResponseHandler.unauthorizedResponse({ message: 'Your account is deleted. Kindly ask the admin!' });
+                return {
+                    statusCode: 401,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is deleted. Kindly ask the admin to reactivate your account!' })
+                };
             }
             if(clientDetail.tenant.is_active === false && clientDetail.tenant.status !== 'PENDING'){   
-                return ResponseHandler.unauthorizedResponse({ message: 'Your account is deactivated. Kindly ask the admin to reactivate your account!' });
+                return {
+                    statusCode: 401,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!' })
+                };
             }
             if(clientDetail.tenant.is_suspended === true){   
-                return ResponseHandler.unauthorizedResponse({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' });
+                return {
+                    statusCode: 401,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' })
+                };
             }
 
-            if (clientDetail.status === 'PENDING' && user.email_verified === "true") {
-                return ResponseHandler.unauthorizedResponse({ message: 'Your account is deactivated. Kindly ask the admin to reactivate your account!' });
+            if (clientDetail.status === 'PENDING' && user.email_verified === true) {
+                return {
+                    statusCode: 401,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({
+                        message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!',
+                    }),
+                };
             }
-            if (clientDetail.status === 'PENDING' && user.email_verified === "false") {
-                return ResponseHandler.unauthorizedResponse({ message: 'Please activate your acount' });
+            if (clientDetail.status === 'PENDING' && user.email_verified === false) {
+                return {
+                    statusCode: 401,
+                    headers: defaultHeaders,
+                    body: JSON.stringify({
+                        message: 'please activate your acount',
+                    }),
+                };
             }
 
             // Attach userPayload to the request context
