@@ -33,7 +33,7 @@ export const getLatestQuotesHandler: RouteHandler = async (
         }
         const result = await getLatestQuote(leadId, tenant);
         if (result) {
-            return ResponseHandler.successResponse({ message: 'Quote fetched successfully', data: result });
+            return ResponseHandler.successResponse({ message: 'Quote fetched successfully', data: result?.data });
         } else {
             return ResponseHandler.notFoundResponse({ message: 'No quote found' });
         }

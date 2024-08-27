@@ -103,6 +103,8 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
         LIMIT 1;
     `;
 
+    const countQuery = `SELECT COUNT(*) FROM ${schema}.quotes WHERE lead_id = $1;`;
+
     try {
         const res = await client.query(query, [leadId]);
         // Manually convert string fields to numbers, if necessary
@@ -124,8 +126,14 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
         delete data.vatincluded;
         delete data.materialpricechargeable;
         delete data.generalinfo;
-
-        return data;
+        // get total count of quotes
+        const totalCount = await client.query(countQuery, [leadId]);
+        return {
+            data: {
+                record: data,
+                count: totalCount.rows[0].count
+            }
+        };
     } catch (error: any) {
         logger.error('Failed to get latest quote', { error });
         throw new Error(`Failed to get latest quote: ${error.message}`);
