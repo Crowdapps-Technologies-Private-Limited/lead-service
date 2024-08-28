@@ -3,6 +3,7 @@ import AWS from 'aws-sdk';
 import logger from './logger';
 import { connectToDatabase } from './database';
 import { GET_TENANT_BY_ID, SELECT_COMPANY_INFO } from '../sql/sqlScript';
+import { checkSubscriptionStatus } from './checkSubscription';
 
 const s3 = new AWS.S3();
 
@@ -17,6 +18,14 @@ export const getTenantProfile = async (userId: string) => {
             throw new Error('User not found');
         }
         const user = result.rows[0];
+              // Check subscription status 
+const status = await checkSubscriptionStatus(user.id);
+if (status.isExpired) {
+    console.log(`Subscription expired: ${status.reason}`);
+    throw new Error(`Subscription expired: ${status.reason}`);
+} else {
+    console.log('Subscription is active');
+}
         const company = await client.query(SELECT_COMPANY_INFO, [result.rows[0].id]);
         if (company.rows.length === 0) {
             throw new Error('User company not found');
