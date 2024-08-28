@@ -14,6 +14,7 @@ export const getAllSurveyors = async (tenant: any) => {
     }
     await client.query(`SET search_path TO ${schema}`);
     // Fetch list
+    
     const res = await client.query(GET_ALL_SURVEYORS, ['Surveyor']);
     return res.rows || [];
   } catch (error: any) {
