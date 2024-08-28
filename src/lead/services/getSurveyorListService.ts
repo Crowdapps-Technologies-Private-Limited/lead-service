@@ -6,7 +6,7 @@ import logger from '../../utils/logger';
 export const getAllSurveyors = async (tenant: any) => {
   // Connect to PostgreSQL database
   const client = await connectToDatabase();
-  const schema = tenant.schema;
+  const schema = tenant?.schema || tenant?.tenant?.schema;
     logger.info('Schema:', { schema });
   try {
     if (tenant?.is_suspended) {
