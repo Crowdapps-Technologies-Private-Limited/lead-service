@@ -94,6 +94,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         // Assign Surveyor
         // Determine if the surveyor is assigned to the tenant
         const isTenantAssigned = !surveyorId.startsWith('EMP');
+        logger.info('isTenantAssigned:', { isTenantAssigned });
         await client.query(INSERT_SURVEY, [
             leadId,
             surveyorId,

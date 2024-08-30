@@ -707,7 +707,7 @@ export const GET_SURVEYS_LIST_TENANT = `
         s.end_time,
         s.description,
         s.status,
-        'tenant' AS "surveyorName",
+        'self' AS "surveyorName",
         true AS "is_tenant_assigned"
     FROM 
         surveys s

@@ -26,25 +26,24 @@ export const getAllSurveys = async (
         // Start transaction
         await client.query('BEGIN');
 
-        // Define time filter conditions
-        let timeFilter = '';
-        if (filterBy === 'monthly') {
-            timeFilter = `AND date_trunc('month', s.start_time) = date_trunc('month', current_date)`;
-        } else if (filterBy === 'weekly') {
-            timeFilter = `AND date_trunc('week', s.start_time) = date_trunc('week', current_date)`;
-        } else if (filterBy === 'daily') {
-            timeFilter = `AND date_trunc('day', s.start_time) = current_date`;
-        }
+        // // Define time filter conditions
+        // let timeFilter = '';
+        // if (filterBy === 'monthly') {
+        //     timeFilter = `AND date_trunc('month', s.start_time) = date_trunc('month', current_date)`;
+        // } else if (filterBy === 'weekly') {
+        //     timeFilter = `AND date_trunc('week', s.start_time) = date_trunc('week', current_date)`;
+        // } else if (filterBy === 'daily') {
+        //     timeFilter = `AND date_trunc('day', s.start_time) = current_date`;
+        // }
 
         // Fetch surveys count
-        const countResult = await client.query(`${GET_SURVEYS_COUNT} ${timeFilter}`);
+        const countResult = await client.query(`${GET_SURVEYS_COUNT}`);
         const count = countResult.rows[0]?.count || 0;
         logger.info('Fetching surveys count', { count });
 
         // Fetch surveys list for tenant
         const tenantQuery = `
             ${GET_SURVEYS_LIST_TENANT}
-            ${timeFilter}
         `;
         const tenantSurveys = await client.query(tenantQuery);
         const result1 = tenantSurveys.rows || [];
@@ -53,7 +52,6 @@ export const getAllSurveys = async (
         // Fetch surveys list for surveyor or other roles
         const surveyorQuery = `
             ${GET_SURVEYS_LIST_BASE}
-            ${timeFilter}
         `;
         const surveyorSurveys = await client.query(surveyorQuery);
         const result2 = surveyorSurveys.rows || [];
