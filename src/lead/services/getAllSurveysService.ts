@@ -1,4 +1,4 @@
-import { GET_SURVEYS_COUNT, GET_SURVEYS_COUNT_SURVEYOR, GET_SURVEYS_LIST_BASE } from "../../sql/sqlScript";
+import { GET_SURVEYS_COUNT, GET_SURVEYS_COUNT_SURVEYOR, GET_SURVEYS_LIST_BASE, GET_SURVEYS_LIST_TENANT, GET_TENANT_SURVEYS_COUNT } from "../../sql/sqlScript";
 import { connectToDatabase } from "../../utils/database";
 import logger from "../../utils/logger";
 
@@ -34,11 +34,11 @@ export const getAllSurveys = async (
             // Logic for client
 
             // Fetch surveys count
-            const resultCount = await client.query(`${GET_SURVEYS_COUNT} ${timeFilter}`);
+            const resultCount = await client.query(`${GET_TENANT_SURVEYS_COUNT} ${timeFilter}`);
 
             // Construct the final query with time filter
             const finalQuery = `
-                ${GET_SURVEYS_LIST_BASE}
+                ${GET_SURVEYS_LIST_TENANT}
                 ${timeFilter}
             `;
 

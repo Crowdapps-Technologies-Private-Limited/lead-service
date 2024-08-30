@@ -13,6 +13,7 @@ export const assignSurveyorHandler: RouteHandler = async (
     try {
         let payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
+        const isTenant = (event.requestContext as any).isTenant;
         logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
@@ -36,7 +37,7 @@ export const assignSurveyorHandler: RouteHandler = async (
         }
       
 
-        const result = await assignSurveyor(leadId, payload, tenant);
+        const result = await assignSurveyor(leadId, payload, tenant, isTenant);
 
         return ResponseHandler.createdResponse({ message: result?.message });
     } catch (error: any) {

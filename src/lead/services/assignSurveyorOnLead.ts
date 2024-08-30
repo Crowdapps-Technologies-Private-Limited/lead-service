@@ -85,6 +85,8 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             throw new Error('Surveyor already has a survey in the given time range');
         }
         // Assign Surveyor
+        // Determine if the surveyor is assigned to the tenant
+        const isTenantAssigned = surveyorId.startsWith('EMP');
         await client.query(INSERT_SURVEY, [
             leadId,
             surveyorId,
@@ -93,7 +95,8 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             startTime,
             endTime || null,
             description,
-            surveyDate || null
+            surveyDate || null,
+            isTenantAssigned
         ]);
         // Update lead status
         await client.query(UPDATE_LEAD_STATUS, ['SURVEY', leadId]);

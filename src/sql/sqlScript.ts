@@ -553,9 +553,8 @@ CREATE TABLE IF NOT EXISTS surveys (
     moving_to_floors INTEGER,
     is_moving_to_postcode_verified BOOLEAN,
     moving_to_type VARCHAR(100),
-    is_confirmed BOOLEAN,
-    is_provisional BOOLEAN,
-    is_not_taking BOOLEAN,
+    summary_status VARCHAR(100),
+    is_tenant_assigned BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
@@ -599,8 +598,9 @@ export const INSERT_SURVEY = `INSERT INTO surveys (
     start_time,
     end_time,
     description,
-    survey_date
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`;
+    survey_date,
+    is_tenant_assigned
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`;
 
 export const CHECK_SURVEY = `
 SELECT * FROM surveys 
@@ -685,9 +685,35 @@ export const GET_SURVEYS_LIST_BASE = `
         surveys s
     LEFT JOIN leads l ON s.lead_id = l.generated_id
     LEFT JOIN customers c ON l.customer_id = c.id
-    LEFT JOIN staffs st ON s.surveyor_id = st.staff_id
+    LEFT JOIN staffs st ON s.surveyor_id = st.staff_id 
     WHERE 
-        s.lead_id IS NOT NULL
+        s.is_tenant_assigned = false
+        AND s.lead_id IS NOT NULL
+`;
+
+export const GET_SURVEYS_LIST_TENANT = `
+    SELECT 
+        s.id,
+        s.lead_id AS "leadId",
+        l.generated_id AS "leadGeneratedId",
+        l.customer_id AS "customerId",
+        c.name AS "customerName",
+        c.phone AS "customerPhone",
+        c.email AS "customerEmail",
+        s.surveyor_id,
+        s.survey_type,
+        s.remarks,
+        s.start_time,
+        s.end_time,
+        s.description,
+        s.status
+    FROM 
+        surveys s
+    LEFT JOIN leads l ON s.lead_id = l.generated_id
+    LEFT JOIN customers c ON l.customer_id = c.id
+    WHERE 
+        s.is_tenant_assigned = true
+        AND s.lead_id IS NOT NULL
 `;
 
 
@@ -698,6 +724,16 @@ export const GET_SURVEYS_COUNT = `
         surveys s
     WHERE 
         s.lead_id IS NOT NULL
+`;
+
+export const GET_TENANT_SURVEYS_COUNT = `
+    SELECT 
+        COUNT(*) 
+    FROM 
+        surveys s
+    WHERE 
+        s.lead_id IS NOT NULL
+        AND s.is_tenant_assigned = true
 `;
 
 export const GET_SURVEYS_COUNT_SURVEYOR = `
