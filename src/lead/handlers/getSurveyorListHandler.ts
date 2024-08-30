@@ -4,6 +4,7 @@ import { getAllSurveyors } from '../services';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getSurveyorListHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -15,13 +16,13 @@ export const getSurveyorListHandler: RouteHandler = async (
         const hasPermission = await checkPermission(user.role, 'Lead', 'read', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
-            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         // Fetch user list
         const result = await getAllSurveyors(tenant);
-        return ResponseHandler.successResponse({ message: 'Surveyor list fetched successfully', data: result });
+        return ResponseHandler.successResponse({ message: getMessage('SURVEYOR_LIST_FETCHED'), data: result });
     } catch (error: any) {
         logger.error('Error occurred', { error });
-        return ResponseHandler.notFoundResponse({ message: error.message });
+        return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

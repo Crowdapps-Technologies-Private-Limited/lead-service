@@ -26,20 +26,17 @@ export const sendEmailHandler: RouteHandler = async (
             return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
         }
         // Validate payload
-        await sendEmailDTO(payload);
+        try {
+            await sendEmailDTO(payload);
+        } catch (error: any) {
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
+            return ResponseHandler.badRequestResponse({ message: cleanedMessage });
+        }
         const result = await sendLeadEmail(leadId, payload, tenant);
 
         return ResponseHandler.createdResponse({ message: result.message });
     } catch (error: any) {
         logger.error('Error occurred send lead email handler', { error });
-        if (error?.message?.includes('Payload Validation Failed')) {
-            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '').trim();
-            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
-        } else if (error?.message?.includes('Tenant is suspended')) {
-            return ResponseHandler.badRequestResponse({ message: "Your account is suspended. Kindly ask the admin to reactivate your account!" });
-        } else {
-            return ResponseHandler.notFoundResponse({ message: error.message });
-            //return ResponseHandler.badRequestResponse({ message: "Something went wrong. Please try later!" });
-        }
+        return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

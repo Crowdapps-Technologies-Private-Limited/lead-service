@@ -4,6 +4,8 @@ import { AddLeadPayload } from '../interface';
 import { generateEmail } from '../../utils/generateEmailService';
 import {  CREATE_LOG_TABLE, INSERT_LOG } from '../../sql/sqlScript';
 import { isEmptyString, toFloat } from '../../utils/utility';
+import { get } from 'http';
+import { getMessage } from '../../utils/errorMessages';
 
 export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: any) => {
     const {
@@ -38,7 +40,7 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         await client.query('BEGIN');
 
         if (tenant?.is_suspended) {
-            throw new Error('Tenant is suspended');
+            throw new Error(getMessage('ACCOUNT_SUSPENDED'));
         }
 
         await client.query(`SET search_path TO ${schema}`);
@@ -49,7 +51,7 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         `, [leadId]);
 
         if (leadCheckResult.rows.length === 0) {
-            throw new Error('Lead not found');
+            throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
         // Check if email or phone is used by another customer
         // const uniqueCustomerCheckResult = await client.query(`
@@ -171,11 +173,11 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         ]);
 
         await client.query('COMMIT');
-        return { message: 'Lead updated successfully' };
+        return { message: getMessage('LEAD_UPDATED') };
     } catch (error: any) {
         await client.query('ROLLBACK');
         logger.error('Failed to edit lead', { error });
-        throw new Error(`Failed to edit lead: ${error.message}`);
+        throw new Error(`${error.message}`);
     } finally {
         client.end();
     }

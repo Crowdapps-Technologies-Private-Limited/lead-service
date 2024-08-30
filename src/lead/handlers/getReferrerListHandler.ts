@@ -3,6 +3,7 @@ import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefault
 import { getAllReferrers } from '../services';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getReferrerListHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -11,10 +12,9 @@ export const getReferrerListHandler: RouteHandler = async (
     try {
         // Fetch referrer list
         const result = await getAllReferrers();
-        return ResponseHandler.successResponse({ message: 'Referrer list fetched successfully', data: result });
+        return ResponseHandler.successResponse({ message: getMessage('REFERRER_LIST_FETCHED'), data: result });
     } catch (error: any) {
         logger.error('Error occurred', { error });
         return ResponseHandler.notFoundResponse({ message: error.message });
-        // return ResponseHandler.badRequestResponse({ message: "Something went wrong. Please try later!", details: error.errors });
     }
 };

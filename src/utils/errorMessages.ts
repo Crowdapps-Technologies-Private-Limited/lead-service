@@ -31,75 +31,67 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return "Lead not found.";
         case "LEAD_LIST_FETCHED":
             return "Lead list fetched successfully.";
+        case "LEAD_LOG_LIST_FETCHED":
+            return "Log list fetched successfully.";
+        case "REFERRER_LIST_FETCHED":
+            return "Referrer list fetched successfully.";
         case "LEAD_ACTIVITY_FETCHED":
             return "Lead activities fetched successfully.";
         case "LEAD_ID_REQUIRED":
             return "Lead ID is required in path parameters.";
+        case "LEAD_SURVEY_EXIST":
+            return 'Survey already exists for this lead.';
+        case "DISTANCE_CALCULATED":
+            return 'Distance calculated successfully.';
+        case "DISTANCE_CALCULATION_FAILED":
+            return 'Error calculating distance.';
 
+        case "ESTIMATE_ADDED": 
+            return "Estimate added successfully.";  
+        case "ESTIMATE_UPDATED":
+            return "Estimate updated successfully."; 
+        case "ESTIMATE_ID_LEAD_ID_REQUIRED":
+            return "Estimate ID and Lead ID are required in path parameters.";
+        case "PDF_GENERATED":
+            return "PDF generated successfully.";
+        case "EMAIL_SENT":
+            return "Email sent successfully.";
+        case "ESTIMATE_FETCHED":
+            return "Estimate fetched successfully.";
+        case "ESTIMATE_NOT_FOUND":
+            return "Estimate not found.";
         case "QUOTE_ADDED":
             return "Quote added successfully.";
         case "QUOTE_UPDATED":
             return "Quote updated successfully.";
+        case "QUOTE_ID_LEAD_ID_REQUIRED":
+            return "Quote ID and Lead ID are required in path parameters.";
+        case "QUOTE_FETCHED":
+            return "Quotation fetched successfully.";
+        case "QUOTE_NOT_FOUND":
+            return "Quotation not found.";
+        case "PREV_QUOTE_NOT_FOUND":
+            return "No previous quotation found.";
+        case "PREV_QUOTE_PDF_GENERATED":
+            return "Previous quotation PDF of the lead generated successfully.";
 
+        case "SURVEYOR_NOT_FOUND":
+            return 'Surveyor not found.';
+        case "SURVEYOR_LIST_FETCHED":
+            return 'Surveyor list fetched successfully.';
+        case "NO_SURVEYOR_AVAILABILITY":
+            return 'No surveyor available in the given time range.';
+        case "SURVEYOR_ASSIGNED":
+            return 'Surveyor assigned successfully.';
+        case "SURVEY_LIST_FETCHED":
+            return 'Survey list fetched successfully.';
+        case "SURVEY_FETCHED":
+            return 'Survey data fetched successfully.';
+        case "SURVEY_ID_REQUIRED":
+            return "Survey ID is required in path parameters.";
+        case "TEMPLATE_NO_FOUND": 
+            return "Email template not found.";
 
-
-        case "USER_NOT_FOUND":
-            return 'User not found.';
-        case "USER_DELETED":
-            return 'User is deleted successfully.';
-        case "USER_ADDED":
-            return 'User is added successfully.';
-        case "USER_FETCHED":
-            return 'User data fetched successfully.';
-        case "USER_EDITED":
-            return 'User is updated successfully.';
-        case "USER_NOT_ACIVATED":
-            return `User's account is not activated yet.`;
-        case "USER_PROFILE_UPDATED":
-            return `User profile updated successfully.`;
-        case "USER_PROFILE_FETCHED":
-            return `User profile fetched successfully.`;
-        case "MISSING_REQUIRED_PARAMS":
-            return 'Missing required parameters.';
-        case "ACCOUNT_ALREADY_ACTIVE":
-            return 'Account is already active.';
-        case "EMAIL_TEMPLATE_ADDED":
-            return 'Email template added successfully.';
-        case "EMAIL_TEMPLATE_EDITED":
-            return 'Email template updated successfully.';
-        case "EMAIL_TEMPLATE_FETCHED":
-            return 'Email template fetched successfully.';
-        case "EMAIL_TEMPLATE_NOT_FOUND":
-            return 'Email template not found.';
-        case "EMAIL_TEMPLATE_DELETED":
-            return 'Email template deleted successfully.';
-        case "EVENT_ADDED":
-            return 'Event added successfully.';
-        case "EVENT_EDITED":
-            return 'Event updated successfully.';
-        case "EVENT_DELETED":
-            return 'Event deleted successfully.';
-        case "SMS_TEMPLATE_ADDED":
-            return 'SMS template added successfully.';
-        case "SMS_TEMPLATE_EDITED":
-                return 'SMS template updated successfully.';
-        case "SMS_TEMPLATE_DELETED":
-            return 'SMS template deleted successfully.';
-        case "SMS_TEMPLATE_FETCHED":
-            return 'SMS template fetched successfully.';
-        case "SMS_TEMPLATE_NOT_FOUND":
-            return 'SMS template not found.';
-        case "ROLE_PERMISSION_ASSIGNED":
-            return 'Permission assigned to role successfully.';
-        case "FEATURE_CREATED":
-            return 'Feature created successfully.';
-        case "FEATURE_DELETED":
-                return 'Feature deleted successfully.';
-        case "MODULE_CREATED":
-            return 'Module created successfully.';
-
-        
-  
         default:
         return "";
     }

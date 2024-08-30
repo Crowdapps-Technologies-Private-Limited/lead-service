@@ -4,6 +4,7 @@ import logger from '../../utils/logger';
 import { getSurveyById } from '../services';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getSurveyByIdHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
@@ -16,10 +17,10 @@ export const getSurveyByIdHandler: RouteHandler = async (
     const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant?.schema || tenant?.tenant?.schema);
     logger.info('hasPermission: -----------', { hasPermission });
     if (!hasPermission) {
-        return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+        return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
     }
     if (!surveyId) {
-        return ResponseHandler.badRequestResponse({ message: 'Survey ID is required' });
+        return ResponseHandler.badRequestResponse({ message: getMessage('SURVEY_ID_REQUIRED') });
     }
 
     try {

@@ -9,9 +9,9 @@ export const getAllSurveyors = async (tenant: any) => {
   const schema = tenant?.schema || tenant?.tenant?.schema;
     logger.info('Schema:', { schema });
   try {
-    if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
-      throw new Error('Tenant is suspended');
-    }
+    // if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
+    //   throw new Error('Tenant is suspended');
+    // }
     await client.query(`SET search_path TO ${schema}`);
     // Fetch list
     
@@ -19,7 +19,7 @@ export const getAllSurveyors = async (tenant: any) => {
     return res.rows || [];
   } catch (error: any) {
     logger.error('Failed to fetch list', { error });
-    throw new Error(`Failed to fetch list: ${error.message}`);
+    throw new Error(`${error.message}`);
   } finally {
     try {
       await client.end();

@@ -4,6 +4,7 @@ import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 import { getAllSurveys } from '../services';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getAllSurveysHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
@@ -19,7 +20,7 @@ export const getAllSurveysHandler: RouteHandler = async (
     const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant?.schema || tenant?.tenant?.schema);
     logger.info('hasPermission: -----------', { hasPermission });
     if (!hasPermission) {
-        return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+        return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
     }
 
     try {
@@ -29,7 +30,7 @@ export const getAllSurveysHandler: RouteHandler = async (
         // Fetch surveys list
         const result = await getAllSurveys(tenant, isTenant, filterBy);
 
-        return ResponseHandler.successResponse({ message: 'Surveys list fetched successfully', data: result });
+        return ResponseHandler.successResponse({ message: getMessage('SURVEY_LIST_FETCHED'), data: result });
     } catch (error: any) {
         logger.error('Failed to fetch surveys list', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });

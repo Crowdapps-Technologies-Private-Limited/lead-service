@@ -5,6 +5,8 @@ import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { addOrUpdateEstimate } from '../services';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
+import { get } from 'http';
 
 export const addEstimateHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
@@ -16,14 +18,12 @@ export const addEstimateHandler: RouteHandler = async (
         logger.info('payload:', { payload });
         const leadId = event.pathParameters?.id;
         logger.info('leadId:', { leadId });
-        
         if (!leadId) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ message: 'Lead ID is required in path parameters' })
             };
         }
-
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
@@ -31,34 +31,24 @@ export const addEstimateHandler: RouteHandler = async (
         const hasPermission = await checkPermission(user.role, 'Estimate', 'create', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
-            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         // Validate payload
-        await addEstimateDTO(payload);
-        logger.info('addEstimateDTO success:');
         try {
-            const result = await addOrUpdateEstimate(leadId, payload, tenant);
-            logger.info('addEstimate success:', { result });
-            if(payload?.estimateId){
-                return ResponseHandler.successResponse({ message: 'Estimate updated successfully' });
-            }
-            else {
-            return ResponseHandler.createdResponse({ message: 'Estimate added successfully' });
-        }
-        }
-        catch (error: any) {
-            logger.info('addEstimate error:', { error });
-            return ResponseHandler.internalServerErrorResponse({ message: error.message });
-
-        }
-      
-    } catch (error: any) {
-        logger.error('Error occurred in addEstimateHandler', { error });
-        if(error?.message?.includes('Payload Validation Failed')) {
-            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '').trim();
+            await addEstimateDTO(payload);
+        } catch (error: any) {
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
             return ResponseHandler.notFoundResponse({ message: cleanedMessage });
-        } else {
-            return ResponseHandler.badRequestResponse({ message: error.message });
         }
+        logger.info('addEstimateDTO success:');
+        const result = await addOrUpdateEstimate(leadId, payload, tenant);
+        logger.info('addEstimate success:', { result });
+        if(payload?.estimateId){
+            return ResponseHandler.successResponse({ message: getMessage('ESTIMATE_UPDATED') });
+        } else {
+            return ResponseHandler.createdResponse({ message: getMessage('ESTIMATE_ADDED') });
+        }
+    } catch (error: any) {
+        return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

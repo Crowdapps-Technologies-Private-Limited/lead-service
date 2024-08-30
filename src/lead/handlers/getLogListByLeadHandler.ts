@@ -4,6 +4,7 @@ import { getAllLogsByLead } from '../services';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getLogListByLeadHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -13,14 +14,14 @@ export const getLogListByLeadHandler: RouteHandler = async (
         const leadId = event?.pathParameters?.id as string;
         logger.info('Lead ID', { leadId });
         if (!leadId) {
-            return ResponseHandler.badRequestResponse({ message: `Lead ID not provided` });
+            return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
         }
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
         const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
-            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         const queryParams = event.queryStringParameters;
         const pageNumber = queryParams?.page ? parseInt(queryParams?.page as string) : 1;
@@ -30,10 +31,9 @@ export const getLogListByLeadHandler: RouteHandler = async (
 
         // Fetch user list
         const result = await getAllLogsByLead(pageSize, pageNumber, orderBy, orderIn, tenant, leadId);
-        return ResponseHandler.successResponse({ message: 'Log list fetched successfully', data: result });
+        return ResponseHandler.successResponse({ message: getMessage('LEAD_LOG_LIST_FETCHED'), data: result });
     } catch (error: any) {
-        logger.error('Error occurred', { error });
+        logger.error('Error occurred at handler', { error });
         return ResponseHandler.notFoundResponse({ message: error.message });
-        //return ResponseHandler.badRequestResponse({ message: "Something went wrong. Please try later!" });
     }
 };

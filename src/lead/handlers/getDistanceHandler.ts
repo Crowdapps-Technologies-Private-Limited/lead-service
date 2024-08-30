@@ -4,6 +4,7 @@ import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefault
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 import { getDistanceBetweenPostcodes } from '../../utils/googlemap';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getDistanceHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -27,11 +28,11 @@ export const getDistanceHandler: RouteHandler = async (
         if (distance !== null) {
             logger.info(`Distance between ${postcode1} and ${postcode2} is ${distance.toFixed(2)} miles`);
             return ResponseHandler.createdResponse({
-                message: `Distance calculated successfully`,
+                message: getMessage('DISTANCE_CALCULATED'),
                 data: { distance: distance.toFixed(2) },
             });
         } else {
-            throw new Error('Error calculating distance');
+            throw new Error(getMessage('DISTANCE_CALCULATION_FAILED'));
         }
     } catch (error: any) {
         logger.error('Error occurred in getDistanceHandler', { error });

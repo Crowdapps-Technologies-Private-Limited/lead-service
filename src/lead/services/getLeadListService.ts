@@ -85,7 +85,7 @@ export const getAllLeads = async (
     return result;
   } catch (error: any) {
     logger.error('Failed to fetch lead list', { error });
-    throw new Error(`Failed to fetch lead list: ${error.message}`);
+    throw new Error(`${error.message}`);
   } finally {
     try {
       await client.end();

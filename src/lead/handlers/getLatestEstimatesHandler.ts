@@ -5,6 +5,7 @@ import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { generatePdfAndUploadToS3 } from '../services/generatePdf';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getLatestEstimatesHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -17,7 +18,7 @@ export const getLatestEstimatesHandler: RouteHandler = async (
         if (!leadId) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'Lead ID is required in path parameters' }),
+                body: JSON.stringify({ message: getMessage('LEAD_ID_REQUIRED') }),
             };
         }
 
@@ -31,14 +32,14 @@ export const getLatestEstimatesHandler: RouteHandler = async (
         const hasPermission = await checkPermission(user.role, 'Estimate', 'read', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
-            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         const result = await getLatestEstimates(leadId, tenant);
         // const url = await generatePdfAndUploadToS3({ html: '<p>Hello, World</p>', key: 'test.pdf' });
         if (result) {
-            return ResponseHandler.successResponse({ message: 'Estimate fetched successfully', data: result });
+            return ResponseHandler.successResponse({ message: getMessage('ESTIMATE_FETCHED'), data: result });
         } else {
-            return ResponseHandler.notFoundResponse({ message: 'No estimates found' });
+            return ResponseHandler.notFoundResponse({ message: getMessage('ESTIMATE_NOT_FOUND') });
         }
     } catch (error: any) {
         logger.error('Error occurred in getLatestEstimatesHandler', { error });

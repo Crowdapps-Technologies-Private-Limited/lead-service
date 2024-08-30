@@ -7,6 +7,7 @@ import generateEstimateHtml from './generateEstimateHtml';
 import { generateEmail } from '../../utils/generateEmailService';
 import { getLatestQuote } from './getLatestQuotes';
 import generateQuoteHtml from './generateQuoteHtml';
+import { getMessage } from '../../utils/errorMessages';
 
 export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenant: any, action: string) => {
     const client = await connectToDatabase();
@@ -16,7 +17,7 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
 
     try {
         if (tenant?.is_suspended) {
-            throw new Error('Tenant is suspended');
+            throw new Error(getMessage('ACCOUNT_SUSPENDED'));
         }
 
         await client.query(`SET search_path TO ${schema}`);
@@ -25,7 +26,7 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
         const leadCheckResult = await client.query(GET_LEAD_BY_ID, [leadId]);
 
         if (leadCheckResult.rows.length === 0) {
-            throw new Error('Lead not found');
+            throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
         const quotationDoc = 'quotation.pdf';
         // Get quote data
@@ -41,7 +42,7 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
         // Generate PDF
         const pdfUrl = await generatePdfAndUploadToS3({ html, key: quotationDoc });
         if (action === 'pdf') {
-            return { message: 'PDF generated successfully', data: { pdfUrl } };
+            return { message: getMessage('PDF_GENERATED'), data: { pdfUrl } };
         }
         const clientLogin = 'https://mmym-client-dev.crowdapps.info/';
 
@@ -67,10 +68,10 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
             leadCheckResult.rows[0].status,
             leadId,
         ]);
-        return { message: 'Email sent successfully', data: null };
+        return { message: getMessage('EMAIL_SENT'), data: null };
     } catch (error: any) {
         logger.error('Failed to send lead email', { error });
-        throw new Error(`Failed to send lead email: ${error.message}`);
+        throw new Error(`${error.message}`);
     } finally {
         client.end();
     }

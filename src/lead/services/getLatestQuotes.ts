@@ -3,9 +3,9 @@ import logger from '../../utils/logger';
 
 export const getLatestQuote = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
-    if (tenant?.is_suspended) {
-        throw new Error('Tenant is suspended');
-    }
+    // if (tenant?.is_suspended) {
+    //     throw new Error('Tenant is suspended');
+    // }
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
     await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
@@ -136,7 +136,7 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
         };
     } catch (error: any) {
         logger.error('Failed to get latest quote', { error });
-        throw new Error(`Failed to get latest quote: ${error.message}`);
+        throw new Error(`${error.message}`);
     } finally {
         client.end();
     }

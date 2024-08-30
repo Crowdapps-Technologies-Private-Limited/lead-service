@@ -8,6 +8,7 @@ import {
     UPDATE_LEAD_STATUS
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
+import { getMessage } from '../../utils/errorMessages';
 import { generateEmail } from '../../utils/generateEmailService';
 import logger from '../../utils/logger';
 import { toFloat } from '../../utils/utility';
@@ -37,7 +38,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         await client.query('BEGIN');
         // Check if tenant is suspended
         if (tenant?.is_suspended) {
-            throw new Error('Tenant is suspended');
+            throw new Error(getMessage('ACCOUNT_SUSPENDED'));
         }
         await client.query(`SET search_path TO ${schema}`);
         let tableCheckRes: any;
@@ -45,27 +46,27 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);
         if (!tableCheckRes.rows[0].exists) {
             logger.info('Leads table does not exist');
-            throw new Error('Lead not found');
+            throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
         // CHECK IF LEAD EXISTS
         const leadCheckResult = await client.query(`
             SELECT * FROM leads WHERE generated_id = $1
         `, [leadId]);
         if (leadCheckResult.rows.length === 0) {
-            throw new Error('Lead not found');
+            throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
         // Check if surveyor table exists
         tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'staffs']);
         if (!tableCheckRes.rows[0].exists) {
             logger.info('Staffs table does not exist');
-            throw new Error('Surveyor not found');
+            throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
         }
         // CHECK IF SURVEYOR EXISTS
         const surveyorCheckResult = await client.query(`
             SELECT * FROM staffs WHERE staff_id = $1
         `, [surveyorId]);
         if (surveyorCheckResult.rows.length === 0) {
-            throw new Error('Surveyor not found');
+            throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
         }
         await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
         logger.info('Survey and related tables created successfully');
@@ -73,7 +74,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         //Check if an incomplete survey exists for that lead
         const surveyCheckResult = await client.query(CHECK_SURVEY, [leadId]);
         if (surveyCheckResult.rows.length > 0) {
-            throw new Error('Survey already exists');
+            throw new Error(getMessage('SURVEY_EXIST'));
         }
         // Check if the surveyor is available in the given time range
         const surveyorAvailabilityResult = await client.query(CHECK_SURVEYOR_AVAILABILITY, [
@@ -82,7 +83,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             endTime
         ]);
         if (surveyorAvailabilityResult.rows[0].has_conflict) {
-            throw new Error('Surveyor already has a survey in the given time range');
+            throw new Error(getMessage('NO_SURVEYOR_AVAILABILITY'));
         }
         // Assign Surveyor
         // Determine if the surveyor is assigned to the tenant
@@ -116,12 +117,12 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         await generateEmail('Assign Survey', surveyorCheckResult?.rows[0]?.email, { username: surveyorCheckResult?.rows[0]?.name });
         await client.query('COMMIT');
         return { 
-            message: 'Surveyor assigned successfully'
+            message: getMessage('SURVEYOR_ASSIGNED')
         };
     } catch (error: any) {
         await client.query('ROLLBACK');
         logger.error('Failed to add survey', { error });
-        throw new Error(`Failed to add survey: ${error.message}`);
+        throw new Error(`${error.message}`);
     } finally {
         try {
             await client.end();

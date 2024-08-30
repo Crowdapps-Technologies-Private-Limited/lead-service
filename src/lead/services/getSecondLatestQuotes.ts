@@ -1,5 +1,6 @@
 import { GET_LEAD_BY_ID } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
+import { getMessage } from '../../utils/errorMessages';
 import logger from '../../utils/logger';
 import { generatePdfAndUploadToS3 } from './generatePdf';
 import generateQuoteHtml from './generateQuoteHtml';
@@ -7,7 +8,7 @@ import generateQuoteHtml from './generateQuoteHtml';
 export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
     if (tenant?.is_suspended) {
-        throw new Error('Tenant is suspended');
+        throw new Error(getMessage('ACCOUNT_SUSPENDED'));
     }
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
@@ -111,13 +112,13 @@ export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => 
         // Check if lead exists
         const leadCheckResult = await client.query(GET_LEAD_BY_ID, [leadId]);
         if (leadCheckResult.rows.length === 0) {
-            throw new Error('Lead not found');
+            throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
         const quotationDoc = 'Quote_previous.pdf';
         const res = await client.query(query, [leadId]);
         // Manually convert string fields to numbers, if necessary
         if(res.rows.length === 0) {
-            throw new Error('No previous quote found');
+            throw new Error(getMessage('PREV_QUOTE_NOT_FOUND'));
         }
         const data = res.rows[0];
         data.quoteId = data?.quoteid;
@@ -147,7 +148,7 @@ export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => 
         logger.info('html:', { html });
         // Generate PDF
         const pdfUrl = await generatePdfAndUploadToS3({ html, key: quotationDoc });
-        return { message: 'Previous Lead PDF generated successfully', data: { pdfUrl } };
+        return { message: getMessage('PREV_QUOTE_PDF_GENERATED'), data: { pdfUrl } };
     } catch (error: any) {
         logger.error('Failed to download prevoius quote', { error });
         throw new Error(`${error.message}`);

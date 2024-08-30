@@ -56,7 +56,7 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
         await client.query('BEGIN'); // Start transaction
 
         if (tenant?.is_suspended) {
-            throw new Error(getMessage('TENANT_SUSPENDED'));
+            throw new Error(getMessage('ACCOUNT_SUSPENDED'));
         }
 
         await client.query(`SET search_path TO ${schema}`);

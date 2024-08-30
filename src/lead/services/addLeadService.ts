@@ -39,7 +39,7 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         await client.query('BEGIN');
 
         if (tenant?.is_suspended) {
-            throw new Error(getMessage('TENANT_SUSPENDED'));
+            throw new Error(getMessage('ACCOUNT_SUSPENDED'));
         }
 
         await client.query(`SET search_path TO ${schema}`);

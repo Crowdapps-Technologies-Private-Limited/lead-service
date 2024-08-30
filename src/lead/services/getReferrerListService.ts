@@ -12,7 +12,7 @@ export const getAllReferrers = async () => {
     return res.rows || [];
   } catch (error: any) {
     logger.error('Failed to fetch list', { error });
-    throw new Error(`Failed to fetch list: ${error.message}`);
+    throw new Error(`${error.message}`);
   } finally {
     try {
       await client.end();

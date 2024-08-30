@@ -1,5 +1,6 @@
 import { GET_SURVEYS_COUNT, GET_SURVEYS_COUNT_SURVEYOR, GET_SURVEYS_LIST_BASE, GET_SURVEYS_LIST_TENANT, GET_TENANT_SURVEYS_COUNT } from "../../sql/sqlScript";
 import { connectToDatabase } from "../../utils/database";
+import { getMessage } from "../../utils/errorMessages";
 import logger from "../../utils/logger";
 
 export const getAllSurveys = async (
@@ -10,9 +11,9 @@ export const getAllSurveys = async (
     const client = await connectToDatabase();
     
     try {
-        if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
-            throw new Error('Tenant is suspended');
-        }
+        // if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
+        //     throw new Error(getMessage('ACCOUNT_SUSPENDED'));
+        // }
 
         const schema = tenant?.schema || tenant?.tenant?.schema;
         logger.info('Schema:', { schema });
@@ -75,7 +76,7 @@ export const getAllSurveys = async (
         return result;
     } catch (error: any) {
         logger.error(`Failed to fetch surveys list: ${error.message}`);
-        throw new Error(`Failed to fetch surveys list: ${error.message}`);
+        throw new Error(`${error.message}`);
     } finally {
         try {
             await client.end();

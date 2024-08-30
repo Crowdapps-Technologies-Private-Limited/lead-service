@@ -5,6 +5,7 @@ import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { generatePdfAndUploadToS3 } from '../services/generatePdf';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getSecondLatestQuotesHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -17,7 +18,7 @@ export const getSecondLatestQuotesHandler: RouteHandler = async (
         if (!leadId) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'Lead ID is required in path parameters' }),
+                body: JSON.stringify({ message: getMessage('LEAD_ID_REQUIRED') }),
             };
         }
 
@@ -29,13 +30,13 @@ export const getSecondLatestQuotesHandler: RouteHandler = async (
         const hasPermission = await checkPermission(user.role, 'Quotation', 'read', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
-            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         const result = await downloadSecondLatestQuote(leadId, tenant);
         if (result) {
             return ResponseHandler.successResponse({ message: result?.message, data: result?.data });
         } else {
-            return ResponseHandler.notFoundResponse({ message: 'No quote found' });
+            return ResponseHandler.notFoundResponse({ message: getMessage('QUOTE_NOT_FOUND') });
         }
     } catch (error: any) {
         logger.error('Error occurred in getLatestEstimatesHandler', { error });

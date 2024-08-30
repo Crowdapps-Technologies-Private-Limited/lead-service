@@ -1,6 +1,8 @@
+import { get } from 'http';
 import { GET_LEAD_BY_ID, GET_REFERRER_BY_ID, CHECK_TABLE_EXISTS, GET_SURVEY_BY_LEAD } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getLeadById = async (leadId: string, tenant: any) => {
   // Connect to PostgreSQL database
@@ -20,7 +22,7 @@ export const getLeadById = async (leadId: string, tenant: any) => {
     if (!leadsTableExists) {
       logger.info('Leads table does not exist');
       return {
-        message: 'Lead data fetched successfully',
+        message: getMessage('LEAD_NOT_FOUND'),
         data: {}
       };
     }
@@ -66,7 +68,7 @@ export const getLeadById = async (leadId: string, tenant: any) => {
   } catch (error: any) {
     await client.query('ROLLBACK');
     logger.error('Failed to fetch data', { error });
-    throw new Error(`Failed to fetch data: ${error.message}`);
+    throw new Error(`${error.message}`);
   } finally {
     try {
       await client.end();

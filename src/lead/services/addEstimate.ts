@@ -21,6 +21,7 @@ import {
     DELETE_ESTIMATE_ANCILLARIES,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
+import { getMessage } from '../../utils/errorMessages';
 import logger from '../../utils/logger';
 import { AddEstimatePayload } from '../interface';
 
@@ -55,7 +56,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         await client.query('BEGIN'); // Start transaction
 
         if (tenant?.is_suspended) {
-            throw new Error('Tenant is suspended');
+            throw new Error(getMessage('ACCOUNT_SUSPENDED'));
         }
 
         await client.query(`SET search_path TO ${schema}`);
@@ -195,7 +196,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
     } catch (error: any) {
         await client.query('ROLLBACK'); // Rollback transaction on error
         logger.error('Failed to process estimate', { error });
-        throw new Error(`Failed to process estimate: ${error.message}`);
+        throw new Error(`${error.message}`);
     } finally {
         client.end();
     }

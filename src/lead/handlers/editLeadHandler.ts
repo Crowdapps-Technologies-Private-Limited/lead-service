@@ -5,6 +5,7 @@ import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 import {  validateEditLeadDTO } from '../validator';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const editLeadHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -19,14 +20,14 @@ export const editLeadHandler: RouteHandler = async (
         const hasPermission = await checkPermission(user.role, 'Lead', 'update', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
-            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
 
         const leadId = event.pathParameters?.id;
         logger.info('leadId:', { leadId });
 
         if (!leadId) {
-            return ResponseHandler.badRequestResponse({ message: 'Lead ID is required' });
+            return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
         }
 
         // Validate payload
@@ -39,18 +40,9 @@ export const editLeadHandler: RouteHandler = async (
 
         const result = await editLead(leadId, payload, tenant);
 
-        return ResponseHandler.successResponse({ message: 'Lead updated successfully' });
+        return ResponseHandler.successResponse({ message: result?.message });
     }  catch (error: any) {
         logger.error('Error occurred in edit lead handler', { error });
-        if(error?.message?.includes('Payload Validation Failed')) {
-            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
-            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
-        } else if (error?.message?.includes('Lead not found')) {
-            return ResponseHandler.notFoundResponse({ message: "Lead not found!" });
-        } else if(error?.message?.includes('Tenant is suspended')) {
-            return ResponseHandler.badRequestResponse({ message: "Your account is suspended. Kindly ask the admin to reactivate your account!" });
-        } else {
-            return ResponseHandler.badRequestResponse({ message: error.message });
-        }
+        return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

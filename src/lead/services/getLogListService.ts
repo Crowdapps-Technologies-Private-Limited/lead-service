@@ -2,6 +2,7 @@ import { GET_LOG_COUNT, GET_LEAD_BY_ID, CHECK_TABLE_EXISTS } from '../../sql/sql
 import { connectToDatabase } from '../../utils/database';
 import { setPaginationData } from '../../utils/utility';
 import logger from '../../utils/logger';
+import { getMessage } from '../../utils/errorMessages';
 
 const allowedOrderFields: { [key: string]: string } = {
   first_name: 'first_name',
@@ -42,7 +43,7 @@ export const getAllLogsByLead = async (
     // Check if lead exists
     let lead = await client.query(GET_LEAD_BY_ID,[leadId]);
     if(lead.rows.length === 0) {
-      throw new Error(`No data found.`);
+      throw new Error(getMessage('LEAD_NOT_FOUND'));
     }
     // Check if logs table exists
     tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'lead_logs']);
@@ -80,7 +81,7 @@ export const getAllLogsByLead = async (
     return result;
   } catch (error: any) {
     logger.error('Failed to fetch log list', { error });
-    throw new Error(`Failed to fetch log list: ${error.message}`);
+    throw new Error(`${error.message}`);
   } finally {
     try {
       await client.end();

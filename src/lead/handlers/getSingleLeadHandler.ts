@@ -4,6 +4,7 @@ import { getLeadById } from '../services';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getSingleLeadHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -16,21 +17,17 @@ export const getSingleLeadHandler: RouteHandler = async (
         const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
-            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         const leadId = event?.pathParameters?.id as string;
         logger.info('Lead ID', { leadId });
         if (!leadId) {
-            return ResponseHandler.badRequestResponse({ message: `Lead ID not provided` });
+            return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
         }
         const result = await getLeadById(leadId, tenant);
-        return ResponseHandler.successResponse({ message: 'Lead fetched successfully', data: result?.data });
+        return ResponseHandler.successResponse({ message: getMessage('LEAD_FETCHED'), data: result?.data });
     } catch (error: any) {
         logger.error('Error occurred at get single lead', { error });
-        if (error?.message?.includes('No data found')) {
-            return ResponseHandler.notFoundResponse({ message: "Lead not found." });
-        } else {
-            return ResponseHandler.notFoundResponse({ message: error.message });
-        }
+        return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

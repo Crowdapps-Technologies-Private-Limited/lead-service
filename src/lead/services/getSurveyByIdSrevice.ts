@@ -1,13 +1,14 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { GET_SURVEY_DETAILS } from '../../sql/sqlScript';
+import { getMessage } from '../../utils/errorMessages';
 
 export const getSurveyById = async (surveyId: string, tenant: any) => {
     const client = await connectToDatabase();
 
     try {
         if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
-            throw new Error('Tenant is suspended');
+            throw new Error(getMessage('ACCOUNT_SUSPENDED'));
         }
 
         const schema = tenant?.schema || tenant?.tenant?.schema;
@@ -26,7 +27,7 @@ export const getSurveyById = async (surveyId: string, tenant: any) => {
         return result.rows[0];
     } catch (error: any) {
         logger.error(`Failed to fetch survey by ID: ${error.message}`);
-        throw new Error(`Failed to fetch survey by ID: ${error.message}`);
+        throw new Error(`${error.message}`);
     } finally {
         try {
             await client.end();
