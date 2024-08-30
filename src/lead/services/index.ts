@@ -1,3 +1,4 @@
+import { getOwnSurveys } from './getOwnSurveyService';
 import { getLatestEstimates } from './getLatestEstimates ';
 import { addOrUpdateEstimate } from './addEstimate';
 import { addLead } from './addLeadService';
@@ -38,4 +39,5 @@ export {
     getLatestQuote,
     sendQuoteEmailOrPdf,
     downloadSecondLatestQuote,
+    getOwnSurveys
 };
