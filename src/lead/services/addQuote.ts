@@ -21,6 +21,7 @@ import {
     DELETE_QUOTE_ANCILLARIES,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
+import { getMessage } from '../../utils/errorMessages';
 import logger from '../../utils/logger';
 import { AddQuotePayload } from '../interface';
 
@@ -55,7 +56,7 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
         await client.query('BEGIN'); // Start transaction
 
         if (tenant?.is_suspended) {
-            throw new Error('Tenant is suspended');
+            throw new Error(getMessage('TENANT_SUSPENDED'));
         }
 
         await client.query(`SET search_path TO ${schema}`);
@@ -195,8 +196,8 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
         return { message: quoteId ? 'Quote updated successfully' : 'Quote added successfully', quoteId: finalQuoteId };
     } catch (error: any) {
         await client.query('ROLLBACK'); // Rollback transaction on error
-        logger.error('Failed to process estimate', { error });
-        throw new Error(`Failed to process estimate: ${error.message}`);
+        logger.error('Failed to process quote', { error });
+        throw new Error(`${error.message}`);
     } finally {
         client.end();
     }

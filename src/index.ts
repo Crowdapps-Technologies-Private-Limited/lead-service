@@ -9,6 +9,7 @@ import { getUserBySub } from './utils/getCognitoUserBySub';
 import logger from './utils/logger';
 import { getUserProfile } from './utils/getProfileService';
 import { getTenantProfile } from './utils/getTenantProfile';
+import { getMessage } from './utils/errorMessages';
 
 const routes = merge(adminRoutes);
 
@@ -58,21 +59,21 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: 'Your account is deleted. Kindly ask the admin to reactivate your account!' })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_DELETED') })
                 };
             }
             if(clientDetail.is_active === false ){   
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!' })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_NOT_ACTIVE') })
                 };
             }
             if(clientDetail.is_suspended === true){   
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_SUSPENDED') })
                 };
             }
             // Attach userPayload to the request context
@@ -88,21 +89,21 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: 'Your account is deleted. Kindly ask the admin to reactivate your account!' })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_DELETED') })
                 };
             }
             if(clientDetail.tenant.is_active === false && clientDetail.tenant.status !== 'PENDING'){   
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!' })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_NOT_ACTIVE') })
                 };
             }
             if(clientDetail.tenant.is_suspended === true){   
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: 'Your account is suspended. Kindly ask the admin to reactivate your account!' })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_SUSPENDED') })
                 };
             }
 
@@ -111,7 +112,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                     statusCode: 401,
                     headers: defaultHeaders,
                     body: JSON.stringify({
-                        message: 'Your account is deactvated. Kindly ask the admin to reactivate your account!',
+                        message: getMessage('ACCOUNT_NOT_ACTIVE'),
                     }),
                 };
             }
@@ -120,7 +121,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                     statusCode: 401,
                     headers: defaultHeaders,
                     body: JSON.stringify({
-                        message: 'please activate your acount',
+                        message: getMessage('ACCOUNT_PENDING'),
                     }),
                 };
             }
@@ -136,7 +137,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return {
             statusCode: 401,
             headers: defaultHeaders,
-            body: JSON.stringify({ message: 'Token not verified', details: error.message }),
+            body: JSON.stringify({ message: getMessage('TOKEN_INVALID'), details: error.message }),
         };
     }
 

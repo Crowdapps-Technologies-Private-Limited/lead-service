@@ -4,6 +4,7 @@ import { AddLeadPayload } from '../interface';
 import { generateEmail } from '../../utils/generateEmailService';
 import { CREATE_LEAD_TABLE, CREATE_LOG_TABLE, INSERT_LOG, GET_ALL_LEADS } from '../../sql/sqlScript';
 import { isEmptyString, toFloat } from '../../utils/utility';
+import { getMessage } from '../../utils/errorMessages';
 
 export const addLead = async (payload: AddLeadPayload, tenant: any) => {
     const {
@@ -38,7 +39,7 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         await client.query('BEGIN');
 
         if (tenant?.is_suspended) {
-            throw new Error('Tenant is suspended');
+            throw new Error(getMessage('TENANT_SUSPENDED'));
         }
 
         await client.query(`SET search_path TO ${schema}`);
@@ -170,11 +171,11 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         await generateEmail('Add Lead', customer.email, { username: customer.name });
         logger.info('Email sent successfully');
         await client.query('COMMIT');
-        return { message: 'Lead added successfully' };
+        return { message: getMessage('LEAD_ADDED') };
     } catch (error: any) {
         await client.query('ROLLBACK');
         logger.error('Failed to add lead', { error });
-        throw new Error(`Failed to add lead: ${error.message}`);
+        throw new Error(`${error.message}`);
     } finally {
         client.end();
     }

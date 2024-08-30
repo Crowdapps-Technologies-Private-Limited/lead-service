@@ -13,7 +13,7 @@ import logger from '../../utils/logger';
 import { toFloat } from '../../utils/utility';
 import { AssignSurveyorPayload } from '../interface';
 
-export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayload, tenant: any) => {
+export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayload, tenant: any, isTenant: boolean) => {
     logger.info('addSurvey service is running:');
     logger.info('payload:', { payload });
     logger.info('leadId:', { leadId });
@@ -86,7 +86,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         }
         // Assign Surveyor
         // Determine if the surveyor is assigned to the tenant
-        const isTenantAssigned = surveyorId.startsWith('EMP');
+        const isTenantAssigned = !surveyorId.startsWith('EMP');
         await client.query(INSERT_SURVEY, [
             leadId,
             surveyorId,

@@ -5,6 +5,7 @@ import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefault
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const addLeadHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -23,7 +24,7 @@ export const addLeadHandler: RouteHandler = async (
         );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
-            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         // Validate payload
         try {
@@ -32,26 +33,11 @@ export const addLeadHandler: RouteHandler = async (
             const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
             return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         }
-      
 
         const result = await addLead(payload, tenant);
-
-        return ResponseHandler.createdResponse({ message: 'Lead added successfully' });
+        return ResponseHandler.createdResponse({ message: result?.message });
     } catch (error: any) {
         logger.error('Error occurred add lead handler', { error });
-        if (error?.message?.includes('Payload Validation Failed')) {
-            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
-            logger.error('Error occurred add lead handler message', { cleanedMessage });
-            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
-        } else if (error?.message?.includes('Lead already exists with this name')) {
-            return ResponseHandler.notFoundResponse({ message: "Lead already exists with this name!" });
-        } else if (error?.message?.includes('Lead already exists with this email')) {
-            return ResponseHandler.notFoundResponse({ message: "Lead already exists with this email!*-" });
-        } else if (error?.message?.includes('Tenant is suspended')) {
-            return ResponseHandler.badRequestResponse({ message: "Your account is suspended. Kindly ask the admin to reactivate your account!" });
-        } else {
-            return ResponseHandler.notFoundResponse({ message: error.message });
-            //return ResponseHandler.badRequestResponse({ message: "Something went wrong. Please try later!" });
-        }
+        return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

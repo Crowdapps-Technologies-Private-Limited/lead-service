@@ -5,6 +5,7 @@ import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { addOrUpdateQuote } from '../services';
 import { checkPermission } from '../../utils/checkPermission';
+import { getMessage } from '../../utils/errorMessages';
 
 export const addQuoteHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
@@ -20,7 +21,7 @@ export const addQuoteHandler: RouteHandler = async (
         if (!leadId) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'Lead ID is required in path parameters' })
+                body: JSON.stringify({ message: getMessage('LEAD_ID_REQUIRED') }),
             };
         }
 
@@ -35,34 +36,27 @@ export const addQuoteHandler: RouteHandler = async (
         );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
-            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         // Validate payload
-        await addQuoteDTO(payload);
-        logger.info('addQuoteDTO success:');
         try {
-            const result = await addOrUpdateQuote(leadId, payload, tenant);
-            logger.info('add or edit quote success:', { result });
-            if(payload?.quoteId){
-                return ResponseHandler.successResponse({ message: 'Quote updated successfully' });
-            }
-            else {
-            return ResponseHandler.createdResponse({ message: 'Quote added successfully' });
+            await addQuoteDTO(payload);
+        } catch (error: any) {
+            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
+            return ResponseHandler.badRequestResponse({ message: cleanedMessage });
         }
+        logger.info('addQuoteDTO success:');
+        const result = await addOrUpdateQuote(leadId, payload, tenant);
+        logger.info('add or edit quote success:', { result });
+        if(payload?.quoteId){
+            return ResponseHandler.successResponse({ message: getMessage('QUOTE_UPDATED') });
         }
-        catch (error: any) {
-            logger.info('addQuote error:', { error });
-            return ResponseHandler.internalServerErrorResponse({ message: error.message });
-
+        else {
+            return ResponseHandler.createdResponse({ message: getMessage('QUOTE_ADDED') });
         }
       
     } catch (error: any) {
         logger.error('Error occurred in addQuoteHandler', { error });
-        if(error?.message?.includes('Payload Validation Failed')) {
-            const cleanedMessage = error.message.replace('Payload Validation Failed: ', '').trim();
-            return ResponseHandler.notFoundResponse({ message: cleanedMessage });
-        } else {
-            return ResponseHandler.badRequestResponse({ message: error.message });
-        }
+        return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };
