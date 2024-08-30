@@ -706,7 +706,9 @@ export const GET_SURVEYS_LIST_TENANT = `
         s.start_time,
         s.end_time,
         s.description,
-        s.status
+        s.status,
+        'tenant' AS "surveyorName",
+        true AS "is_tenant_assigned"
     FROM 
         surveys s
     LEFT JOIN leads l ON s.lead_id = l.generated_id

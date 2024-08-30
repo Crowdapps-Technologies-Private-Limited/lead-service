@@ -1,4 +1,8 @@
-import { GET_SURVEYS_COUNT, GET_SURVEYS_COUNT_SURVEYOR, GET_SURVEYS_LIST_BASE, GET_SURVEYS_LIST_TENANT, GET_TENANT_SURVEYS_COUNT } from "../../sql/sqlScript";
+import { 
+    GET_SURVEYS_COUNT, 
+    GET_SURVEYS_LIST_BASE, 
+    GET_SURVEYS_LIST_TENANT, 
+} from "../../sql/sqlScript";
 import { connectToDatabase } from "../../utils/database";
 import { getMessage } from "../../utils/errorMessages";
 import logger from "../../utils/logger";
@@ -19,6 +23,9 @@ export const getAllSurveys = async (
         logger.info('Schema:', { schema });
         await client.query(`SET search_path TO ${schema}`);
 
+        // Start transaction
+        await client.query('BEGIN');
+
         // Define time filter conditions
         let timeFilter = '';
         if (filterBy === 'monthly') {
@@ -29,52 +36,42 @@ export const getAllSurveys = async (
             timeFilter = `AND date_trunc('day', s.start_time) = current_date`;
         }
 
-        let result: any;
+        // Fetch surveys count
+        const countResult = await client.query(`${GET_SURVEYS_COUNT} ${timeFilter}`);
+        const count = countResult.rows[0]?.count || 0;
+        logger.info('Fetching surveys count', { count });
+
+        // Fetch surveys list for tenant
+        const tenantQuery = `
+            ${GET_SURVEYS_LIST_TENANT}
+            ${timeFilter}
+        `;
+        const tenantSurveys = await client.query(tenantQuery);
+        const result1 = tenantSurveys.rows || [];
+        logger.info('Fetching tenant surveys list', { count: result1 });
+
+        // Fetch surveys list for surveyor or other roles
+        const surveyorQuery = `
+            ${GET_SURVEYS_LIST_BASE}
+            ${timeFilter}
+        `;
+        const surveyorSurveys = await client.query(surveyorQuery);
+        const result2 = surveyorSurveys.rows || [];
+        logger.info('Fetching surveyor surveys list', { count: result2 });
+
+        // Combine the results
+        const combinedResult = {
+            count: count,
+            list: [...result1, ...result2]
+        };
+
+        // Commit transaction
+        await client.query('COMMIT');
         
-        if (isTenant) {
-            // Logic for client
-
-            // Fetch surveys count
-            const resultCount = await client.query(`${GET_TENANT_SURVEYS_COUNT} ${timeFilter}`);
-
-            // Construct the final query with time filter
-            const finalQuery = `
-                ${GET_SURVEYS_LIST_TENANT}
-                ${timeFilter}
-            `;
-
-            // Fetch surveys list
-            const res = await client.query(finalQuery);
-
-            logger.info('Fetching surveys list');
-
-            result = {
-                list: res.rows || []
-            };
-        } else {
-            // Logic for surveyor
-
-            // Fetch surveys count
-            const resultCount = await client.query(`${GET_SURVEYS_COUNT_SURVEYOR} ${timeFilter}`, [tenant?.staff_id]);
-
-            // Construct the final query with time filter
-            const finalQuery = `
-                ${GET_SURVEYS_LIST_BASE}
-                ${timeFilter}
-                AND s.surveyor_id = $1
-            `;
-
-            // Fetch surveys list
-            const res = await client.query(finalQuery, [tenant?.staff_id]);
-
-            logger.info('Fetching surveys list');
-
-            result = {
-                list: res.rows || []
-            };
-        }
-        return result;
+        return combinedResult;
     } catch (error: any) {
+        // Rollback transaction in case of an error
+        await client.query('ROLLBACK');
         logger.error(`Failed to fetch surveys list: ${error.message}`);
         throw new Error(`${error.message}`);
     } finally {

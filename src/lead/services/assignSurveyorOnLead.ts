@@ -62,12 +62,18 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
         }
         // CHECK IF SURVEYOR EXISTS
-        const surveyorCheckResult = await client.query(`
+        let surveyorCheckResult
+        if(surveyorId.startsWith('EMP')){
+         surveyorCheckResult = await client.query(`
             SELECT * FROM staffs WHERE staff_id = $1
         `, [surveyorId]);
         if (surveyorCheckResult.rows.length === 0) {
             throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
         }
+    }
+    else if(surveyorId !== tenant.id){
+        throw new Error('Surveyor not found');
+    }
         await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
         logger.info('Survey and related tables created successfully');
 
@@ -114,7 +120,11 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         ]);
         logger.info('Log inserted successfully');
         // Send nofitication to surveyor on email
+        if(surveyorId.startsWith('EMP'))
+        {
         await generateEmail('Assign Survey', surveyorCheckResult?.rows[0]?.email, { username: surveyorCheckResult?.rows[0]?.name });
+    }
+   
         await client.query('COMMIT');
         return { 
             message: getMessage('SURVEYOR_ASSIGNED')

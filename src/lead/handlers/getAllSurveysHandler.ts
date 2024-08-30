@@ -2,7 +2,7 @@ import { ResponseHandler } from '../../utils/ResponseHandler';
 import { APIGatewayProxyEventBase, APIGatewayProxyResult, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
-import { getAllSurveys } from '../services';
+import { getAllSurveys, getOwnSurveys } from '../services';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 
@@ -26,11 +26,19 @@ export const getAllSurveysHandler: RouteHandler = async (
     try {
         const queryParams = event.queryStringParameters;
         const filterBy = queryParams?.filterBy || 'monthly';  // New search parameter
+        const all = queryParams?.all 
 
         // Fetch surveys list
-        const result = await getAllSurveys(tenant, isTenant, filterBy);
+        if (all) {
+            const result = await getAllSurveys(tenant, isTenant, filterBy);
+            return ResponseHandler.successResponse({ message: 'Surveys list fetched successfully', data: result });
+        }
+        else{
+        const result = await getOwnSurveys(tenant, isTenant, filterBy);
+        return ResponseHandler.successResponse({ message: 'Surveys list fetched successfully', data: result });
 
-        return ResponseHandler.successResponse({ message: getMessage('SURVEY_LIST_FETCHED'), data: result });
+        }
+        
     } catch (error: any) {
         logger.error('Failed to fetch surveys list', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });
