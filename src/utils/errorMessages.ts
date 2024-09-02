@@ -91,6 +91,10 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return "Survey ID is required in path parameters.";
         case "TEMPLATE_NO_FOUND": 
             return "Email template not found.";
+        case "NOT_VALID_START_TIME":
+            return `Survey start time must be before the lead's packing on date or moving on date`;
+        case "NOT_VALID_END_TIME":
+            return `Survey end time must be before the lead's packing on date or moving on date`;
 
         default:
         return "";

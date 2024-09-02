@@ -67,13 +67,13 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
          surveyorCheckResult = await client.query(`
             SELECT * FROM staffs WHERE staff_id = $1
         `, [surveyorId]);
-        if (surveyorCheckResult.rows.length === 0) {
-            throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
+            if (surveyorCheckResult.rows.length === 0) {
+                throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
+            }
         }
-    }
-    else if(surveyorId !== tenant.id){
-        throw new Error('Surveyor not found');
-    }
+        else if(surveyorId !== tenant.id){
+            throw new Error('Surveyor not found');
+        }
         await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
         logger.info('Survey and related tables created successfully');
 
@@ -90,6 +90,16 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         ]);
         if (surveyorAvailabilityResult.rows[0].has_conflict) {
             throw new Error(getMessage('NO_SURVEYOR_AVAILABILITY'));
+        }
+        // Check if the survey date (start and end time) is before the lead's packing_on or moving_on date
+        const leadPackingOn = new Date(leadCheckResult.rows[0].packing_on);
+        const leadMovingOn = new Date(leadCheckResult.rows[0].moving_on);
+
+        if (new Date(startTime as string) > leadPackingOn || new Date(startTime as string) > leadMovingOn) {
+            throw new Error(getMessage('NOT_VALID_START_TIME'));
+        }
+        if (new Date(endTime as string) > leadPackingOn || new Date(endTime as string) > leadMovingOn) {
+            throw new Error(getMessage('NOT_VALID_END_TIME'));
         }
         // Assign Surveyor
         // Determine if the surveyor is assigned to the tenant
