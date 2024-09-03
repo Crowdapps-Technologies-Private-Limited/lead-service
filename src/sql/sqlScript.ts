@@ -152,7 +152,7 @@ WHERE
 `;
 
 export const GET_SURVEY_BY_LEAD = `
-SELECT id, lead_id
+SELECT id, lead_id, status
 FROM surveys 
 WHERE lead_id = $1
 ORDER BY created_at DESC 

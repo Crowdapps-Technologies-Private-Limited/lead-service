@@ -48,7 +48,7 @@ export const getLeadById = async (leadId: string, tenant: any) => {
       }
     }
     lead.survey_id = surveyId;
-    lead.surveyStatus = surveyStatus;
+    lead.survey_status = surveyStatus;
     // Get the referrer by ID
     const referrerResult = await client.query(GET_REFERRER_BY_ID, [lead.referrer_id]);
     const referrer = referrerResult.rows[0] || {};
