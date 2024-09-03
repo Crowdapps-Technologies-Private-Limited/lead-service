@@ -31,20 +31,24 @@ export const getLeadById = async (leadId: string, tenant: any) => {
     const leadResult = await client.query(GET_LEAD_BY_ID, [leadId]);
     const lead = leadResult.rows[0] || {};
     let surveyId = null;
+    let surveyStatus = null;
     // Check survey table exists
     tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'surveys']);
     const checkTableExists = tableCheckRes.rows[0].exists;
     if (!checkTableExists) {
       logger.info('Leads table does not exist');
       surveyId = null;
+      surveyStatus = null;
     } else {
       //Get survey by lead id
       const surveyResult = await client.query(GET_SURVEY_BY_LEAD, [leadId]);
       if(surveyResult.rows.length > 0) {
         surveyId = surveyResult.rows[0].id;
+        surveyStatus = surveyResult.rows[0].status;
       }
     }
     lead.survey_id = surveyId;
+    lead.surveyStatus = surveyStatus;
     // Get the referrer by ID
     const referrerResult = await client.query(GET_REFERRER_BY_ID, [lead.referrer_id]);
     const referrer = referrerResult.rows[0] || {};
