@@ -130,7 +130,7 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
         const totalCount = await client.query(countQuery, [leadId]);
         return {
             data: {
-                record: data,
+                ...data,
                 count: totalCount.rows[0].count
             }
         };

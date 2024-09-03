@@ -1003,7 +1003,7 @@ export const DELETE_QUOTE_SERVICES = `
 
 export const DELETE_QUOTE_MATERIALS = `
     DELETE FROM quote_materials
-    WHERE equote_id = $1;
+    WHERE quote_id = $1;
 `;
 
 
@@ -1021,7 +1021,7 @@ export const DELETE_QUOTE_GENERAL_INFO = `
 
 export const DELETE_QUOTE_ANCILLARIES = `
     DELETE FROM quote_ancillaries
-    WHERE equote_id = $1;
+    WHERE quote_id = $1;
 `;
 
 export const UPDATE_QUOTE = `
