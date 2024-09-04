@@ -51,12 +51,12 @@ export const createConfigGetter = () => {
                 config[key] = parameter.Value;
             }
         });
-        config.database="mydatabase";
-        config.host="ec2-18-133-79-169.eu-west-2.compute.amazonaws.com";
+        config.database="postgres";
+        config.host="ec2-35-179-135-196.eu-west-2.compute.amazonaws.com";
         config.port="5432";
         config.region="eu-west-2";
-        config.user="myuser";
-        config.s3BucketName="dev-mmym-files";
+        config.user="postgres";
+        config.s3BucketName="dev-mmym-files-chs";
         return config;
     };
 

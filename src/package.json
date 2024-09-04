@@ -11,9 +11,9 @@
     "lint": "eslint '*.ts' --quiet --fix",
     "compile": "tsc",
     "test": "npm run compile && npm run unit",
-    "build": "cd ../ && sam build --profile mymm",
-    "package": "npm run build && cd ../ && sam package --profile mmym",
-    "deploy": "npm run package && cd ../ && sam deploy --profile mmym"
+    "build": "cd ../ && sam build --profile dev-mmym",
+    "package": "npm run build && cd ../ && sam package --profile dev-mmym",
+    "deploy": "npm run package && cd ../ && sam deploy --profile dev-mmym"
   },
   "dependencies": {
     "aws-lambda": "^1.0.7",
