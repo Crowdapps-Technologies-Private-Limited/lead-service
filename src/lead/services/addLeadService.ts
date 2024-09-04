@@ -6,6 +6,14 @@ import { CREATE_LEAD_TABLE, CREATE_LOG_TABLE, INSERT_LOG, GET_ALL_LEADS } from '
 import { isEmptyString, toFloat } from '../../utils/utility';
 import { getMessage } from '../../utils/errorMessages';
 
+const isAddressEmpty = (address: any) => {
+    return isEmptyString(address.street) &&
+        isEmptyString(address.town) &&
+        isEmptyString(address.county) &&
+        isEmptyString(address.postcode) &&
+        isEmptyString(address.country);
+};
+
 export const addLead = async (payload: AddLeadPayload, tenant: any) => {
     const {
         referrerId,
@@ -69,59 +77,58 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         logger.info('Referrer ID:', { referrerId });
         logger.info('Collection Address:', { collectionAddress });
         logger.info('Delivery Address:', { deliveryAddress });
-        // Check if collection address exists
-        let collectionAddressId;
-        try {
-        const collectionAddressCheckResult = await client.query(`
-            SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
-        `, [collectionAddress.street, collectionAddress.town, collectionAddress.postcode]);
 
-        if (collectionAddressCheckResult.rows.length > 0) {
-            collectionAddressId = collectionAddressCheckResult.rows[0].id;
-        } else {
-            const collectionAddressResult = await client.query(`
-                INSERT INTO addresses (street, town, county, postcode, country)
-                VALUES ($1, $2, $3, $4, $5) RETURNING id
-            `, [
-                collectionAddress.street,
-                collectionAddress.town,
-                collectionAddress.county,
-                collectionAddress.postcode,
-                collectionAddress.country
-            ]);
-            collectionAddressId = collectionAddressResult.rows[0].id;
-        }
-    } catch (error:any) {
-        logger.error('Failed to add collection address', { error });
-        throw new Error(`Failed to add collection address: ${error.message}`);
-    }
-        // Check if delivery address exists
-        let deliveryAddressId;
-        try {
-        const deliveryAddressCheckResult = await client.query(`
-            SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3
-        `, [deliveryAddress.street, deliveryAddress.town, deliveryAddress.postcode]);
+        // Check if collection address is not empty and exists
+        let collectionAddressId = null;
+        if (!isAddressEmpty(collectionAddress)) {
+            const collectionAddressCheckResult = await client.query(`
+                SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3 AND country = $4 AND county = $5
+            `, [collectionAddress.street, collectionAddress.town, collectionAddress.postcode, collectionAddress.country, collectionAddress.county]);
 
-        if (deliveryAddressCheckResult.rows.length > 0) {
-            deliveryAddressId = deliveryAddressCheckResult.rows[0].id;
+            if (collectionAddressCheckResult.rows.length > 0) {
+                collectionAddressId = collectionAddressCheckResult.rows[0].id;
+            } else {
+                const collectionAddressResult = await client.query(`
+                    INSERT INTO addresses (street, town, county, postcode, country)
+                    VALUES ($1, $2, $3, $4, $5) RETURNING id
+                `, [
+                    collectionAddress.street,
+                    collectionAddress.town,
+                    collectionAddress.county,
+                    collectionAddress.postcode,
+                    collectionAddress.country
+                ]);
+                collectionAddressId = collectionAddressResult.rows[0].id;
+            }
         } else {
-            const deliveryAddressResult = await client.query(`
-                INSERT INTO addresses (street, town, county, postcode, country)
-                VALUES ($1, $2, $3, $4, $5) RETURNING id
-            `, [
-                deliveryAddress.street,
-                deliveryAddress.town,
-                deliveryAddress.county,
-                deliveryAddress.postcode,
-                deliveryAddress.country
-            ]);
-            deliveryAddressId = deliveryAddressResult.rows[0].id;
+            logger.warn('Collection address is empty, no address record created.');
         }
-    }
-    catch (error:any) {
-        logger.error('Failed to add delivery address', { error });
-        throw new Error(`Failed to add delivery address: ${error.message}`);
-    }
+
+        // Check if delivery address is not empty and exists
+        let deliveryAddressId = null;
+        if (!isAddressEmpty(deliveryAddress)) {
+            const deliveryAddressCheckResult = await client.query(`
+                SELECT id FROM addresses WHERE street = $1 AND town = $2 AND postcode = $3 AND country = $4 AND county = $5
+            `, [deliveryAddress.street, deliveryAddress.town, deliveryAddress.postcode, deliveryAddress.country, deliveryAddress.county]);
+
+            if (deliveryAddressCheckResult.rows.length > 0) {
+                deliveryAddressId = deliveryAddressCheckResult.rows[0].id;
+            } else {
+                const deliveryAddressResult = await client.query(`
+                    INSERT INTO addresses (street, town, county, postcode, country)
+                    VALUES ($1, $2, $3, $4, $5) RETURNING id
+                `, [
+                    deliveryAddress.street,
+                    deliveryAddress.town,
+                    deliveryAddress.county,
+                    deliveryAddress.postcode,
+                    deliveryAddress.country
+                ]);
+                deliveryAddressId = deliveryAddressResult.rows[0].id;
+            }
+        } else {
+            logger.warn('Delivery address is empty, no address record created.');
+        }
 
         // Generate new lead ID
         let newGeneratedId;
@@ -155,6 +162,7 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         ]);
 
         logger.info('Lead added successfully');
+
         // Insert log
         await client.query(CREATE_LOG_TABLE);
         await client.query(INSERT_LOG, [
@@ -167,9 +175,11 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             newGeneratedId
         ]);
         logger.info('Log added successfully');
+
         // Send email notification
         await generateEmail('Add Lead', customer.email, { username: customer.name });
         logger.info('Email sent successfully');
+
         await client.query('COMMIT');
         return { message: getMessage('LEAD_ADDED') };
     } catch (error: any) {
