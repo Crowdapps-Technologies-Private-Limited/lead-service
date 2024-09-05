@@ -4,6 +4,7 @@ import logger from './logger';
 import { connectToDatabase } from './database';
 import { GET_TENANT_BY_ID, SELECT_COMPANY_INFO } from '../sql/sqlScript';
 import { checkSubscriptionStatus } from './checkSubscription';
+import { getconfigSecrets } from './getConfig';
 
 const s3 = new AWS.S3();
 
@@ -26,7 +27,16 @@ export const getTenantProfile = async (userId: string) => {
         user.logo = company.rows[0].logo;
         user.phoneNumber = company.rows[0].phone_number;
         user.transportCode = company.rows[0].transport_code;
+        if (user.logo) {
+            const config = await getconfigSecrets();
 
+            // Generate signed URL for the photo
+            user.logo = s3.getSignedUrl('getObject', {
+                Bucket: config.s3BucketName,
+                Key: user.logo,
+                Expires: 60 * 60, // URL expires in 1 hour
+            });
+        }
         logger.info('User profile final  :', { user });
         return user;
     } catch (error: any) {
