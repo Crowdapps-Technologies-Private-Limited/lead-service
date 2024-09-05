@@ -1,8 +1,6 @@
-import { INSERT_GENERAL_INFO } from './../sql/sqlScript';
 import axios from 'axios';
 import { getconfigSecrets } from './getConfig';
 import logger from './logger';
-import { Number } from 'aws-sdk/clients/iot';
 
 interface Coordinates {
     lat: number;
@@ -65,8 +63,11 @@ export const getDistanceBetweenPostcodes = async (originPostcode: string, destin
             throw new Error(`Error with the distance calculation: ${distanceInfo.status}`);
         }
 
-        const distanceInKm = parseFloat(distanceInfo.distance.text.split(' ')[0]);
-        const distanceInMiles = distanceInKm * kilometersToMilesConversionFactor;
+        // const distanceInKm = parseFloat(distanceInfo.distance.text.split(' ')[0]);
+        // const distanceInMiles = distanceInKm * kilometersToMilesConversionFactor;
+        // Use the 'value' field, which is in meters, to avoid parsing issues
+        const distanceInMeters = distanceInfo.distance.value;
+        const distanceInMiles = (distanceInMeters / 1000) * kilometersToMilesConversionFactor;
 
         return distanceInMiles;
     } catch (error: any) {

@@ -643,6 +643,11 @@ export const GET_SURVEY_DETAILS = `
         c.name AS "customerName",
         c.phone AS "customerPhone",
         c.email AS "customerEmail",
+        coll_addr.street AS "collectionStreet",
+        coll_addr.town AS "collectionTown",
+        coll_addr.county AS "collectionCounty",
+        coll_addr.postcode AS "collectionPostcode",
+        coll_addr.country AS "collectionCountry",
         s.surveyor_id,
         st.name AS "surveyorName",
         st.email AS "surveyorEmail",
@@ -658,6 +663,7 @@ export const GET_SURVEY_DETAILS = `
     LEFT JOIN leads l ON s.lead_id = l.generated_id
     LEFT JOIN customers c ON l.customer_id = c.id
     LEFT JOIN staffs st ON s.surveyor_id = st.staff_id
+    LEFT JOIN addresses coll_addr ON coll_addr.id = l.collection_address_id
     WHERE 
         s.id = $1
 `;

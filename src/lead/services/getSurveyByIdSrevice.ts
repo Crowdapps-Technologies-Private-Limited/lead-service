@@ -23,8 +23,25 @@ export const getSurveyById = async (surveyId: string, tenant: any) => {
         if (result.rowCount === 0) {
             return null; // Survey not found
         }
-
-        return result.rows[0];
+        const survey = result.rows[0];
+        let description = `Client Email: ${survey?.customerEmail}`;
+        if (survey?.collectionStreet) {
+            description += `\nAddress: ${survey.collectionStreet}`;
+        }
+        if (survey?.collectionTown) {
+            description += `\nTown: ${survey.collectionTown}`;
+        }
+        if (survey?.collectionCountry) {
+            description += `\nCountry: ${survey.collectionCountry}`;
+        }
+        if (survey?.collectionPostcode) {
+            description += `\nPostcode: ${survey.collectionPostcode}`;
+        }
+        if (survey?.customerPhone) {
+            description += `\nMobile: ${survey.customerPhone}`;
+        }
+        survey.description = description;
+        return survey;
     } catch (error: any) {
         logger.error(`Failed to fetch survey by ID: ${error.message}`);
         throw new Error(`${error.message}`);
