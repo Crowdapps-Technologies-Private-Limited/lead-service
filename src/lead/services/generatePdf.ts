@@ -9,7 +9,7 @@ interface GeneratePdfOptions {
 }
 
 const API2PDF_ENDPOINT = 'https://v2.api2pdf.com/chrome/pdf/html';
-const API2PDF_API_KEY = '7e71a4e6-18d6-4bac-b671-045580714d49'; // Replace with your actual API key
+const API2PDF_API_KEY = '766d71f8-6bf6-4362-a1f6-f97039f75cef'; // Replace with your actual API key
 
 export const generatePdfAndUploadToS3 = async (options: GeneratePdfOptions): Promise<string> => {
     const { html, key } = options;
