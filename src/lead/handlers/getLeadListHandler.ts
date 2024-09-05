@@ -13,7 +13,6 @@ export const getLeadListHandler: RouteHandler = async (
     try {
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
-        const isTenant = (event.requestContext as any).isTenant;
         const hasPermission = await checkPermission(user.role, 'Lead', 'read', tenant?.schema || tenant?.tenant?.schema);
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
@@ -27,7 +26,7 @@ export const getLeadListHandler: RouteHandler = async (
         const search = queryParams?.search || '';  // New search parameter
 
         // Fetch user list
-        const result = await getAllLeads(pageSize, pageNumber, orderBy, orderIn, search, tenant, isTenant);
+        const result = await getAllLeads(pageSize, pageNumber, orderBy, orderIn, search, tenant);
         return ResponseHandler.successResponse({ message: getMessage('LEAD_LIST_FETCHED'), data: result });
     } catch (error: any) {
         logger.error('Error occurred', { error });
