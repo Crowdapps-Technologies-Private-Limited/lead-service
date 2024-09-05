@@ -60,6 +60,17 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         }
 
         await client.query(`SET search_path TO ${schema}`);
+        const leadCheckResult = await client.query(`
+            SELECT * FROM leads WHERE generated_id = $1
+        `, [leadId]);
+
+        if (leadCheckResult.rows.length === 0) {
+            throw new Error(getMessage('LEAD_NOT_FOUND'));
+        }
+        const status = ['NEW', 'ESTIMATES'];
+        if(!status.includes(leadCheckResult.rows[0].status)) {
+            throw new Error(getMessage('LEAD_STATUS_NOT_ALLOWED'));
+        }
         await client.query(CREATE_ESTIMATE_AND_RELATED_TABLE);
         logger.info('Estimate and related tables created successfully');
 

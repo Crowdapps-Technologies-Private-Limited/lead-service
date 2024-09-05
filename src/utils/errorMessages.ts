@@ -74,6 +74,8 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return "No previous quotation found.";
         case "PREV_QUOTE_PDF_GENERATED":
             return "Previous quotation PDF of the lead generated successfully.";
+        case "LEAD_STATUS_NOT_ALLOWED":
+            return "Lead is not allowed for this operation as stage already passed.";
 
         case "SURVEYOR_NOT_FOUND":
             return 'Surveyor not found.';
