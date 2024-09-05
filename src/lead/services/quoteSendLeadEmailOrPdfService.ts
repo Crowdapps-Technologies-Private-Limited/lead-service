@@ -36,7 +36,7 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
         const html = await generateQuoteHtml({
             client: tenant,
             lead: leadCheckResult.rows[0],
-            quote: quoteData,
+            quote: quoteData.data,
         });
         logger.info('html:', { html });
         // Generate PDF
