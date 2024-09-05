@@ -118,12 +118,12 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
             const materialResult = await client.query(INSERT_MATERIAL, [
                 material.name,
                 material.dimensions || null,
-                material.surveyedQty || null,
-                material.chargeQty || null,
-                material.price || null,
-                material.total || null,
-                material.volume || null,
-                material.cost || null,
+                material.surveyedQty || 0,
+                material.chargeQty || 0,
+                material.price || 0,
+                material.total || 0,
+                material.volume || 0,
+                material.cost || 0,
             ]);
             const materialId = materialResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_MATERIAL, [finalEstimateId, materialId]);
@@ -133,13 +133,13 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         // Handle Costs
         for (const cost of costs) {
             const costResult = await client.query(INSERT_COST, [
-                cost.driverQty || null,
-                cost.porterQty || null,
-                cost.packerQty || null,
-                cost.vehicleQty || null,
+                cost.driverQty || 0,
+                cost.porterQty || 0,
+                cost.packerQty || 0,
+                cost.vehicleQty || 0,
                 cost.vehicleTypeId || null,
-                cost.wageCharge || null,
-                cost.fuelCharge || null,
+                cost.wageCharge || 0,
+                cost.fuelCharge || 0,
             ]);
             const costId = costResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_COST, [finalEstimateId, costId]);
@@ -149,9 +149,9 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         // Handle General Info
         for (const info of generalInfo) {
             const infoResult = await client.query(INSERT_GENERAL_INFO, [
-                info.driverWage || null,
-                info.porterWage || null,
-                info.packerWage || null,
+                info.driverWage || 0,
+                info.porterWage || 0,
+                info.packerWage || 0,
                 info.contentsValue || null,
                 info.paymentMethod || null,
                 info.insuranceAmount || null,
@@ -167,7 +167,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         for (const ancillary of ancillaries) {
             const ancillaryResult = await client.query(INSERT_ANCILLARY, [
                 ancillary.name,
-                ancillary.charge || null,
+                ancillary.charge || 0,
                 ancillary.isChargeable || null,
             ]);
             const ancillaryId = ancillaryResult.rows[0].id;
