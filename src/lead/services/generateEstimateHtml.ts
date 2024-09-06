@@ -152,7 +152,7 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
             <div>
                 <p><strong>Client ID:</strong> ${lead?.generated_id}</p>
                 <p><strong>Date:</strong> ${createdAtFormatted}</p>
-                <p><strong>Volume:</strong> ${lead?.collection_volume} m<sup>3</sup></p>
+                <p><strong>Volume:</strong> ${lead?.collection_volume} ${lead?.collection_volume_unit}<sup>3</sup></p>
                 <p><strong>Quote Expires On:</strong> ${quoteExpiresOnFormatted}</p>
             </div>
         </div>
