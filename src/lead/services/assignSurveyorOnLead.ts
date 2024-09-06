@@ -72,7 +72,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             }
         }
         else if(surveyorId !== tenant.id){
-            throw new Error('Surveyor not found');
+            throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
         }
         await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
         logger.info('Survey and related tables created successfully');
@@ -80,7 +80,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         //Check if an incomplete survey exists for that lead
         const surveyCheckResult = await client.query(CHECK_SURVEY, [leadId]);
         if (surveyCheckResult.rows.length > 0) {
-            throw new Error(getMessage('SURVEY_EXIST'));
+            throw new Error(getMessage('LEAD_SURVEY_EXIST'));
         }
         // Check if the surveyor is available in the given time range
         const surveyorAvailabilityResult = await client.query(CHECK_SURVEYOR_AVAILABILITY, [
