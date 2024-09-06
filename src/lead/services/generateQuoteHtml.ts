@@ -50,9 +50,9 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
             (material: Material) => `
         <tr>
             <td>${material.name}</td>
-            <td>${material.chargeQty}</td>
+            <td>${material.surveyedQty}</td>
             <td>£ ${material.price}</td>
-            <td>£ ${material.total}</td>
+            <td>£ ${material.cost}</td>
         </tr>
     `,
         )
