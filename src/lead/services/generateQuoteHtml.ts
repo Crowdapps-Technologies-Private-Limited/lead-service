@@ -58,6 +58,8 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
         )
         .join('');
 
+    const logoHtml = client?.logo ? `<img src="${client?.logo}" alt="Company Logo" style="max-height: 60px;">` : '';
+
     const servicesHtml = quote?.services
         ?.map(
             (service: Service) => `
@@ -130,11 +132,11 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
         <div class="header">
         <div class="company_detail">
             <div class="logo">
-                <img src="${client?.logo}" alt="Company Logo" style="max-height: 60px;">
+                ${logoHtml}
             </div>
             <div class="company-info">
                 <p>${client.name && client.name !== ""? client.name : ""}</p>
-                <p>Email: ${client.address && client.address !== ""? client.address : ""}${client.postCode && client.postCode !== ""? ", " + client.postCode : ""}</p>
+                <p>Address: ${client.address && client.address !== ""? client.address : ""}${client.postCode && client.postCode !== ""? ", " + client.postCode : ""}</p>
                 <p>Email: ${client.email && client.email !== ""? client.email : ""}</p>
                 <p>Website: ${client.general_website && client.general_website !== ""? client.general_website : ""}</p>
             </div>
@@ -152,7 +154,7 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
             <div>
                 <p><strong>Client ID:</strong> ${lead?.generated_id}</p>
                 <p><strong>Date:</strong> ${createdAtFormatted}</p>
-                <p><strong>Volume:</strong> ${lead?.collection_volume} ${lead?.collection_volume_unit}<sup>3</sup></p>
+                <p><strong>Volume:</strong> ${lead?.collection_volume} ${lead?.collection_volume_unit === 'm3' ? ' m' : ' ft'}<sup>3</sup></p>
                 <p><strong>Quote Expires On:</strong> ${quoteExpiresOnFormatted}</p>
             </div>
         </div>

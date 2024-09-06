@@ -1,4 +1,6 @@
+import { CHECK_TABLE_EXISTS } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
+import { getMessage } from '../../utils/errorMessages';
 import logger from '../../utils/logger';
 
 export const getLatestQuote = async (leadId: string, tenant: any) => {
@@ -12,7 +14,15 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
     logger.info('Schema created successfully');
     await client.query(`SET search_path TO ${schema}`);
     logger.info('Schema set successfully');
-
+    let tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'quotes']);
+    const checkTableExists = tableCheckRes.rows[0].exists;
+    if (!checkTableExists) {
+      logger.info('Quotes table does not exist');
+      return {
+        message: getMessage('QUOTE_NOT_FOUND'),
+        data: {}
+      };
+    }
     const query = `
         SELECT 
             e.id AS quoteId,

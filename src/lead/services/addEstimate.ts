@@ -67,7 +67,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         if (leadCheckResult.rows.length === 0) {
             throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
-        const status = ['NEW', 'ESTIMATES'];
+        const status = ['NEW', 'ESTIMATES', 'NEW LEAD'];
         if(!status.includes(leadCheckResult.rows[0].status)) {
             throw new Error(getMessage('LEAD_STATUS_NOT_ALLOWED'));
         }

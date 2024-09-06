@@ -158,7 +158,7 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             isEmptyString(movingOnDate) ? null : movingOnDate, 
             collectionPurchaseStatus, collectionHouseSize, toFloat(collectionDistance), toFloat(collectionVolume), collectionVolumeUnit,
             deliveryPurchaseStatus, deliveryHouseSize, toFloat(deliveryDistance), toFloat(deliveryVolume), deliveryVolumeUnit,
-            'NEW', customerNotes, batch || null, inceptBatch || null, leadId || null, isEmptyString(leadDate) ? null : leadDate, 
+            'NEW LEAD', customerNotes, batch || null, inceptBatch || null, leadId || null, isEmptyString(leadDate) ? null : leadDate, 
         ]);
 
         logger.info('Lead added successfully');
