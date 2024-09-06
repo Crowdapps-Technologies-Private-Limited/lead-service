@@ -42,8 +42,8 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
         delivery_addr += `, ${lead?.delivery_postcode}`;
     }
 
-    const createdAtFormatted = dayjs(lead?.createdAt).format('DD-MM-YYYY');
-    const quoteExpiresOnFormatted = dayjs(quote?.quote_expires_on).format('DD-MM-YYYY');
+    const createdAtFormatted = dayjs(lead?.created_at).format('DD-MM-YYYY');
+    const quoteExpiresOnFormatted = dayjs(quote?.quoteExpiresOn).format('DD-MM-YYYY');
 
     const materialsHtml = quote?.materials
         ?.map(
