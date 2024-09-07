@@ -1,4 +1,5 @@
 import { 
+    CHECK_TABLE_EXISTS,
     GET_SURVEYS_COUNT, 
     GET_SURVEYS_LIST_BASE, 
     GET_SURVEYS_LIST_TENANT, 
@@ -25,6 +26,16 @@ export const getAllSurveys = async (
 
         // Start transaction
         await client.query('BEGIN');
+
+        const tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'surveys']);
+        const checkTableExists = tableCheckRes.rows[0].exists;
+        if (!checkTableExists) {
+            logger.info('Surveys table does not exist');
+            return {
+                count: 0,
+                list: []
+            };
+        }
 
         // // Define time filter conditions
         // let timeFilter = '';

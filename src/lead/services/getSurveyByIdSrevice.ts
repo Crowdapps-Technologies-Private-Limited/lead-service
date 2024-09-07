@@ -1,6 +1,6 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
-import { GET_SURVEY_DETAILS } from '../../sql/sqlScript';
+import { CHECK_TABLE_EXISTS, GET_SURVEY_DETAILS } from '../../sql/sqlScript';
 import { getMessage } from '../../utils/errorMessages';
 
 export const getSurveyById = async (surveyId: string, tenant: any) => {
@@ -14,7 +14,12 @@ export const getSurveyById = async (surveyId: string, tenant: any) => {
         const schema = tenant?.schema || tenant?.tenant?.schema;
         logger.info('Schema:', { schema });
         await client.query(`SET search_path TO ${schema}`);
-
+        const tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'surveys']);
+        const checkTableExists = tableCheckRes.rows[0].exists;
+        if (!checkTableExists) {
+            logger.info('Surveys table does not exist');
+            return null;
+        }
         // Fetch survey by ID
         const result = await client.query(GET_SURVEY_DETAILS, [surveyId]);
 

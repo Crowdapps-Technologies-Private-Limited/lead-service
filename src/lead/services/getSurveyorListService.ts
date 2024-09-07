@@ -1,4 +1,4 @@
-import { GET_ALL_SURVEYORS } from '../../sql/sqlScript';
+import { CHECK_TABLE_EXISTS, GET_ALL_SURVEYORS } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { setPaginationData } from '../../utils/utility';
 import logger from '../../utils/logger';
@@ -14,7 +14,12 @@ export const getAllSurveyors = async (tenant: any) => {
     // }
     await client.query(`SET search_path TO ${schema}`);
     // Fetch list
-    
+    const tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'staffs']);
+    const checkTableExists = tableCheckRes.rows[0].exists;
+    if (!checkTableExists) {
+      logger.info('Staffs table does not exist');
+      return [];
+    }
     const res = await client.query(GET_ALL_SURVEYORS, ['Surveyor']);
     return res.rows || [];
   } catch (error: any) {

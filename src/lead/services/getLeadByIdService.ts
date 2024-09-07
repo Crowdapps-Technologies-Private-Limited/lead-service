@@ -36,7 +36,7 @@ export const getLeadById = async (leadId: string, tenant: any) => {
     tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'surveys']);
     const checkTableExists = tableCheckRes.rows[0].exists;
     if (!checkTableExists) {
-      logger.info('Leads table does not exist');
+      logger.info('Surveys table does not exist');
       surveyId = null;
       surveyStatus = null;
     } else {
