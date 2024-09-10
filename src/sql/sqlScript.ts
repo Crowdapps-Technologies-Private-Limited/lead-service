@@ -1042,3 +1042,35 @@ export const UPDATE_QUOTE = `
         material_price_chargeable = $7
     WHERE id = $8
 `;
+
+export const CREATE_CONFIRMATION_AND_REALTED_TABLE = `
+CREATE TABLE IF NOT EXISTS confirmations (
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    lead_id VARCHAR(20) REFERENCES leads(generated_id) ON DELETE CASCADE,
+    moving_on_date TIMESTAMP,
+    moving_on_time VARCHAR(100),
+    moving_on_status VARCHAR(100),
+    packing_on_date TIMESTAMP DEFAULT NULL,
+    packing_on_time VARCHAR(100),
+    packing_on_status VARCHAR(100),
+    is_accept_liability_cover BOOLEAN DEFAULT FALSE,
+    liability_cover NUMBER DEFAULT NULL,
+    is_terms_accepted BOOLEAN DEFAULT FALSE,
+    is_quoation_accepted BOOLEAN DEFAULT FALSE,
+    is_submitted BOOLEAN DEFAULT FALSE,
+    comments TEXT,
+    notes TEXT,
+    confirmed_on TIMESTAMP DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS confirmation_services (
+    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    confirmation_id UUID REFERENCES confirmations(id) ON DELETE CASCADE,
+    name VARCHAR(100),
+    cost DECIMAL(10, 2),
+    status VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`
