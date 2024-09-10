@@ -16,10 +16,12 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/quotes': admiinHandlers.getLatestQuotesHandler,
         '/leads/{id}/previous-quotes': admiinHandlers.getSecondLatestQuotesHandler,
         '/leads/{id}/quote-send-email/{quoteId}': admiinHandlers.quoteSendEmailHandler,
+        '/leads/{id}/send-confirmation-email': admiinHandlers.sendConfirmationHandler,
+        
     },
     PUT: {
         '/leads/{id}': admiinHandlers.editLeadHandler,
-        '/leads/{id}/send-email': admiinHandlers.sendEmailHandler,
+        '/leads/{id}/send-email': admiinHandlers.sendEmailHandler,    
     },
     POST: {
         '/leads': admiinHandlers.addLeadHandler,
@@ -27,5 +29,6 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/distance': admiinHandlers.getDistanceHandler,
         '/leads/{id}/assign-surveyor': admiinHandlers.assignSurveyorHandler,
         '/leads/{id}/quotes': admiinHandlers.addQuoteHandler,
+       
     },
 };

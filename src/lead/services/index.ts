@@ -1,3 +1,4 @@
+import { sendConfirmationEmail } from './sendConfirmationEmailService';
 import { getOwnSurveys } from './getOwnSurveyService';
 import { getLatestEstimates } from './getLatestEstimates ';
 import { addOrUpdateEstimate } from './addEstimate';
@@ -39,5 +40,6 @@ export {
     getLatestQuote,
     sendQuoteEmailOrPdf,
     downloadSecondLatestQuote,
-    getOwnSurveys
+    getOwnSurveys,
+    sendConfirmationEmail
 };

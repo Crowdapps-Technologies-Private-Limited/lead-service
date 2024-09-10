@@ -14,11 +14,18 @@ export const GET_TENANT_BY_ID = 'SELECT * FROM public.tenants WHERE id = $1';
 
 export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-export const CREATE_LEAD_TABLE = `CREATE TABLE IF NOT EXISTS customers (
+export const CREATE_LEAD_TABLE = `
+CREATE TABLE IF NOT EXISTS customers (
     id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    username VARCHAR(100) UNIQUE NULL,
     phone VARCHAR(20),
     email VARCHAR(100) UNIQUE,
+    password VARCHAR(255) NULL,
+    cognito_sub VARCHAR(255) ,
+    tenant_id UUID,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT NULL
 );
@@ -1043,9 +1050,41 @@ export const UPDATE_QUOTE = `
     WHERE id = $8
 `;
 
-export const CREATE_CONFIRMATION_AND_REALTED_TABLE = `
+
+
+export const GET_LEAD_CUSTOMER_BY_LEAD_ID = `
+    SELECT
+        l.generated_id,
+        cust.id AS customer_id,
+        cust.name AS customer_name,
+        cust.phone AS customer_phone,
+        cust.email AS customer_email,  -- Missing comma added here
+        l.moving_on_date AS "moving_on_date",
+        l.packing_on_date AS "packing_on_date"
+    FROM
+        leads l
+    LEFT JOIN
+        customers cust ON l.customer_id = cust.id
+    WHERE
+        l.generated_id = $1;
+`;
+
+
+export const UPDATE_CUSTOMER_WITH_CREDENTIAL = `
+UPDATE customers
+SET 
+    password = $1,
+    cognito_sub = $2,
+    tenant_id = $3,
+    updated_by = $4,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $5;
+`;
+
+export const CREATE_CONFIRMATION_TABLES = `
 CREATE TABLE IF NOT EXISTS confirmations (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    confirmation_id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    customer_id UUID DEFAULT public.uuid_generate_v4(),
     lead_id VARCHAR(20) REFERENCES leads(generated_id) ON DELETE CASCADE,
     moving_on_date TIMESTAMP,
     moving_on_time VARCHAR(100),
@@ -1054,23 +1093,167 @@ CREATE TABLE IF NOT EXISTS confirmations (
     packing_on_time VARCHAR(100),
     packing_on_status VARCHAR(100),
     is_accept_liability_cover BOOLEAN DEFAULT FALSE,
-    liability_cover NUMBER DEFAULT NULL,
+    liability_cover NUMERIC DEFAULT NULL,
     is_terms_accepted BOOLEAN DEFAULT FALSE,
-    is_quoation_accepted BOOLEAN DEFAULT FALSE,
+    is_quotation_accepted BOOLEAN DEFAULT FALSE,  -- Corrected from "is_quoation_accepted"
     is_submitted BOOLEAN DEFAULT FALSE,
+    tool_tip_content VARCHAR(100) DEFAULT NULL,
+	is_seen BOOLEAN DEFAULT FALSE,
     comments TEXT,
     notes TEXT,
     confirmed_on TIMESTAMP DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255) DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS confirmation_services (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    confirmation_id UUID REFERENCES confirmations(id) ON DELETE CASCADE,
+    service_id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    confirmation_id UUID REFERENCES confirmations(confirmation_id) ON DELETE CASCADE,
     name VARCHAR(100),
     cost DECIMAL(10, 2),
     status VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);`
+);
+`;
+
+
+
+export const INSERT_CONFIRMATION = `
+INSERT INTO confirmations (
+    confirmation_id, 
+    customer_id, 
+    lead_id, 
+    moving_on_date, 
+    packing_on_date, 
+    is_accept_liability_cover, 
+    is_terms_accepted, 
+    is_quotation_accepted, 
+    is_submitted, 
+    is_seen, 
+    notes, 
+    created_by
+) VALUES (
+    public.uuid_generate_v4(),   
+    $1,                         
+    $2,                          
+    $3,    
+    $4,                         
+    $5,                         
+    $6,                          
+    $7,                          
+    $8,                         
+    $9,                         
+    $10,                       
+    $11                         
+) RETURNING confirmation_id;
+`;
+
+
+
+
+export const GET_QUOTE_SERVICES = `
+SELECT 
+    e.id AS quoteId,
+    e.lead_id AS leadId,
+    e.notes,
+    e.vat_included AS vatIncluded,
+    (
+        SELECT json_agg(json_build_object(
+            'serviceId', s.id,
+            'serviceName', s.service_name,
+            'description', s.description,
+            'price', s.price
+        ))
+        FROM quote_services es
+        JOIN services s ON es.service_id = s.id
+        WHERE es.quote_id = e.id
+    ) AS services
+FROM 
+    quotes e
+WHERE 
+    e.lead_id = $1
+ORDER BY 
+    e.created_at DESC
+LIMIT 1;
+`;
+
+export const INSERT_CONFIRMATION_SERVICES = `
+INSERT INTO confirmation_services (
+    service_id,
+    confirmation_id,
+    name,
+    cost,
+    status,
+    created_at,
+    updated_at
+) VALUES (
+    public.uuid_generate_v4(),   
+    $1,                         
+    $2,                         
+    $3,                         
+    $4,                         
+    CURRENT_TIMESTAMP,           
+    CURRENT_TIMESTAMP           
+);
+`;
+
+export const DELETE_CONFIRMATION_BY_LEAD_ID = `
+DELETE FROM confirmations
+WHERE lead_id = $1;
+`;
+
+
+export const GET_CONFIRMATION_BY_LEAD_ID = `
+SELECT 
+    confirmation_id,
+    customer_id,
+    lead_id,
+    moving_on_date,
+    moving_on_time,
+    moving_on_status,
+    packing_on_date,
+    packing_on_time,
+    packing_on_status,
+    is_accept_liability_cover,
+    liability_cover,
+    is_terms_accepted,
+    is_quotation_accepted,
+    is_submitted,
+    tool_tip_content,
+    is_seen,
+    comments,
+    notes,
+    confirmed_on,
+    created_at,
+    updated_at,
+    created_by,
+    updated_by
+FROM confirmations
+WHERE lead_id = $1;
+`;
+
+
+export const GET_CUSTOMER_BY_EMAIL = `
+SELECT 
+    id AS customer_id,
+    name AS customer_name,
+    phone AS customer_phone,
+    email AS customer_email,
+    password,
+    cognito_sub,
+    tenant_id,
+    created_at,
+    updated_at
+FROM 
+    customers
+WHERE 
+    email = $1;
+`;
+
+
+
+
+
