@@ -44,6 +44,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         logger.info('user:', { user });
         
         if (!user || user.role === 'SUPER_ADMIN') {
+            logger.info('In if SuperAdmin:', { user });
             return {
                 statusCode: 401,
                 headers: defaultHeaders,

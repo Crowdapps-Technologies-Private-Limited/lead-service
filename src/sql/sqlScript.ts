@@ -1076,9 +1076,10 @@ SET
     password = $1,
     cognito_sub = $2,
     tenant_id = $3,
-    updated_by = $4,
+    username = $4,
+    updated_by = $5,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = $5;
+WHERE id = $6;
 `;
 
 export const CREATE_CONFIRMATION_TABLES = `

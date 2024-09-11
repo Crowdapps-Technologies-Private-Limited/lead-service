@@ -118,6 +118,8 @@ export const getErrorMessage = (template: string, systemErr: string): string => 
             return `Failed to fetch client list due to ${systemErr}`;
         case "CLIENT_FETCH_ACTIVITY":
             return `Failed to fetch client's activities due to ${systemErr}`;
+        case "CUSTOMER_NOT_FOUND":
+            return "Customer not found.";
         default:
             return "";
     }

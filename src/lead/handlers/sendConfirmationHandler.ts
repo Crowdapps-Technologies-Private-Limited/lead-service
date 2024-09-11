@@ -34,7 +34,7 @@ export const sendConfirmationHandler: RouteHandler = async (
        
         const result = await sendConfirmationEmail(leadId, tenant, user);
 
-        return ResponseHandler.createdResponse({ message: result?.message });
+        return ResponseHandler.createdResponse({ message: getMessage('EMAIL_SENT') });
     } catch (error: any) {
         return ResponseHandler.notFoundResponse({ message: error.message });
     }

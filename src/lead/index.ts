@@ -15,7 +15,7 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/surveys/{id}': admiinHandlers.getSurveyByIdHandler,
         '/leads/{id}/quotes': admiinHandlers.getLatestQuotesHandler,
         '/leads/{id}/previous-quotes': admiinHandlers.getSecondLatestQuotesHandler,
-        '/leads/{id}/quote-send-email/{quoteId}': admiinHandlers.quoteSendEmailHandler,
+        '/leads/{id}/quote-send-email/{quoteId}': admiinHandlers.sendConfirmationHandler,
         '/leads/{id}/send-confirmation-email': admiinHandlers.sendConfirmationHandler,
         
     },

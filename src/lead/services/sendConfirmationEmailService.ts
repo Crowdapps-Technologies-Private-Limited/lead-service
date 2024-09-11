@@ -16,7 +16,7 @@ import {
     GET_CONFIRMATION_BY_LEAD_ID,
     GET_CUSTOMER_BY_EMAIL  // Make sure this query is added to your SQL scripts
 } from '../../sql/sqlScript';
-import { getMessage } from '../../utils/errorMessages';
+import { getErrorMessage, getMessage } from '../../utils/errorMessages';
 import { generateEmail } from '../../utils/generateEmailService';
 import { generateRandomPassword, generateRandomString } from '../../utils/generateRandomPassword';
 import { getconfigSecrets } from '../../utils/getConfig';
@@ -54,6 +54,9 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
         const email = leadData?.customer_email;
         logger.info('Customer email:', { email });
         logger.info('Customer username:', { userName });
+        if (!email) {
+            throw new Error(getErrorMessage('CUSTOMER_NOT_FOUND', "Email not found"));
+        }
 
         // Start transaction
         await client.query('BEGIN');
@@ -135,6 +138,7 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                     encryptedPassword,
                     cognitoSub,
                     tenant.id,
+                    userName,
                     user.sub,
                     leadData.customer_id,  // Assuming you have customer id as result.id
                 ]);
@@ -168,7 +172,7 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
 
             // Check if confirmation already exists and is not submitted
             const confirmationCheckResult = await client.query(GET_CONFIRMATION_BY_LEAD_ID, [leadId]);
-            if (confirmationCheckResult.rows.length > 0 && !confirmationCheckResult.rows[0].is_submitted) {
+            if (confirmationCheckResult.rows.length > 0 && !confirmationCheckResult.rows[0].confirmed_on) {
                 await client.query(DELETE_CONFIRMATION_BY_LEAD_ID, [leadId]);
                 logger.info('Previous unsubmitted confirmation deleted');
             }
@@ -206,7 +210,7 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                     confirmationId,         // $1: confirmation_id
                     service.serviceName,    // $2: service_name
                     service.price,          // $3: service_cost
-                    'PENDING'               // $4: status (default)
+                    null               // $4: status (default)
                 ]);
             }
             logger.info('Services inserted successfully');
