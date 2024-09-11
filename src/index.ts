@@ -52,6 +52,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             };
         }
 
+        if (!user || user.role === 'CUSTOMER') {
+            return {
+                statusCode: 401,
+                headers: defaultHeaders,
+                body: JSON.stringify({ message: 'Forbidden' })
+            };
+        }
+
         if (user.role === 'TENANT') {
             logger.info(' In if TenantAdmin:', { user });
             const clientDetail= await getTenantProfile(user.tenant_id);
