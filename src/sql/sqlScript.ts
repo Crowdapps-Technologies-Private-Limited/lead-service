@@ -1099,7 +1099,8 @@ CREATE TABLE IF NOT EXISTS confirmations (
     is_quotation_accepted BOOLEAN DEFAULT FALSE,  -- Corrected from "is_quoation_accepted"
     is_submitted BOOLEAN DEFAULT FALSE,
     tool_tip_content VARCHAR(100) DEFAULT NULL,
-    is_new_responce BOOLEAN DEFAULT FALSE,
+    is_new_response BOOLEAN DEFAULT FALSE,
+    is_deposit_received BOOLEAN DEFAULT FALSE,
 	is_seen BOOLEAN DEFAULT FALSE,
     comments TEXT,
     notes TEXT,

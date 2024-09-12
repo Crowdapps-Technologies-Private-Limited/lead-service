@@ -172,7 +172,7 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
 
             // Check if confirmation already exists and is not submitted
             const confirmationCheckResult = await client.query(GET_CONFIRMATION_BY_LEAD_ID, [leadId]);
-            if (confirmationCheckResult.rows.length > 0 && !confirmationCheckResult.rows[0].confirmed_on) {
+            if (confirmationCheckResult.rows.length > 0 && confirmationCheckResult.rows[0].moving_on_status !== 'fixed') {
                 await client.query(DELETE_CONFIRMATION_BY_LEAD_ID, [leadId]);
                 logger.info('Previous unsubmitted confirmation deleted');
             }
