@@ -1,39 +1,35 @@
 import { APIGatewayProxyEventBase, APIGatewayProxyResult, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
-import { getSurveyById } from '../services';
+import { getConfirmationTooltipDetails, getSurveyById } from '../services';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 
-export const getSurveyByIdHandler: RouteHandler = async (
+export const getConfirmationTooltipHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('Received event at getSurveyByIdHandler', { event });
+    logger.info('Received event at getConfirmationTooltipHandler', { event });
 
-    const surveyId = event.pathParameters?.id;
+    const leadId = event.pathParameters?.id;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
-    const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant?.schema || tenant?.tenant?.schema);
+    const hasPermission = await checkPermission(user.role, 'Confirmation', 'read', tenant?.schema || tenant?.tenant?.schema);
     logger.info('hasPermission: -----------', { hasPermission });
     if (!hasPermission) {
         return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
     }
-    if (!surveyId) {
-        return ResponseHandler.badRequestResponse({ message: getMessage('SURVEY_ID_REQUIRED') });
+    if (!leadId) {
+        return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
     }
 
     try {
-        // Fetch survey by ID
-        const survey = await getSurveyById(surveyId, tenant);
+        // Fetch data
+        const result = await getConfirmationTooltipDetails(leadId, tenant);
 
-        if (!survey) {
-            return ResponseHandler.notFoundResponse({ message: `Survey with ID ${surveyId} not found` });
-        }
-
-        return ResponseHandler.successResponse({ message: getMessage('SURVEY_FETCHED'), data: survey });
+        return ResponseHandler.successResponse({ message: getMessage('CONFIRMATION_TOOLTIP_FETCHED'), data: result });
     } catch (error: any) {
-        logger.error('Failed to fetch survey by ID', { error });
+        logger.error('Failed to fetch confirmation tooltip data at handler', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

@@ -1256,7 +1256,29 @@ WHERE
     email = $1;
 `;
 
+export const GET_CONFIRMATION_TOOLTIP_DETAILS = `
+    SELECT
+        c.confirmation_id AS "confirmationId",
+        c.lead_id AS "leadId",
+        c.is_seen AS "isSeen",
+        c.is_new_response AS "isNewResponse"
+    FROM
+        confirmations c
+    WHERE
+        c.lead_id = $1
+    ORDER BY
+        c.created_at DESC
+    LIMIT 1;
+`;
 
+export const UPDATE_CONFIRMATION_TOOLTIP_DETAILS = `
+    UPDATE confirmations
+    SET
+        is_seen = $1,
+        is_new_response = $2,
+        updated_at = NOW(),
+        updated_by = $3
+    WHERE confirmation_id = $4`
 
 
 

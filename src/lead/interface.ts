@@ -218,3 +218,9 @@ export interface AddQuotePayload {
     generalInfo: GeneralInfo[];
     ancillaries: Ancillary[];
 }
+
+export interface TooltipConfirmationPayload {
+    confirmationId: string;
+    isSeen: boolean;
+    isNewResponse: boolean;
+}

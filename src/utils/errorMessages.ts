@@ -97,6 +97,12 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return `Survey start time must be before the lead's packing on date or moving on date`;
         case "NOT_VALID_END_TIME":
             return `Survey end time must be before the lead's packing on date or moving on date`;
+        case "SURVEY_FETCHED":
+            return 'Survey fetched successfully.';
+        case "CONFIRMATION_TOOLTIP_FETCHED":
+            return 'Details fetched successfully.';
+        case "CONFIRMATION_TOOLTIP_UPDATED":
+                return 'Details updated successfully.';
 
         default:
         return "";

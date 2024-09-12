@@ -10,6 +10,7 @@ import {
     AddSurveyTab3Payload,
     AssignSurveyorPayload,
     AddQuotePayload,
+    TooltipConfirmationPayload,
 } from './interface';
 import logger from '../utils/logger';
 
@@ -501,5 +502,20 @@ export const addQuoteDTO = async (payload: AddQuotePayload): Promise<void> => {
         await addQuoteSchema.validate(payload, { abortEarly: false, strict: true });
     } catch (err: any) {
         throw new Error(`Payload Validation Failed: ${err?.errors?.join()}`);
+    }
+};
+
+// Define the confirmation tooltip schema
+export const updateConfirmationTooltipSchema = yup.object().shape({
+    confirmationId: yup.string().required('Confirmation ID is required'),
+    isSeen: yup.boolean().required('Seen status is required'),
+    isNewResponse: yup.boolean().required('New response status is required')
+});
+
+export const updateConfirmationTooltipDTO = async (payload: TooltipConfirmationPayload): Promise<void> => {
+    try {
+        await updateConfirmationTooltipSchema.validate(payload, { abortEarly: false, strict: true });
+    } catch (err: any) {
+        throw new Error(`Payload Validation Failed: ${err.errors.join(', ')}`);
     }
 };

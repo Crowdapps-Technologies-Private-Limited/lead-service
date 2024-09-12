@@ -18,6 +18,8 @@ import { addOrUpdateQuote } from './addQuote';
 import { getLatestQuote } from './getLatestQuotes';
 import { sendQuoteEmailOrPdf } from './quoteSendLeadEmailOrPdfService';
 import { downloadSecondLatestQuote } from './getSecondLatestQuotes';
+import { getConfirmationTooltipDetails } from './getConfirmationTooltipService';
+import { updateConfirmationTooltipDetails } from './updateConfirmationTooltipService';
 
 // Removed incomplete import statement
 
@@ -41,5 +43,7 @@ export {
     sendQuoteEmailOrPdf,
     downloadSecondLatestQuote,
     getOwnSurveys,
-    sendConfirmationEmail
+    sendConfirmationEmail,
+    getConfirmationTooltipDetails,
+    updateConfirmationTooltipDetails
 };

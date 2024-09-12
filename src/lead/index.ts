@@ -16,11 +16,13 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/quotes': admiinHandlers.getLatestQuotesHandler,
         '/leads/{id}/previous-quotes': admiinHandlers.getSecondLatestQuotesHandler,
         '/leads/{id}/quote-send-email/{quoteId}': admiinHandlers.sendConfirmationHandler,
+        '/leads/{id}/confirmation-tooltip': admiinHandlers.getConfirmationTooltipHandler,
         
     },
     PUT: {
         '/leads/{id}': admiinHandlers.editLeadHandler,
-        '/leads/{id}/send-email': admiinHandlers.sendEmailHandler,    
+        '/leads/{id}/send-email': admiinHandlers.sendEmailHandler, 
+        '/leads/{id}/confirmation-tooltip': admiinHandlers.updateConfirmationTooltipHandler,   
     },
     POST: {
         '/leads': admiinHandlers.addLeadHandler,

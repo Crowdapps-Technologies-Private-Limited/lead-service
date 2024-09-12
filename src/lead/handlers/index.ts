@@ -5,6 +5,7 @@ import { editLeadHandler } from './editLeadHandler';
 import { addEstimateHandler } from './estimateHandler';
 import { estimateSendEmailHandler } from './estimateSendEmailHandler';
 import { getAllSurveysHandler } from './getAllSurveysHandler';
+import { getConfirmationTooltipHandler } from './getConfirmationTooltipHandler';
 import { getDistanceHandler } from './getDistanceHandler';
 import { getLatestEstimatesHandler } from './getLatestEstimatesHandler';
 import { getLatestQuotesHandler } from './getLatestQuotesHandler';
@@ -18,6 +19,7 @@ import { getSurveyorListHandler } from './getSurveyorListHandler';
 import { quoteSendEmailHandler } from './quoteSendEmailHandler';
 import { sendConfirmationHandler } from './sendConfirmationHandler';
 import { sendEmailHandler } from './sendEmailHandler';
+import { updateConfirmationTooltipHandler } from './updateConfirmationTooltipHandler';
 
 const authHandlers = {
     addLeadHandler,
@@ -39,7 +41,9 @@ const authHandlers = {
     getLatestQuotesHandler,
     quoteSendEmailHandler,
     getSecondLatestQuotesHandler,
-    sendConfirmationHandler
+    sendConfirmationHandler,
+    getConfirmationTooltipHandler,
+    updateConfirmationTooltipHandler
 };
 
 export default authHandlers;
