@@ -1280,5 +1280,16 @@ export const UPDATE_CONFIRMATION_TOOLTIP_DETAILS = `
         updated_by = $3
     WHERE confirmation_id = $4`
 
+export const GET_TERMS_DOC = `
+    SELECT * FROM documents WHERE name = 'terms_conditions';
+`;
+
+export const GET_PACKING_DOC = `
+    SELECT * FROM documents WHERE name = 'packing_guide';
+`;
+
+
+
+
 
 
