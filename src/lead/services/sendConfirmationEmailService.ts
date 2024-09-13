@@ -198,7 +198,7 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                 false,                     // $8: is_submitted
                 false,                     // $9: is_seen
                 quoteNotes,                // $10: notes
-                user.email                 // $11: created_by
+                user.email,             // $11: created_by
             ]);
 
             const confirmationId = confirmationResult.rows[0].confirmation_id; // Retrieve confirmation_id

@@ -17,9 +17,10 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/previous-quotes': admiinHandlers.getSecondLatestQuotesHandler,
         '/leads/{id}/quote-send-email/{quoteId}': admiinHandlers.sendConfirmationHandler,
         '/leads/{id}/confirmation-tooltip': admiinHandlers.getConfirmationTooltipHandler,
-        
+        '/leads/{id}/confirmation': admiinHandlers.getConfirmationHandler,   
     },
     PUT: {
+        //   '/leads/{id}/confirmation': admiinHandlers.updateConfirmationHandler,
         '/leads/{id}': admiinHandlers.editLeadHandler,
         '/leads/{id}/send-email': admiinHandlers.sendEmailHandler, 
         '/leads/{id}/confirmation-tooltip': admiinHandlers.updateConfirmationTooltipHandler,   

@@ -1,3 +1,4 @@
+import { getConfirmation } from './getConfirmationService';
 import { sendConfirmationEmail } from './sendConfirmationEmailService';
 import { getOwnSurveys } from './getOwnSurveyService';
 import { getLatestEstimates } from './getLatestEstimates ';
@@ -45,5 +46,6 @@ export {
     getOwnSurveys,
     sendConfirmationEmail,
     getConfirmationTooltipDetails,
-    updateConfirmationTooltipDetails
+    updateConfirmationTooltipDetails,
+    getConfirmation
 };

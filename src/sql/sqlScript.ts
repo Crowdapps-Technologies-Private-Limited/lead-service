@@ -1289,6 +1289,156 @@ export const GET_PACKING_DOC = `
 `;
 
 
+export const GET_CONFIRMATION_DETAILS = `
+    SELECT
+        c.confirmation_id AS "confirmationId",
+        c.customer_id AS "customerId",
+        c.lead_id AS "leadId",
+        c.moving_on_date AS "movingOnDate",
+        c.moving_on_time AS "movingOnTime",
+        c.moving_on_status AS "movingOnStatus",
+        c.packing_on_date AS "packingOnDate",
+        c.packing_on_time AS "packingOnTime",
+        c.packing_on_status AS "packingOnStatus",
+        c.is_accept_liability_cover AS "isAcceptLiabilityCover",
+        c.liability_cover AS "liabilityCover",
+        c.is_terms_accepted AS "isTermsAccepted",
+        c.is_quotation_accepted AS "isQuotationAccepted",
+        c.is_submitted AS "isSubmitted",
+        c.tool_tip_content AS "toolTipContent",
+        c.is_seen AS "isSeen",
+        c.comments AS "comments",
+        c.notes AS "notes",
+        c.confirmed_on AS "confirmedOn",
+        (
+            SELECT json_agg(json_build_object(
+                'serviceId', cs.service_id,
+                'name', cs.name,
+                'cost', cs.cost,
+                'status', cs.status
+            ))
+            FROM confirmation_services cs
+            WHERE cs.confirmation_id = c.confirmation_id
+        ) AS services
+    FROM
+        confirmations c
+    WHERE
+        c.lead_id = $1
+    ORDER BY
+        c.created_at DESC
+    LIMIT 1;
+`;
+
+
+
+export const UPDATE_CONFIRMATION = `
+    UPDATE confirmations
+    SET
+        moving_on_date = $1,
+        moving_on_time = $2,
+        moving_on_status = $3,
+        packing_on_date = $4,
+        packing_on_time = $5,
+        packing_on_status = $6,
+        is_accept_liability_cover = $7,
+        liability_cover = $8,
+        is_terms_accepted = $9,
+        is_quotation_accepted = $10,
+        is_submitted = $11,
+        tool_tip_content = $12,
+        is_seen = $13,
+        comments = $14,
+        confirmed_on = $15,
+        updated_by = $16,
+        is_new_response = $17,
+        updated_at = NOW()
+    WHERE confirmation_id = $18
+    RETURNING *;
+`;
+
+export const UPDATE_CONFIRMATION_SERVICE = `
+    UPDATE confirmation_services
+    SET
+        name = $1,
+        cost = $2,
+        status = $3,
+        confirmation_id = $4,
+        updated_at = NOW()
+    WHERE service_id = $5
+    RETURNING *;
+`;
+
+export const INSERT_CONFIRMATION_SERVICE = `
+    INSERT INTO confirmation_services (
+        name,
+        cost,
+        status,
+        confirmation_id
+    ) VALUES ($1, $2, $3, $4)
+    RETURNING *;
+`;
+
+export const GET_LEAD_DETAILS_FOR_CUSTOMER = `
+    SELECT
+        cust.name AS "name",
+        cust.phone AS "phone",
+        ca.street AS "collectionStreet",
+        ca.town AS "collectionTown",
+        ca.county AS "collectionCounty",
+        ca.postcode AS "collectionPostcode",
+        ca.country AS "collectionCountry",
+        da.street AS "deliveryStreet",
+        da.town AS "deliveryTown",
+        da.county AS "deliveryCounty",
+        da.postcode AS "deliveryPostcode",
+        da.country AS "deliveryCountry",
+        l.collection_purchase_status AS "collectionPurchaseStatus",
+        l.delivery_purchase_status AS "deliveryPurchaseStatus"
+    FROM
+        leads l
+    LEFT JOIN
+        customers cust ON l.customer_id = cust.id
+    LEFT JOIN
+        addresses ca ON l.collection_address_id = ca.id
+    LEFT JOIN
+        addresses da ON l.delivery_address_id = da.id
+    WHERE
+        l.generated_id = $1;
+`;
+
+
+export const GET_LEAD_QUOTES_CONFIRMATION = `
+SELECT 
+    q.notes,
+    q.vat_included  AS "vatIncluded",
+    c.driver_qty AS "driverQty",
+    c.porter_qty AS "porterQty",
+    c.packer_qty AS "packerQty",
+    g.contents_value AS "contentsValue",
+    m.volume,
+    g.payment_method AS "paymentMethod",
+    g.insurance_amount AS "insuranceAmount",
+    g.insurance_percentage AS "insurancePercentage",
+    g.insurance_type AS "insuranceType"
+FROM 
+    quotes q
+LEFT JOIN 
+    quote_costs qc ON q.id = qc.quote_id
+LEFT JOIN 
+    costs c ON qc.cost_id = c.id
+LEFT JOIN 
+    quote_general_info qg ON q.id = qg.quote_id
+LEFT JOIN 
+    general_information g ON qg.general_info_id = g.id
+LEFT JOIN 
+    quote_materials qm ON q.id = qm.quote_id
+LEFT JOIN 
+    materials m ON qm.material_id = m.id
+WHERE 
+    q.lead_id = $1;
+`;
+
+
 
 
 

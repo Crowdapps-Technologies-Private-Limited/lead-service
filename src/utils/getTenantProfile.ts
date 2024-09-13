@@ -40,6 +40,7 @@ export const getTenantProfile = async (userId: string) => {
                 Expires: 60 * 60, // URL expires in 1 hour
             });
         }
+       
         logger.info('User profile final  :', { user });
         return user;
     } catch (error: any) {
