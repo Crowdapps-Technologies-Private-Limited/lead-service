@@ -224,3 +224,26 @@ export interface TooltipConfirmationPayload {
     isSeen: boolean;
     isNewResponse: boolean;
 }
+
+export interface ServiceType {
+    serviceId?: string;
+    name: string;
+    status: string;
+    cost?: number;
+}
+
+export interface DateStruct {
+    date: string;
+    time?: string;
+    status: string;
+}
+
+
+export interface UpdateConfirmationPayload {
+    confirmationId?: string | null;
+    movingDate?: DateStruct;
+    packingDate?: DateStruct;
+    isDepositeRecieved?: boolean;
+    services: ServiceType[];
+    vatIncluded?: boolean;
+}

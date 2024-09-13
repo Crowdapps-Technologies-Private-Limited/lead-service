@@ -1438,6 +1438,28 @@ WHERE
     q.lead_id = $1;
 `;
 
+export const GET_CONFIRMATION_BY_ID = `
+    SELECT * FROM confirmations WHERE confirmation_id = $1;
+`;
+
+
+
+export const UPDATE_CONFIRMATION_BY_CLIENT = `
+    UPDATE confirmations
+    SET
+        moving_on_date = $1,
+        moving_on_time = $2,
+        moving_on_status = $3,
+        packing_on_date = $4,
+        packing_on_time = $5,
+        packing_on_status = $6,
+        is_deposit_received = $7,
+        updated_by = $8,
+        updated_at = NOW()
+    WHERE confirmation_id = $9
+    RETURNING *;
+`;
+
 
 
 

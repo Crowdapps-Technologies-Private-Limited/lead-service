@@ -11,6 +11,7 @@ import {
     AssignSurveyorPayload,
     AddQuotePayload,
     TooltipConfirmationPayload,
+    UpdateConfirmationPayload,
 } from './interface';
 import logger from '../utils/logger';
 
@@ -519,3 +520,41 @@ export const updateConfirmationTooltipDTO = async (payload: TooltipConfirmationP
         throw new Error(`Payload Validation Failed: ${err.errors.join(', ')}`);
     }
 };
+
+  // Define the Add Customer Confirmation schema
+  export const updateConfirmationSchema = yup.object().shape({
+    confirmationId: yup.string().required('confirmationId is required'),
+    movingDate: yup.object().shape({
+        date: yup.string().required('Moving date is required'),
+        time: yup.string().nullable(),
+        status: yup.string().required('Moving date status is required'),
+    }).required('Moving date details are required'),
+    packingDate: yup.object().shape({
+        date: yup.string().nullable(),
+        time: yup.string().nullable(),
+        status: yup.string().nullable(),
+    }).required('Packing date details are required'),
+    isDepositeRecieved: yup.boolean().required('Deposit received status is required'),
+    vatIncluded: yup.boolean().required('VAT inclusion status is required'),
+    services: yup
+        .array()
+        .of(
+            yup.object().shape({
+                serviceId: yup.string().nullable(),
+                name: yup.string().required('Service name is required'),
+                status: yup.string().required('Service status is required'),
+                cost: yup.number().nullable(),
+            })
+        )
+        .required('Services are required'),
+}).noUnknown(true, 'Unknown field in payload');
+
+
+export const updateConfirmationDTO = async (payload: UpdateConfirmationPayload): Promise<void> => {
+    try {
+        await updateConfirmationSchema.validate(payload, { abortEarly: false, strict: true });
+    } catch (err: any) {
+        throw new Error(`Payload Validation Failed: ${err.errors.join(', ')}`);
+    }
+};
+

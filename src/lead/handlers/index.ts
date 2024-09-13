@@ -20,6 +20,7 @@ import { getSurveyorListHandler } from './getSurveyorListHandler';
 import { quoteSendEmailHandler } from './quoteSendEmailHandler';
 import { sendConfirmationHandler } from './sendConfirmationHandler';
 import { sendEmailHandler } from './sendEmailHandler';
+import { updateConfirmationHandler } from './updateConfirmationHandler';
 import { updateConfirmationTooltipHandler } from './updateConfirmationTooltipHandler';
 
 const authHandlers = {
@@ -46,6 +47,7 @@ const authHandlers = {
     getConfirmationTooltipHandler,
     updateConfirmationTooltipHandler,
     getConfirmationHandler,
+    updateConfirmationHandler
 };
 
 export default authHandlers;

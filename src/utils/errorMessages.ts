@@ -103,6 +103,30 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return 'Details fetched successfully.';
         case "CONFIRMATION_TOOLTIP_UPDATED":
                 return 'Details updated successfully.';
+        case "CONFIRMATION_NOT_FOUND":
+            return "Confirmation not found.";
+        case "CONFIRMATION_UPDATED":
+            return "Thankyou for submitting your confirmation.";
+        case "CONFIRMATION_SUBMITTED":
+            return "Thankyou! Your confirmation is already submitted. You can't update it now.";
+        case "SERVICE_NOT_AVAILABLE":
+            return 'Service unavailable.';
+        case "PERMISSION_DENIED":
+            return 'Permission denied.';
+        case "ACCOUNT_NOT_ACTIVE":
+            return 'Your account is deactivated. Kindly ask the admin to reactivate your account!';
+        case "ACCOUNT_DELETED":
+            return 'Your account is deleted. Kindly ask the admin!';
+        case "ACCOUNT_PENDING":
+                return 'Please activate your acount!';
+        case "INCORRECT_CURRENT_PASSWORD":
+            return 'Please! check your current password and try again.';
+        case "PASSWORD_CHANGED_ACTIVATE":
+            return 'Password changed and user attributes updated successfully.';
+        case "PASSWORD_UPDATED":
+                return 'Password updated successfully.';
+        case "INFO_FETCHED":
+            return "Details fetched successfully.";
 
         default:
         return "";
