@@ -20,11 +20,11 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/confirmation': admiinHandlers.getConfirmationHandler,
     },
     PUT: {
-        '/leads/{id}/confirmation': admiinHandlers.updateConfirmationHandler,
         '/leads/{id}': admiinHandlers.editLeadHandler,
         '/leads/{id}/send-email': admiinHandlers.sendEmailHandler,
     },
     POST: {
+        '/leads/{id}/confirmation': admiinHandlers.updateConfirmationHandler,
         '/leads/{id}/confirmation-tooltip': admiinHandlers.updateConfirmationTooltipHandler,
         '/leads': admiinHandlers.addLeadHandler,
         '/leads/{id}/estimates': admiinHandlers.addEstimateHandler,

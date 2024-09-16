@@ -211,7 +211,9 @@ export const addEstimateDTO = async (payload: AddEstimatePayload): Promise<void>
 };
 
 // Define the edit estimate schema
-export const editEstimateSchema = yup.object().shape({
+export const editEstimateSchema = yup
+    .object()
+    .shape({
         quoteTotal: yup.number().required('Quote total is required'),
         costTotal: yup.number().required('Cost total is required'),
         quoteExpiresOn: yup.string().required('Quote expiry date is required'),
@@ -300,14 +302,16 @@ export const editEstimateDTO = async (payload: EditEstimatePayload): Promise<voi
 };
 
 // Define the send email payload schema
-export const sendEmailSchema = yup.object().shape({
+export const sendEmailSchema = yup
+    .object()
+    .shape({
         from: yup.string().email('Invalid email format').required('From email is required'),
         to: yup.string().email('Invalid email format').required('To email is required'),
         subject: yup.string().required('Subject is required'),
         body: yup.string().required('Body is required'),
         addClientSignature: yup.boolean().required('Client signature status is required'),
         templateId: yup.string().required('Template ID is required'),
-})
+    })
     .noUnknown(true, 'Unknown field in payload');
 
 // Validate the send email payload
@@ -323,10 +327,16 @@ export const sendEmailDTO = async (payload: SendEmailPayload): Promise<void> => 
 const addsurveyItemTab1Schema = yup.object().shape({
     room: yup.string().required('Room is required').max(100, 'Room name cannot exceed 100 characters'),
     item: yup.string().required('Item is required').max(100, 'Item name cannot exceed 100 characters'),
-    ft3: yup.number().required('ft3 is required')
-        .min(0, 'ft3 must be greater than or equal to 0').max(999.99, 'ft3 must be less than or equal to 999.99'),
-    quantity: yup.number().required('Quantity is required')
-        .integer('Quantity must be an integer').min(1, 'Quantity must be greater than or equal to 1'),
+    ft3: yup
+        .number()
+        .required('ft3 is required')
+        .min(0, 'ft3 must be greater than or equal to 0')
+        .max(999.99, 'ft3 must be less than or equal to 999.99'),
+    quantity: yup
+        .number()
+        .required('Quantity is required')
+        .integer('Quantity must be an integer')
+        .min(1, 'Quantity must be greater than or equal to 1'),
     isLeave: yup.boolean().required('isLeave is required'),
     isWeee: yup.boolean().required('isWeee is required'),
     isCust: yup.boolean().required('isCust is required'),
@@ -338,8 +348,11 @@ const addsurveyItemTab1Schema = yup.object().shape({
 // Define the validation schema for the AddSurveyPayload
 export const addSurveyTab1PayloadSchema = yup.object().shape({
     surveyorId: yup.string().required('Surveyor ID is required'),
-    surveyItems: yup.array().of(addsurveyItemTab1Schema)
-        .required('Survey items are required').min(1, 'There must be at least one survey item')
+    surveyItems: yup
+        .array()
+        .of(addsurveyItemTab1Schema)
+        .required('Survey items are required')
+        .min(1, 'There must be at least one survey item'),
 });
 
 // Function to validate the payload
@@ -355,20 +368,31 @@ const addsurveyItemTab3Schema = yup.object().shape({
     surveyItemId: yup.string().required('Survey item ID is required'),
     room: yup.string().required('Room is required').max(100, 'Room name cannot exceed 100 characters'),
     item: yup.string().required('Item is required').max(100, 'Item name cannot exceed 100 characters'),
-    ft3: yup.number().required('ft3 is required')
-        .min(0, 'ft3 must be greater than or equal to 0').max(999.99, 'ft3 must be less than or equal to 999.99'),
-    dismantleCharges: yup.number().required('Dismantle Charges is required')
+    ft3: yup
+        .number()
+        .required('ft3 is required')
+        .min(0, 'ft3 must be greater than or equal to 0')
+        .max(999.99, 'ft3 must be less than or equal to 999.99'),
+    dismantleCharges: yup
+        .number()
+        .required('Dismantle Charges is required')
         .min(0, 'Dismantle Charges must be greater than or equal to 0'),
-    sortOrder: yup.number().required('Sort Order is required')
-        .integer('Quantity must be an integer').min(1, 'Sort Order must be greater than or equal to 1'),
+    sortOrder: yup
+        .number()
+        .required('Sort Order is required')
+        .integer('Quantity must be an integer')
+        .min(1, 'Sort Order must be greater than or equal to 1'),
     linkedItem: yup.string().nullable().max(100, 'Linked Item name cannot exceed 100 characters'),
 });
 
 // Define the validation schema for the AddSurveyPayload
 export const addSurveyTab3PayloadSchema = yup.object().shape({
     surveyId: yup.string().required('Surveyor ID is required'),
-    surveyItems: yup.array().of(addsurveyItemTab3Schema)
-        .required('Survey items are required').min(1, 'There must be at least one survey item')
+    surveyItems: yup
+        .array()
+        .of(addsurveyItemTab3Schema)
+        .required('Survey items are required')
+        .min(1, 'There must be at least one survey item'),
 });
 
 // Function to validate the payload
@@ -383,7 +407,7 @@ export const validateAddSurveyTab3Payload = async (payload: AddSurveyTab3Payload
 // Define the validation schema for the AddSurveyPayload
 export const addSurveyTab2PayloadSchema = yup.object().shape({
     surveyId: yup.string().required('Surveyor ID is required'),
-    notes: yup.string().nullable()
+    notes: yup.string().nullable(),
 });
 
 // Function to validate the payload
@@ -402,7 +426,7 @@ const assignSurveyorPayloadSchema = yup.object().shape({
     startTime: yup.string().required('Start time is required'),
     endTime: yup.string().nullable(),
     description: yup.string().required('Description is required'),
-    surveyDate: yup.string().nullable()
+    surveyDate: yup.string().nullable(),
 });
 
 export const assignSurveyorDTO = async (payload: AssignSurveyorPayload) => {
@@ -506,49 +530,42 @@ export const addQuoteDTO = async (payload: AddQuotePayload): Promise<void> => {
     }
 };
 
-// Define the confirmation tooltip schema
-export const updateConfirmationTooltipSchema = yup.object().shape({
-    confirmationId: yup.string().required('Confirmation ID is required'),
-    isSeen: yup.boolean().required('Seen status is required'),
-    isNewResponse: yup.boolean().required('New response status is required')
-});
-
-export const updateConfirmationTooltipDTO = async (payload: TooltipConfirmationPayload): Promise<void> => {
-    try {
-        await updateConfirmationTooltipSchema.validate(payload, { abortEarly: false, strict: true });
-    } catch (err: any) {
-        throw new Error(`Payload Validation Failed: ${err.errors.join(', ')}`);
-    }
-};
-
-  // Define the Add Customer Confirmation schema
-  export const updateConfirmationSchema = yup.object().shape({
-    confirmationId: yup.string().required('confirmationId is required'),
-    movingDate: yup.object().shape({
-        date: yup.string().required('Moving date is required'),
-        time: yup.string().nullable(),
-        status: yup.string().required('Moving date status is required'),
-    }).required('Moving date details are required'),
-    packingDate: yup.object().shape({
-        date: yup.string().nullable(),
-        time: yup.string().nullable(),
-        status: yup.string().nullable(),
-    }).required('Packing date details are required'),
-    isDepositeRecieved: yup.boolean().required('Deposit received status is required'),
-    vatIncluded: yup.boolean().required('VAT inclusion status is required'),
-    services: yup
-        .array()
-        .of(
-            yup.object().shape({
-                serviceId: yup.string().nullable(),
-                name: yup.string().required('Service name is required'),
-                status: yup.string().required('Service status is required'),
-                cost: yup.number().nullable(),
+// Define the Add Customer Confirmation schema
+export const updateConfirmationSchema = yup
+    .object()
+    .shape({
+        confirmationId: yup.string().required('confirmationId is required'),
+        movingDate: yup
+            .object()
+            .shape({
+                date: yup.string().required('Moving date is required'),
+                time: yup.string().nullable(),
+                status: yup.string().required('Moving date status is required'),
             })
-        )
-        .required('Services are required'),
-}).noUnknown(true, 'Unknown field in payload');
-
+            .required('Moving date details are required'),
+        packingDate: yup
+            .object()
+            .shape({
+                date: yup.string().nullable(),
+                time: yup.string().nullable(),
+                status: yup.string().nullable(),
+            })
+            .required('Packing date details are required'),
+        isDepositeRecieved: yup.boolean().required('Deposit received status is required'),
+        vatIncluded: yup.boolean().required('VAT inclusion status is required'),
+        services: yup
+            .array()
+            .of(
+                yup.object().shape({
+                    serviceId: yup.string().nullable(),
+                    name: yup.string().required('Service name is required'),
+                    status: yup.string().required('Service status is required'),
+                    cost: yup.number().nullable(),
+                }),
+            )
+            .required('Services are required'),
+    })
+    .noUnknown(true, 'Unknown field in payload');
 
 export const updateConfirmationDTO = async (payload: UpdateConfirmationPayload): Promise<void> => {
     try {
@@ -557,4 +574,3 @@ export const updateConfirmationDTO = async (payload: UpdateConfirmationPayload):
         throw new Error(`Payload Validation Failed: ${err.errors.join(', ')}`);
     }
 };
-

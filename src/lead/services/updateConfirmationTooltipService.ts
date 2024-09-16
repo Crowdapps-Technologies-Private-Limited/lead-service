@@ -1,12 +1,15 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
-import { CHECK_TABLE_EXISTS, GET_CONFIRMATION_TOOLTIP_DETAILS, GET_LEAD_BY_ID, GET_SURVEY_DETAILS, UPDATE_CONFIRMATION_TOOLTIP_DETAILS } from '../../sql/sqlScript';
+import {
+    CHECK_TABLE_EXISTS,
+    GET_CONFIRMATION_ID_BY_LEAD_ID,
+    GET_LEAD_BY_ID,
+    UPDATE_CONFIRMATION_TOOLTIP_DETAILS,
+} from '../../sql/sqlScript';
 import { getMessage } from '../../utils/errorMessages';
-import { TooltipConfirmationPayload } from '../interface';
 
-export const updateConfirmationTooltipDetails = async (leadId: string, payload: TooltipConfirmationPayload, tenant: any) => {
+export const updateConfirmationTooltipDetails = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
-    const { confirmationId, isNewResponse, isSeen } = payload;
     try {
         if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
             throw new Error(getMessage('ACCOUNT_SUSPENDED'));
@@ -19,23 +22,34 @@ export const updateConfirmationTooltipDetails = async (leadId: string, payload: 
         let tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);
         let checkTableExists = tableCheckRes.rows[0].exists;
         if (!checkTableExists) {
-          logger.info('Leads table does not exist');
+            logger.info('Leads table does not exist');
         }
         // Check if the lead id exists
         const leadResult = await client.query(GET_LEAD_BY_ID, [leadId]);
-        if(leadResult.rows.length === 0) {
+        if (leadResult.rows.length === 0) {
             logger.info('Lead does not exist');
+            throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
         tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'confirmations']);
         checkTableExists = tableCheckRes.rows[0].exists;
         if (!checkTableExists) {
-          logger.info('Confirmations table does not exist');
+            logger.info('Confirmations table does not exist');
         }
+
+        const confirmationIdRes = await client.query(GET_CONFIRMATION_ID_BY_LEAD_ID, [leadId]);
+        if (confirmationIdRes.rows.length === 0) {
+            logger.info('Confirmation Id does not exist');
+            new Error(getMessage('CONFIRMATION_NOT_FOUND'));
+        }
+
+        const confirmationId = confirmationIdRes.rows[0].confirmation_id;
+        logger.info('Confirmation Id:', { confirmationId });
+
         const confirmationResult = await client.query(UPDATE_CONFIRMATION_TOOLTIP_DETAILS, [
-            isSeen,
-            isNewResponse,
+            true,
+            false,
             tenant.email,
-            confirmationId
+            confirmationId,
         ]);
         const confirmation = confirmationResult.rows[0];
         return confirmation;

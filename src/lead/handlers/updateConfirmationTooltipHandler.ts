@@ -8,14 +8,19 @@ import { getMessage } from '../../utils/errorMessages';
 import { updateConfirmationTooltipDTO } from '../validator';
 
 export const updateConfirmationTooltipHandler: RouteHandler = async (
-    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
+    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
     logger.info('Received event at updateConfirmationTooltipHandler', { event });
     const payload = JSON.parse(event.body || '{}');
     const leadId = event.pathParameters?.id;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
-    const hasPermission = await checkPermission(user.role, 'Confirmation', 'update', tenant?.schema || tenant?.tenant?.schema);
+    const hasPermission = await checkPermission(
+        user.role,
+        'Confirmation',
+        'update',
+        tenant?.schema || tenant?.tenant?.schema,
+    );
     logger.info('hasPermission: -----------', { hasPermission });
     if (!hasPermission) {
         return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
@@ -23,17 +28,10 @@ export const updateConfirmationTooltipHandler: RouteHandler = async (
     if (!leadId) {
         return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
     }
-    // Validate payload
-    try {
-        await updateConfirmationTooltipDTO(payload);
-    } catch (error: any) {
-        const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
-        return ResponseHandler.notFoundResponse({ message: cleanedMessage });
-    }
 
     try {
         // Update data
-        await updateConfirmationTooltipDetails(leadId, payload, tenant);
+        await updateConfirmationTooltipDetails(leadId, tenant);
         return ResponseHandler.successResponse({ message: getMessage('CONFIRMATION_TOOLTIP_UPDATED') });
     } catch (error: any) {
         logger.error('Failed to update confirmation tooltip data at handler', { error });

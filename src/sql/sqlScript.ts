@@ -1547,3 +1547,15 @@ ORDER BY
     e.created_at DESC
 LIMIT 1;
 `;
+
+export const GET_CONFIRMATION_ID_BY_LEAD_ID = `
+SELECT 
+    confirmation_id
+FROM 
+    confirmations
+WHERE 
+    lead_id = $1
+ORDER BY 
+    created_at DESC
+LIMIT 1;
+`;
