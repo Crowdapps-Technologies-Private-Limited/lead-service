@@ -1,156 +1,140 @@
 export const getMessage = (template: any, systemErr?: any): string => {
     // return systemErr;
     switch (template) {
-        case "TOKEN_INVALID":
+        case 'TOKEN_INVALID':
             return 'Token not verified.';
-        case "PERMISSION_DENIED":
+        case 'PERMISSION_DENIED':
             return 'Permission denied.';
-        case "ACCOUNT_NOT_ACTIVE":
+        case 'ACCOUNT_NOT_ACTIVE':
             return 'Your account is deactivated. Kindly ask the admin to reactivate your account!';
-        case "ACCOUNT_DELETED":
+        case 'ACCOUNT_DELETED':
             return 'Your account is deleted. Kindly ask the admin!';
-        case "ACCOUNT_PENDING":
-                return 'Please activate your acount!';
-        case "ACCOUNT_SUSPENDED":
+        case 'ACCOUNT_PENDING':
+            return 'Please activate your acount!';
+        case 'ACCOUNT_SUSPENDED':
             return 'Your account is suspended. Kindly ask the admin to reactivate your account!';
-        case "INCORRECT_CURRENT_PASSWORD":
-            return 'Please! check your current password and try again.';
-        case "PASSWORD_CHANGED_ACTIVATE":
+        case 'PASSWORD_CHANGED_ACTIVATE':
             return 'Password changed and user attributes updated successfully.';
-        case "PASSWORD_UPDATED":
-                return 'Password updated successfully.';
-        case "LEAD_ADDED":
-            return "Lead added successfully.";
-        case "LEAD_UPDATED":
-            return "Lead updated successfully.";
-        case "LEAD_DELETED":
-            return "Lead deleted successfully.";
-        case "LEAD_FETCHED":
-            return "Lead data fetched successfully.";
-        case "LEAD_NOT_FOUND":
-            return "Lead not found.";
-        case "LEAD_LIST_FETCHED":
-            return "Lead list fetched successfully.";
-        case "LEAD_LOG_LIST_FETCHED":
-            return "Log list fetched successfully.";
-        case "REFERRER_LIST_FETCHED":
-            return "Referrer list fetched successfully.";
-        case "LEAD_ACTIVITY_FETCHED":
-            return "Lead activities fetched successfully.";
-        case "LEAD_ID_REQUIRED":
-            return "Lead ID is required in path parameters.";
-        case "LEAD_SURVEY_EXIST":
+        case 'PASSWORD_UPDATED':
+            return 'Password updated successfully.';
+        case 'LEAD_ADDED':
+            return 'Lead added successfully.';
+        case 'LEAD_UPDATED':
+            return 'Lead updated successfully.';
+        case 'LEAD_DELETED':
+            return 'Lead deleted successfully.';
+        case 'LEAD_FETCHED':
+            return 'Lead data fetched successfully.';
+        case 'LEAD_NOT_FOUND':
+            return 'Lead not found.';
+        case 'LEAD_LIST_FETCHED':
+            return 'Lead list fetched successfully.';
+        case 'LEAD_LOG_LIST_FETCHED':
+            return 'Log list fetched successfully.';
+        case 'REFERRER_LIST_FETCHED':
+            return 'Referrer list fetched successfully.';
+        case 'LEAD_ACTIVITY_FETCHED':
+            return 'Lead activities fetched successfully.';
+        case 'LEAD_ID_REQUIRED':
+            return 'Lead ID is required in path parameters.';
+        case 'LEAD_SURVEY_EXIST':
             return 'Survey already exists for this lead.';
-        case "DISTANCE_CALCULATED":
+        case 'DISTANCE_CALCULATED':
             return 'Distance calculated successfully.';
-        case "DISTANCE_CALCULATION_FAILED":
+        case 'DISTANCE_CALCULATION_FAILED':
             return 'Error calculating distance.';
 
-        case "ESTIMATE_ADDED": 
-            return "Estimate added successfully.";  
-        case "ESTIMATE_UPDATED":
-            return "Estimate updated successfully."; 
-        case "ESTIMATE_ID_LEAD_ID_REQUIRED":
-            return "Estimate ID and Lead ID are required in path parameters.";
-        case "PDF_GENERATED":
-            return "PDF generated successfully.";
-        case "EMAIL_SENT":
-            return "Email sent successfully.";
-        case "ESTIMATE_FETCHED":
-            return "Estimate fetched successfully.";
-        case "ESTIMATE_NOT_FOUND":
-            return "Estimate not found.";
-        case "QUOTE_ADDED":
-            return "Quote added successfully.";
-        case "QUOTE_UPDATED":
-            return "Quote updated successfully.";
-        case "QUOTE_ID_LEAD_ID_REQUIRED":
-            return "Quote ID and Lead ID are required in path parameters.";
-        case "QUOTE_FETCHED":
-            return "Quotation fetched successfully.";
-        case "QUOTE_NOT_FOUND":
-            return "Quotation not found.";
-        case "PREV_QUOTE_NOT_FOUND":
-            return "No previous quotation found.";
-        case "PREV_QUOTE_PDF_GENERATED":
-            return "Previous quotation PDF of the lead generated successfully.";
-        case "LEAD_STATUS_NOT_ALLOWED":
-            return "Lead is not allowed for this operation as stage already passed.";
+        case 'ESTIMATE_ADDED':
+            return 'Estimate added successfully.';
+        case 'ESTIMATE_UPDATED':
+            return 'Estimate updated successfully.';
+        case 'ESTIMATE_ID_LEAD_ID_REQUIRED':
+            return 'Estimate ID and Lead ID are required in path parameters.';
+        case 'PDF_GENERATED':
+            return 'PDF generated successfully.';
+        case 'EMAIL_SENT':
+            return 'Email sent successfully.';
+        case 'ESTIMATE_FETCHED':
+            return 'Estimate fetched successfully.';
+        case 'ESTIMATE_NOT_FOUND':
+            return 'Estimate not found.';
+        case 'QUOTE_ADDED':
+            return 'Quote added successfully.';
+        case 'QUOTE_UPDATED':
+            return 'Quote updated successfully.';
+        case 'QUOTE_ID_LEAD_ID_REQUIRED':
+            return 'Quote ID and Lead ID are required in path parameters.';
+        case 'QUOTE_FETCHED':
+            return 'Quotation fetched successfully.';
+        case 'QUOTE_NOT_FOUND':
+            return 'Quotation not found.';
+        case 'PREV_QUOTE_NOT_FOUND':
+            return 'No previous quotation found.';
+        case 'PREV_QUOTE_PDF_GENERATED':
+            return 'Previous quotation PDF of the lead generated successfully.';
+        case 'LEAD_STATUS_NOT_ALLOWED':
+            return 'Lead is not allowed for this operation as stage already passed.';
 
-        case "SURVEYOR_NOT_FOUND":
+        case 'SURVEYOR_NOT_FOUND':
             return 'Surveyor not found.';
-        case "SURVEYOR_LIST_FETCHED":
+        case 'SURVEYOR_LIST_FETCHED':
             return 'Surveyor list fetched successfully.';
-        case "NO_SURVEYOR_AVAILABILITY":
+        case 'NO_SURVEYOR_AVAILABILITY':
             return 'No surveyor available in the given time range.';
-        case "SURVEYOR_ASSIGNED":
+        case 'SURVEYOR_ASSIGNED':
             return 'Surveyor assigned successfully.';
-        case "SURVEY_LIST_FETCHED":
+        case 'SURVEY_LIST_FETCHED':
             return 'Survey list fetched successfully.';
-        case "SURVEY_FETCHED":
-            return 'Survey data fetched successfully.';
-        case "SURVEY_ID_REQUIRED":
-            return "Survey ID is required in path parameters.";
-        case "TEMPLATE_NO_FOUND": 
-            return "Email template not found.";
-        case "NOT_VALID_START_TIME":
+        case 'SURVEY_ID_REQUIRED':
+            return 'Survey ID is required in path parameters.';
+        case 'TEMPLATE_NO_FOUND':
+            return 'Email template not found.';
+        case 'NOT_VALID_START_TIME':
             return `Survey start time must be before the lead's packing on date or moving on date`;
-        case "NOT_VALID_END_TIME":
+        case 'NOT_VALID_END_TIME':
             return `Survey end time must be before the lead's packing on date or moving on date`;
-        case "SURVEY_FETCHED":
+        case 'SURVEY_FETCHED':
             return 'Survey fetched successfully.';
-        case "CONFIRMATION_TOOLTIP_FETCHED":
+        case 'CONFIRMATION_TOOLTIP_FETCHED':
             return 'Details fetched successfully.';
-        case "CONFIRMATION_TOOLTIP_UPDATED":
-                return 'Details updated successfully.';
-        case "CONFIRMATION_NOT_FOUND":
-            return "Confirmation not found.";
-        case "CONFIRMATION_UPDATED":
-            return "Thankyou for submitting your confirmation.";
-        case "CONFIRMATION_SUBMITTED":
+        case 'CONFIRMATION_TOOLTIP_UPDATED':
+            return 'Details updated successfully.';
+        case 'CONFIRMATION_NOT_FOUND':
+            return 'Confirmation not found.';
+        case 'CONFIRMATION_UPDATED':
+            return 'Thankyou for submitting your confirmation.';
+        case 'CONFIRMATION_SUBMITTED':
             return "Thankyou! Your confirmation is already submitted. You can't update it now.";
-        case "SERVICE_NOT_AVAILABLE":
+        case 'SERVICE_NOT_AVAILABLE':
             return 'Service unavailable.';
-        case "PERMISSION_DENIED":
-            return 'Permission denied.';
-        case "ACCOUNT_NOT_ACTIVE":
-            return 'Your account is deactivated. Kindly ask the admin to reactivate your account!';
-        case "ACCOUNT_DELETED":
-            return 'Your account is deleted. Kindly ask the admin!';
-        case "ACCOUNT_PENDING":
-                return 'Please activate your acount!';
-        case "INCORRECT_CURRENT_PASSWORD":
+        case 'INCORRECT_CURRENT_PASSWORD':
             return 'Please! check your current password and try again.';
-        case "PASSWORD_CHANGED_ACTIVATE":
-            return 'Password changed and user attributes updated successfully.';
-        case "PASSWORD_UPDATED":
-                return 'Password updated successfully.';
-        case "INFO_FETCHED":
-            return "Details fetched successfully.";
+        case 'INFO_FETCHED':
+            return 'Details fetched successfully.';
 
         default:
-        return "";
+            return '';
     }
-}
+};
 
 export const getErrorMessage = (template: string, systemErr: string): string => {
     // return systemErr;
     switch (template) {
-        case "ADD_CLIENT":
+        case 'ADD_CLIENT':
             return `Failed to add client due to ${systemErr}`;
-        case "DELETE_CLIENT":
+        case 'DELETE_CLIENT':
             return `Failed to delete client due to ${systemErr}`;
-        case "EDIT_CLIENT":
+        case 'EDIT_CLIENT':
             return `Failed to update client due to ${systemErr}`;
-        case "CLIENT_FETCH":
+        case 'CLIENT_FETCH':
             return `Failed to fetch client details due to ${systemErr}`;
-        case "CLIENT_FETCH_LIST":
+        case 'CLIENT_FETCH_LIST':
             return `Failed to fetch client list due to ${systemErr}`;
-        case "CLIENT_FETCH_ACTIVITY":
+        case 'CLIENT_FETCH_ACTIVITY':
             return `Failed to fetch client's activities due to ${systemErr}`;
-        case "CUSTOMER_NOT_FOUND":
-            return "Customer not found.";
+        case 'CUSTOMER_NOT_FOUND':
+            return 'Customer not found.';
         default:
-            return "";
+            return '';
     }
-}
+};

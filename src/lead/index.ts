@@ -17,20 +17,19 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/previous-quotes': admiinHandlers.getSecondLatestQuotesHandler,
         '/leads/{id}/quote-send-email/{quoteId}': admiinHandlers.sendConfirmationHandler,
         '/leads/{id}/confirmation-tooltip': admiinHandlers.getConfirmationTooltipHandler,
-        '/leads/{id}/confirmation': admiinHandlers.getConfirmationHandler,   
+        '/leads/{id}/confirmation': admiinHandlers.getConfirmationHandler,
     },
     PUT: {
-       '/leads/{id}/confirmation': admiinHandlers.updateConfirmationHandler,
+        '/leads/{id}/confirmation': admiinHandlers.updateConfirmationHandler,
         '/leads/{id}': admiinHandlers.editLeadHandler,
-        '/leads/{id}/send-email': admiinHandlers.sendEmailHandler, 
-        '/leads/{id}/confirmation-tooltip': admiinHandlers.updateConfirmationTooltipHandler,   
+        '/leads/{id}/send-email': admiinHandlers.sendEmailHandler,
     },
     POST: {
+        '/leads/{id}/confirmation-tooltip': admiinHandlers.updateConfirmationTooltipHandler,
         '/leads': admiinHandlers.addLeadHandler,
         '/leads/{id}/estimates': admiinHandlers.addEstimateHandler,
         '/leads/distance': admiinHandlers.getDistanceHandler,
         '/leads/{id}/assign-surveyor': admiinHandlers.assignSurveyorHandler,
         '/leads/{id}/quotes': admiinHandlers.addQuoteHandler,
-       
     },
 };

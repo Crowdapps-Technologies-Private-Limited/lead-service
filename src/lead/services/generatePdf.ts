@@ -13,7 +13,6 @@ const API2PDF_API_KEY = '11d34aa8-9033-480e-80b1-7851fac23a04'; // Replace with 
 
 export const generatePdfAndUploadToS3 = async (options: GeneratePdfOptions): Promise<string> => {
     const { html, key } = options;
-    const bucketName = 'dev-mmym-files';
 
     if (!html) {
         throw new Error('HTML content must be provided');

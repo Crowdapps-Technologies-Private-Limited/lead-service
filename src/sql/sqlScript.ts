@@ -459,8 +459,6 @@ export const UPDATE_SERVICE = `
     WHERE id = $4
 `;
 
-
-
 export const UPDATE_MATERIAL = `
     UPDATE materials
     SET
@@ -731,7 +729,6 @@ export const GET_SURVEYS_LIST_TENANT = `
         AND s.lead_id IS NOT NULL
 `;
 
-
 export const GET_SURVEYS_COUNT = `
     SELECT 
         COUNT(*) 
@@ -822,14 +819,12 @@ SET
 WHERE id = $9
 `;
 
-
 export const GET_ALL_SURVEYORS = `
   SELECT *
   FROM staffs s
   INNER JOIN staff_roles sr ON s.role_id = sr.id
   WHERE sr.role = $1
 `;
-
 
 export const DELETE_ESTIMATE_SERVICES = `
     DELETE FROM estimate_services
@@ -841,24 +836,20 @@ export const DELETE_ESTIMATE_MATERIALS = `
     WHERE estimate_id = $1;
 `;
 
-
 export const DELETE_ESTIMATE_COSTS = `
     DELETE FROM estimate_costs
     WHERE estimate_id = $1;
 `;
-
 
 export const DELETE_ESTIMATE_GENERAL_INFO = `
     DELETE FROM estimate_general_info
     WHERE estimate_id = $1;
 `;
 
-
 export const DELETE_ESTIMATE_ANCILLARIES = `
     DELETE FROM estimate_ancillaries
     WHERE estimate_id = $1;
 `;
-
 
 export const CREATE_QUOTE_AND_RELATED_TABLE = `
 CREATE TABLE IF NOT EXISTS quotes (
@@ -1019,18 +1010,15 @@ export const DELETE_QUOTE_MATERIALS = `
     WHERE quote_id = $1;
 `;
 
-
 export const DELETE_QUOTE_COSTS = `
     DELETE FROM quote_costs
     WHERE quote_id = $1;
 `;
 
-
 export const DELETE_QUOTE_GENERAL_INFO = `
     DELETE FROM quote_general_info
     WHERE quote_id = $1;
 `;
-
 
 export const DELETE_QUOTE_ANCILLARIES = `
     DELETE FROM quote_ancillaries
@@ -1050,8 +1038,6 @@ export const UPDATE_QUOTE = `
     WHERE id = $8
 `;
 
-
-
 export const GET_LEAD_CUSTOMER_BY_LEAD_ID = `
     SELECT
         l.generated_id,
@@ -1068,7 +1054,6 @@ export const GET_LEAD_CUSTOMER_BY_LEAD_ID = `
     WHERE
         l.generated_id = $1;
 `;
-
 
 export const UPDATE_CUSTOMER_WITH_CREDENTIAL = `
 UPDATE customers
@@ -1087,6 +1072,7 @@ CREATE TABLE IF NOT EXISTS confirmations (
     confirmation_id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
     customer_id UUID DEFAULT public.uuid_generate_v4(),
     lead_id VARCHAR(20) REFERENCES leads(generated_id) ON DELETE CASCADE,
+    quote_id UUID REFERENCES quotes(id) ON DELETE CASCADE,
     moving_on_date TIMESTAMP,
     moving_on_time VARCHAR(100),
     moving_on_status VARCHAR(100),
@@ -1122,8 +1108,6 @@ CREATE TABLE IF NOT EXISTS confirmation_services (
 );
 `;
 
-
-
 export const INSERT_CONFIRMATION = `
 INSERT INTO confirmations (
     confirmation_id, 
@@ -1137,7 +1121,8 @@ INSERT INTO confirmations (
     is_submitted, 
     is_seen, 
     notes, 
-    created_by
+    created_by,
+    quote_id
 ) VALUES (
     public.uuid_generate_v4(),   
     $1,                         
@@ -1150,12 +1135,10 @@ INSERT INTO confirmations (
     $8,                         
     $9,                         
     $10,                       
-    $11                         
+    $11,
+    $12                         
 ) RETURNING confirmation_id;
 `;
-
-
-
 
 export const GET_QUOTE_SERVICES = `
 SELECT 
@@ -1208,7 +1191,6 @@ DELETE FROM confirmations
 WHERE lead_id = $1;
 `;
 
-
 export const GET_CONFIRMATION_BY_LEAD_ID = `
 SELECT 
     confirmation_id,
@@ -1237,7 +1219,6 @@ SELECT
 FROM confirmations
 WHERE lead_id = $1;
 `;
-
 
 export const GET_CUSTOMER_BY_EMAIL = `
 SELECT 
@@ -1278,7 +1259,7 @@ export const UPDATE_CONFIRMATION_TOOLTIP_DETAILS = `
         is_new_response = $2,
         updated_at = NOW(),
         updated_by = $3
-    WHERE confirmation_id = $4`
+    WHERE confirmation_id = $4`;
 
 export const GET_TERMS_DOC = `
     SELECT * FROM documents WHERE name = 'terms_conditions';
@@ -1288,12 +1269,13 @@ export const GET_PACKING_DOC = `
     SELECT * FROM documents WHERE name = 'packing_guide';
 `;
 
-
 export const GET_CONFIRMATION_DETAILS = `
     SELECT
         c.confirmation_id AS "confirmationId",
         c.customer_id AS "customerId",
         c.lead_id AS "leadId",
+        c.quote_id AS "quoteId",
+        c.is_deposit_received AS "isDepositReceived",
         c.moving_on_date AS "movingOnDate",
         c.moving_on_time AS "movingOnTime",
         c.moving_on_status AS "movingOnStatus",
@@ -1328,8 +1310,6 @@ export const GET_CONFIRMATION_DETAILS = `
         c.created_at DESC
     LIMIT 1;
 `;
-
-
 
 export const UPDATE_CONFIRMATION = `
     UPDATE confirmations
@@ -1392,6 +1372,10 @@ export const GET_LEAD_DETAILS_FOR_CUSTOMER = `
         da.county AS "deliveryCounty",
         da.postcode AS "deliveryPostcode",
         da.country AS "deliveryCountry",
+        l.collection_volume,
+        l.collection_volume_unit,
+        l.delivery_volume,
+        l.delivery_volume_unit,
         l.collection_purchase_status AS "collectionPurchaseStatus",
         l.delivery_purchase_status AS "deliveryPurchaseStatus"
     FROM
@@ -1406,16 +1390,14 @@ export const GET_LEAD_DETAILS_FOR_CUSTOMER = `
         l.generated_id = $1;
 `;
 
-
 export const GET_LEAD_QUOTES_CONFIRMATION = `
 SELECT 
     q.notes,
-    q.vat_included  AS "vatIncluded",
+    q.vat_included AS "vatIncluded",
     c.driver_qty AS "driverQty",
     c.porter_qty AS "porterQty",
     c.packer_qty AS "packerQty",
     g.contents_value AS "contentsValue",
-    m.volume,
     g.payment_method AS "paymentMethod",
     g.insurance_amount AS "insuranceAmount",
     g.insurance_percentage AS "insurancePercentage",
@@ -1432,17 +1414,13 @@ LEFT JOIN
     general_information g ON qg.general_info_id = g.id
 LEFT JOIN 
     quote_materials qm ON q.id = qm.quote_id
-LEFT JOIN 
-    materials m ON qm.material_id = m.id
 WHERE 
-    q.lead_id = $1;
+    q.id = $1;
 `;
 
 export const GET_CONFIRMATION_BY_ID = `
     SELECT * FROM confirmations WHERE confirmation_id = $1;
 `;
-
-
 
 export const UPDATE_CONFIRMATION_BY_CLIENT = `
     UPDATE confirmations
@@ -1460,8 +1438,112 @@ export const UPDATE_CONFIRMATION_BY_CLIENT = `
     RETURNING *;
 `;
 
+export const CREATE_JOB_SCHEDULE_TABLE_IF_NOT_EXIST = `
+CREATE TABLE IF NOT EXISTS job_schedules (
+    job_id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    job_title VARCHAR(255) NOT NULL,
+    lead_id INT NOT NULL,
+    assigned_workers INT,
+    customer_id UUID,
+    collection_address_id UUID,
+    delivery_address_id UUID,
+    start_date_time TIMESTAMP NOT NULL,
+    end_date_time TIMESTAMP,
+    note TEXT,
+    vehicle_type VARCHAR(100),
+    vehicle_count INT,
+    status VARCHAR(50),
+    created_by VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by VARCHAR(255),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)
+`;
 
+export const GET_CONFIRMATION_AND_CUSTOMER_BY_ID = `
+SELECT 
+    c.confirmation_id,
+    c.lead_id,
+    c.quote_id,
+    cus.id AS customer_id,
+    cus.name AS customer_name,
+    cus.phone AS customer_phone,
+    cus.email AS customer_email,
+    a1.street AS collection_street,
+    a1.town AS collection_town,
+    a1.county AS collection_county,
+    a1.postcode AS collection_postcode,
+    a1.country AS collection_country,
+    a2.street AS delivery_street,
+    a2.town AS delivery_town,
+    a2.county AS delivery_county,
+    a2.postcode AS delivery_postcode,
+    a2.country AS delivery_country,
+    c.moving_on_status,
+    c.packing_on_date,
+    c.packing_on_status
+FROM 
+    confirmations c
+JOIN 
+    leads l ON c.lead_id = l.generated_id
+LEFT JOIN 
+    customers cus ON l.customer_id = cus.id
+LEFT JOIN 
+    addresses a1 ON l.collection_address_id = a1.id
+LEFT JOIN 
+    addresses a2 ON l.delivery_address_id = a2.id
+WHERE 
+    c.confirmation_id = $1;
+`;
 
+export const INSERT_JOB_SCHEDULE = `
+  INSERT INTO job_schedules (
+    job_title, 
+    assigned_workers, 
+    customer_id, 
+    collection_address_id,
+    delivery_address_id,
+    start_date_time, 
+    end_date_time, 
+    note,
+    status, 
+    created_by, 
+    created_at, 
+    updated_by, 
+    updated_at, 
+    lead_id
+  ) 
+  VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+  ) RETURNING *;
+`;
 
-
-
+export const GET_QUOTE_BY_ID_FOR_CONFIRMATION = `
+SELECT 
+    e.id AS quoteId,
+    e.lead_id AS leadId,
+    e.quote_total AS quoteTotal,
+    e.cost_total AS costTotal,
+    e.notes,
+    (
+        SELECT json_agg(json_build_object(
+            'costId', c.id,
+            'driverQty', c.driver_qty,
+            'porterQty', c.porter_qty,
+            'packerQty', c.packer_qty,
+            'vehicleQty', c.vehicle_qty,
+            'vehicleTypeId', c.vehicle_type_id
+        ))
+        FROM quote_costs ec
+        JOIN costs c ON ec.cost_id = c.id
+        JOIN public.vehicle_types vt ON c.vehicle_type_id = vt.id
+        WHERE ec.quote_id = e.id
+    ) AS costs
+FROM 
+    quotes e
+WHERE 
+    e.id = $1
+ORDER BY 
+    e.created_at DESC
+LIMIT 1;
+`;

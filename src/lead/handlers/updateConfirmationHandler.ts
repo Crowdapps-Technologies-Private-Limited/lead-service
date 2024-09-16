@@ -8,14 +8,19 @@ import { getMessage } from '../../utils/errorMessages';
 import { updateConfirmationDTO, updateConfirmationTooltipDTO } from '../validator';
 
 export const updateConfirmationHandler: RouteHandler = async (
-    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
+    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
     logger.info('Received event at updateConfirmationHandler', { event });
     const payload = JSON.parse(event.body || '{}');
     const leadId = event.pathParameters?.id;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
-    const hasPermission = await checkPermission(user.role, 'Confirmation', 'update', tenant?.schema || tenant?.tenant?.schema);
+    const hasPermission = await checkPermission(
+        user.role,
+        'Confirmation',
+        'update',
+        tenant?.schema || tenant?.tenant?.schema,
+    );
     logger.info('hasPermission: -----------', { hasPermission });
     if (!hasPermission) {
         return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });

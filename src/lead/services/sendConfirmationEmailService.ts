@@ -4,8 +4,8 @@ import logger from '../../utils/logger';
 import AWS from 'aws-sdk';
 const { CognitoIdentityServiceProvider } = AWS;
 const cognito = new CognitoIdentityServiceProvider();
-import {  
-    INSERT_LOG, 
+import {
+    INSERT_LOG,
     GET_LEAD_CUSTOMER_BY_LEAD_ID,
     UPDATE_CUSTOMER_WITH_CREDENTIAL,
     CREATE_CONFIRMATION_TABLES,
@@ -14,7 +14,7 @@ import {
     INSERT_CONFIRMATION_SERVICES,
     DELETE_CONFIRMATION_BY_LEAD_ID,
     GET_CONFIRMATION_BY_LEAD_ID,
-    GET_CUSTOMER_BY_EMAIL  // Make sure this query is added to your SQL scripts
+    GET_CUSTOMER_BY_EMAIL, // Make sure this query is added to your SQL scripts
 } from '../../sql/sqlScript';
 import { getErrorMessage, getMessage } from '../../utils/errorMessages';
 import { generateEmail } from '../../utils/generateEmailService';
@@ -55,21 +55,23 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
         logger.info('Customer email:', { email });
         logger.info('Customer username:', { userName });
         if (!email) {
-            throw new Error(getErrorMessage('CUSTOMER_NOT_FOUND', "Email not found"));
+            throw new Error(getErrorMessage('CUSTOMER_NOT_FOUND', 'Email not found'));
         }
 
         // Start transaction
         await client.query('BEGIN');
 
         // Check if the email already exists in AWS Cognito
-        let password = "";
+        let password = '';
         let customer = null;
 
         try {
-            const usersByEmail = await cognito.listUsers({
-                UserPoolId: config.cognitoUserPoolId,
-                Filter: `email = "${email}"`
-            }).promise();
+            const usersByEmail = await cognito
+                .listUsers({
+                    UserPoolId: config.cognitoUserPoolId,
+                    Filter: `email = "${email}"`,
+                })
+                .promise();
 
             if (usersByEmail.Users?.length) {
                 // Email already exists in Cognito;
@@ -89,17 +91,19 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                 // Sign up user in Cognito
                 let signUpResult;
                 try {
-                    signUpResult = await cognito.signUp({
-                        ClientId: config.cognitoAppClientId as string,
-                        Username: userName,
-                        Password: password,
-                        UserAttributes: [
-                            { Name: 'email', Value: email },
-                            { Name: 'name', Value: userName },
-                            { Name: 'custom:role', Value: 'CUSTOMER' },
-                            { Name: 'custom:tenant_id', Value: tenant.id }
-                        ],
-                    }).promise();
+                    signUpResult = await cognito
+                        .signUp({
+                            ClientId: config.cognitoAppClientId as string,
+                            Username: userName,
+                            Password: password,
+                            UserAttributes: [
+                                { Name: 'email', Value: email },
+                                { Name: 'name', Value: userName },
+                                { Name: 'custom:role', Value: 'CUSTOMER' },
+                                { Name: 'custom:tenant_id', Value: tenant.id },
+                            ],
+                        })
+                        .promise();
                     logger.info('User signed up in Cognito');
                 } catch (signUpError) {
                     logger.error('Error during Cognito sign-up:', signUpError);
@@ -114,19 +118,21 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                 }
 
                 // Confirm the user in Cognito
-                await cognito.adminConfirmSignUp({
-                    UserPoolId: config.cognitoUserPoolId,
-                    Username: userName,
-                }).promise();
+                await cognito
+                    .adminConfirmSignUp({
+                        UserPoolId: config.cognitoUserPoolId,
+                        Username: userName,
+                    })
+                    .promise();
                 logger.info('User confirmed in Cognito');
 
-                await cognito.adminUpdateUserAttributes({
-                    UserPoolId: config.cognitoUserPoolId,
-                    Username: userName,
-                    UserAttributes: [
-                        { Name: 'email_verified', Value: 'true' },
-                    ],
-                }).promise();
+                await cognito
+                    .adminUpdateUserAttributes({
+                        UserPoolId: config.cognitoUserPoolId,
+                        Username: userName,
+                        UserAttributes: [{ Name: 'email_verified', Value: 'true' }],
+                    })
+                    .promise();
                 logger.info('User attributes updated successfully in Cognito');
 
                 // Encrypt the password
@@ -140,7 +146,7 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                     tenant.id,
                     userName,
                     user.sub,
-                    leadData.customer_id,  // Assuming you have customer id as result.id
+                    leadData.customer_id, // Assuming you have customer id as result.id
                 ]);
                 logger.info('Customer updated with Cognito credentials');
             }
@@ -172,7 +178,10 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
 
             // Check if confirmation already exists and is not submitted
             const confirmationCheckResult = await client.query(GET_CONFIRMATION_BY_LEAD_ID, [leadId]);
-            if (confirmationCheckResult.rows.length > 0 && confirmationCheckResult.rows[0].moving_on_status !== 'fixed') {
+            if (
+                confirmationCheckResult.rows.length > 0 &&
+                confirmationCheckResult.rows[0].moving_on_status !== 'fixed'
+            ) {
                 await client.query(DELETE_CONFIRMATION_BY_LEAD_ID, [leadId]);
                 logger.info('Previous unsubmitted confirmation deleted');
             }
@@ -185,32 +194,62 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                 throw new Error(getMessage('QUOTE_NOT_FOUND'));
             }
 
-            const { services, notes: quoteNotes } = quoteDataResult.rows[0];
+            const { services, notes: quoteNotes, quoteid: quote_id } = quoteDataResult.rows[0];
+
+            logger.info('Quote services retrieved successfully', { services });
+            logger.info('Quote notes:', { quoteNotes });
+            logger.info('Quote ID:', { quote_id });
 
             const confirmationResult = await client.query(INSERT_CONFIRMATION, [
-                leadData.customer_id,      // $1: customer_id
-                leadId,                    // $2: lead_id
-                leadData.moving_on_date,    // $3: moving_on_date
-                leadData.packing_on_date,   // $4: packing_on_date
-                false,                     // $5: is_accept_liability_cover
-                false,                     // $6: is_terms_accepted
-                false,                     // $7: is_quotation_accepted
-                false,                     // $8: is_submitted
-                false,                     // $9: is_seen
-                quoteNotes,                // $10: notes
-                user.email,             // $11: created_by
+                leadData.customer_id, // $1: customer_id
+                leadId, // $2: lead_id
+                leadData.moving_on_date, // $3: moving_on_date
+                leadData.packing_on_date, // $4: packing_on_date
+                false, // $5: is_accept_liability_cover
+                false, // $6: is_terms_accepted
+                false, // $7: is_quotation_accepted
+                false, // $8: is_submitted
+                false, // $9: is_seen
+                quoteNotes, // $10: notes
+                user.email, // $11: created_by
+                quote_id, // $12: quote_id
             ]);
 
             const confirmationId = confirmationResult.rows[0].confirmation_id; // Retrieve confirmation_id
             logger.info('Confirmation inserted successfully:', { confirmationId });
 
             // Insert services into confirmation_services table
-            for (const service of services) {
+            // Custom order for specific services
+            const customOrder = ['Door to Door', 'Full Pack'];
+
+            // Custom sorting function
+            const sortedServices = services.sort((a, b) => {
+                const indexA = customOrder.indexOf(a.serviceName);
+                const indexB = customOrder.indexOf(b.serviceName);
+
+                // If both services are in the customOrder, compare their indices
+                if (indexA !== -1 && indexB !== -1) {
+                    return indexA - indexB;
+                }
+                // If one of them is in customOrder, it should come first
+                if (indexA !== -1) {
+                    return -1;
+                }
+                if (indexB !== -1) {
+                    return 1;
+                }
+                // If neither is in customOrder, maintain original order
+                return 0;
+            });
+
+            logger.info('Services sorted:', { sortedServices });
+
+            for (const service of sortedServices) {
                 await client.query(INSERT_CONFIRMATION_SERVICES, [
-                    confirmationId,         // $1: confirmation_id
-                    service.serviceName,    // $2: service_name
-                    service.price,          // $3: service_cost
-                    null               // $4: status (default)
+                    confirmationId, // $1: confirmation_id
+                    service.serviceName, // $2: service_name
+                    service.price, // $3: service_cost
+                    null, // $4: status (default)
                 ]);
             }
             logger.info('Services inserted successfully');
@@ -218,7 +257,6 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
             // Commit transaction
             await client.query('COMMIT');
             return { message: getMessage('EMAIL_SENT') };
-
         } catch (error: any) {
             logger.error('Failed to send confirmation email', { error });
 
@@ -228,10 +266,12 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
             // Rollback Cognito user creation if Cognito signup succeeded but an error occurred afterward
             if (cognitoSub) {
                 try {
-                    await cognito.adminDeleteUser({
-                        UserPoolId: config.cognitoUserPoolId,
-                        Username: cognitoSub,
-                    }).promise();
+                    await cognito
+                        .adminDeleteUser({
+                            UserPoolId: config.cognitoUserPoolId,
+                            Username: cognitoSub,
+                        })
+                        .promise();
                     logger.info('Cognito user deleted due to rollback');
                 } catch (cognitoDeleteError: any) {
                     if (cognitoDeleteError.code === 'UserNotFoundException') {
@@ -241,7 +281,6 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                     }
                 }
             }
-
             throw new Error(`${error.message}`);
         } finally {
             client.end();

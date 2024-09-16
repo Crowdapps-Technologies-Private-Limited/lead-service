@@ -1,19 +1,26 @@
 import { UpdateConfirmationPayload } from './../interface';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
-import { CHECK_TABLE_EXISTS, GET_CONFIRMATION_BY_ID,  GET_LEAD_BY_ID,  INSERT_CONFIRMATION_SERVICE, INSERT_LOG, UPDATE_CONFIRMATION_BY_CLIENT, UPDATE_CONFIRMATION_SERVICE} from '../../sql/sqlScript';
+import {
+    CREATE_JOB_SCHEDULE_TABLE_IF_NOT_EXIST,
+    GET_CONFIRMATION_AND_CUSTOMER_BY_ID,
+    GET_QUOTE_BY_ID_FOR_CONFIRMATION,
+    INSERT_JOB_SCHEDULE,
+    INSERT_LOG,
+    UPDATE_CONFIRMATION_BY_CLIENT,
+    UPDATE_CONFIRMATION_SERVICE,
+} from '../../sql/sqlScript';
 import { getMessage } from '../../utils/errorMessages';
+import { log } from 'console';
 
-export const updateConfirmationByClient = async (leadId: string, payload: UpdateConfirmationPayload, tenant: any, user:any) => {
+export const updateConfirmationByClient = async (
+    leadId: string,
+    payload: UpdateConfirmationPayload,
+    tenant: any,
+    user: any,
+) => {
     const client = await connectToDatabase();
-    const {
-        confirmationId,
-        movingDate,
-        packingDate,
-        isDepositeRecieved,
-        services,
-        vatIncluded
-    } = payload;
+    const { confirmationId, movingDate, packingDate, isDepositeRecieved, services, vatIncluded } = payload;
     try {
         if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
             throw new Error(getMessage('ACCOUNT_SUSPENDED'));
@@ -23,56 +30,75 @@ export const updateConfirmationByClient = async (leadId: string, payload: Update
         logger.info('Schema:', { schema });
         await client.query(`SET search_path TO ${schema}`);
         let confirmRes: any;
-        if(confirmationId) {
-            confirmRes  = await client.query(
-                GET_CONFIRMATION_BY_ID,
-                [confirmationId]
-            );
-            if(!confirmRes?.rows?.length) {
+        if (confirmationId) {
+            confirmRes = await client.query(GET_CONFIRMATION_AND_CUSTOMER_BY_ID, [confirmationId]);
+            if (!confirmRes?.rows?.length) {
                 throw new Error(getMessage('CONFIRMATION_NOT_FOUND'));
             }
         }
-       
-        const leadRes = await client.query(
-            GET_LEAD_BY_ID,
-            [confirmRes?.rows[0]?.lead_id]
-        );
-        let toolTipContent = '';
-        if(movingDate?.status === 'fixed') { 
-            toolTipContent = 'Accepted';
-        } else {
-            toolTipContent = 'Declined';
+
+        logger.info('Confirmation:', { confirmation: confirmRes?.rows[0] });
+
+        const quoteRes = await client.query(GET_QUOTE_BY_ID_FOR_CONFIRMATION, [confirmRes?.rows[0]?.quote_id]);
+        logger.info('Quote:', { quoteRes });
+
+        if (movingDate?.status === 'fixed' && packingDate?.status === 'fixed') {
+            if (isDepositeRecieved) {
+                const cost = confirmRes?.rows[0]?.costs[0];
+                logger.info('Cost:', { cost });
+                let totalWorker = 0;
+                if (cost) {
+                    totalWorker = cost?.driverQty + cost?.packerQty + cost?.porterQty;
+                }
+                const startDateTime = new Date(`${movingDate?.date}T${movingDate?.time}:00`);
+                const endDateTime = new Date(startDateTime.getTime() + 30 * 60000); // Adds 30 minutes
+                logger.info('Start date time:', { startDateTime });
+                logger.info('End date time:', { endDateTime });
+                logger.info('Total worker:', { totalWorker });
+                await client.query(CREATE_JOB_SCHEDULE_TABLE_IF_NOT_EXIST);
+                await client.query(INSERT_JOB_SCHEDULE, [
+                    'Moving', // job title
+                    totalWorker, // assigned workers
+                    confirmRes?.rows[0]?.customer_id, // customer ID
+                    confirmRes?.rows[0]?.collection_address_id, // collection address ID
+                    confirmRes?.rows[0]?.delivery_address_id, // delivery address ID
+                    startDateTime, // start time
+                    endDateTime, // end time
+                    movingDate?.date, // note
+                    'Scheduled', // status
+                    user.email, // created by
+                    new Date(), // created_at
+                    user.email, // updated_by
+                    new Date(), // updated_at
+                    confirmRes?.rows[0]?.lead_id, // lead ID
+                ]);
+            }
         }
+        logger.info('Job schedule created successfully');
         // Update confirmation
-        await client.query(
-            UPDATE_CONFIRMATION_BY_CLIENT,
-            [
-                movingDate?.date,
-                movingDate?.time || null,
-                movingDate?.status,
-                packingDate?.date || null,
-                packingDate?.time || null,
-                packingDate?.status || null,        
-                isDepositeRecieved,
-                user.email,
-                confirmationId
-            ]
-        );
+        await client.query(UPDATE_CONFIRMATION_BY_CLIENT, [
+            movingDate?.date,
+            movingDate?.time || null,
+            movingDate?.status,
+            packingDate?.date || null,
+            packingDate?.time || null,
+            packingDate?.status || null,
+            isDepositeRecieved,
+            user.email,
+            confirmationId,
+        ]);
         // Update confirmation services
-        for(const service of services) {
-            if(service.serviceId) {
-                const serviceRes = await client.query(
-                    UPDATE_CONFIRMATION_SERVICE,
-                    [
-                        service.name,
-                        service.cost,
-                        service.status,
-                        confirmationId,
-                        service.serviceId
-                    ]
-                );
+        for (const service of services) {
+            if (service.serviceId) {
+                const serviceRes = await client.query(UPDATE_CONFIRMATION_SERVICE, [
+                    service.name,
+                    service.cost,
+                    service.status,
+                    confirmationId,
+                    service.serviceId,
+                ]);
                 logger.info('Service updated successfully:', { service: serviceRes.rows[0] });
-            } 
+            }
         }
         // Insert log entry
         await client.query(INSERT_LOG, [
@@ -81,7 +107,7 @@ export const updateConfirmationByClient = async (leadId: string, payload: Update
             tenant.email,
             `Customer confirmation added / updated.`,
             'LEAD',
-            leadRes?.rows[0]?.status,
+            'CONFIRMATION',
             confirmRes?.rows[0]?.lead_id,
         ]);
         logger.info('Log entry created successfully');
