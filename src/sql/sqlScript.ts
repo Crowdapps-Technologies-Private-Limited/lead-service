@@ -1456,8 +1456,8 @@ CREATE TABLE IF NOT EXISTS job_schedules (
     created_by VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_by VARCHAR(255),
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 `;
 
 export const GET_CONFIRMATION_AND_CUSTOMER_BY_ID = `
@@ -1469,11 +1469,13 @@ SELECT
     cus.name AS customer_name,
     cus.phone AS customer_phone,
     cus.email AS customer_email,
+    a1.id AS collection_address_id,
     a1.street AS collection_street,
     a1.town AS collection_town,
     a1.county AS collection_county,
     a1.postcode AS collection_postcode,
     a1.country AS collection_country,
+    a2.id AS delivery_address_id,
     a2.street AS delivery_street,
     a2.town AS delivery_town,
     a2.county AS delivery_county,
@@ -1507,6 +1509,7 @@ export const INSERT_JOB_SCHEDULE = `
     end_date_time, 
     note,
     status, 
+    vehicle_type,
     created_by, 
     created_at, 
     updated_by, 
@@ -1514,7 +1517,7 @@ export const INSERT_JOB_SCHEDULE = `
     lead_id
   ) 
   VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
   ) RETURNING *;
 `;
 
@@ -1525,6 +1528,7 @@ SELECT
     e.quote_total AS quoteTotal,
     e.cost_total AS costTotal,
     e.notes,
+    e.vat_included,
     (
         SELECT json_agg(json_build_object(
             'costId', c.id,
@@ -1558,4 +1562,11 @@ WHERE
 ORDER BY 
     created_at DESC
 LIMIT 1;
+`;
+
+export const UPDATE_VAT_INCLUDED_IN_QUOTE = `
+UPDATE quotes
+SET
+   vat_included = $1
+ WHERE id = $2 ;
 `;
