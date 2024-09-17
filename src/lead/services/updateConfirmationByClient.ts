@@ -58,7 +58,7 @@ export const updateConfirmationByClient = async (
         logger.info('Quote retrieved:', { quote: quoteRes?.rows[0] });
 
         // Process Job Scheduling
-        if (movingDate?.status === 'fixed' && packingDate?.status === 'fixed' && isDepositeRecieved) {
+        if (movingDate?.status === 'fixed' && isDepositeRecieved) {
             logger.info('Processing job schedule');
             logger.info('Moving date:', { movingDate });
             logger.info('Packing date:', { packingDate });
@@ -101,6 +101,7 @@ export const updateConfirmationByClient = async (
                 movingDateObj, // start time (updated date object with time)
                 packingDateObj, // end time (updated date object with time)
                 '', // note
+                'job', // type
                 'Scheduled', // status
                 cost?.vehicleTypeId,
                 user.email, // created by
@@ -135,7 +136,12 @@ export const updateConfirmationByClient = async (
             // ]);
             // logger.info('Log entry created successfully');
         }
-        await client.query(UPDATE_VAT_INCLUDED_IN_QUOTE, [vatIncluded, quoteRes?.rows[0]?.id]);
+
+       logger.info('Job schedule and lead status updated successfully');
+        // Update VAT included in quote
+        logger.info('Updating VAT included in quote:', { vatIncluded }); 
+        logger.info('quoteId:', { quote_id: confirmRes?.rows[0]?.quote_id }); 
+        await client.query(UPDATE_VAT_INCLUDED_IN_QUOTE, [vatIncluded, confirmRes?.rows[0]?.quote_id]);
 
         // Update confirmation details
         await client.query(UPDATE_CONFIRMATION_BY_CLIENT, [

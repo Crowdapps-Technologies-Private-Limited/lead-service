@@ -1452,6 +1452,7 @@ CREATE TABLE IF NOT EXISTS job_schedules (
     note TEXT,
     vehicle_type VARCHAR(100),
     vehicle_count INT,
+    job_type VARCHAR(50),
     status VARCHAR(50),
     created_by VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1508,6 +1509,7 @@ export const INSERT_JOB_SCHEDULE = `
     start_date_time, 
     end_date_time, 
     note,
+    job_type,
     status, 
     vehicle_type,
     created_by, 
@@ -1517,7 +1519,7 @@ export const INSERT_JOB_SCHEDULE = `
     lead_id
   ) 
   VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
   ) RETURNING *;
 `;
 
@@ -1570,3 +1572,95 @@ SET
    vat_included = $1
  WHERE id = $2 ;
 `;
+
+export const GET_LATEST_QUOTES = `
+SELECT 
+    e.id AS quoteId,
+    e.lead_id AS leadId,
+    e.quote_total AS quoteTotal,
+    e.cost_total AS costTotal,
+    e.quote_expires_on AS quoteExpiresOn,
+    e.notes,
+    e.vat_included AS vatIncluded,
+    e.material_price_chargeable AS materialPriceChargeable,
+    (
+        SELECT json_agg(json_build_object(
+            'serviceId', s.id,
+            'typeName', s.service_name,
+            'description', s.description,
+            'price', s.price
+        ))
+        FROM quote_services es
+        JOIN services s ON es.service_id = s.id
+        WHERE es.quote_id = e.id
+    ) AS services,
+    (
+        SELECT json_agg(json_build_object(
+            'materialId', m.id,
+            'name', m.name,
+            'dimensions', m.dimensions,
+            'surveyedQty', m.surveyed_qty,
+            'chargeQty', m.charge_qty,
+            'price', m.price,
+            'total', m.total,
+            'volume', m.volume,
+            'cost', m.cost
+        ))
+        FROM quote_materials em
+        JOIN materials m ON em.material_id = m.id
+        WHERE em.quote_id = e.id
+    ) AS materials,
+    (
+        SELECT json_agg(json_build_object(
+            'costId', c.id,
+            'driverQty', c.driver_qty,
+            'porterQty', c.porter_qty,
+            'packerQty', c.packer_qty,
+            'vehicleQty', c.vehicle_qty,
+            'vehicleTypeId', c.vehicle_type_id,
+            'vehicleTypeName', vt.type_name,
+            'fuelCharge', c.fuel_charge,
+            'wageCharge', c.wage_charge
+        ))
+        FROM quote_costs ec
+        JOIN costs c ON ec.cost_id = c.id
+        JOIN public.vehicle_types vt ON c.vehicle_type_id = vt.id
+        WHERE ec.quote_id = e.id
+    ) AS costs,
+    (
+        SELECT json_agg(json_build_object(
+            'generalInfoId', gi.id,
+            'driverWage', gi.driver_wage,
+            'porterWage', gi.porter_wage,
+            'packerWage', gi.packer_wage,
+            'contentsValue', gi.contents_value,
+            'paymentMethod', gi.payment_method,
+            'insuranceAmount', gi.insurance_amount,
+            'insurancePercentage', gi.insurance_percentage,
+            'insuranceType', gi.insurance_type
+        ))
+        FROM quote_general_info eg
+        JOIN general_information gi ON eg.general_info_id = gi.id
+        WHERE eg.quote_id = e.id
+    ) AS generalInfo,
+    (
+        SELECT json_agg(json_build_object(
+            'ancillaryId', a.id,
+            'name', a.name,
+            'charge', a.charge,
+            'isChargeable', a.ischargeable
+        ))
+        FROM quote_ancillaries ea
+        JOIN ancillaries a ON ea.ancillary_id = a.id
+        WHERE ea.quote_id = e.id
+    ) AS ancillaries
+FROM 
+    quotes e
+WHERE 
+    e.lead_id = $1
+ORDER BY 
+    e.created_at DESC
+LIMIT 1;
+`;
+
+
