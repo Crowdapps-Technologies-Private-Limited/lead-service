@@ -1664,3 +1664,22 @@ LIMIT 1;
 `;
 
 
+export const CREATE_DOC_TABLE_IF_NOT_EXISTS = `
+CREATE TABLE IF NOT EXISTS documents
+(
+    doc_id uuid NOT NULL DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    name CHAR(50) COLLATE pg_catalog."default" NOT NULL UNIQUE,
+    s3key text COLLATE pg_catalog."default",
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    created_by text COLLATE pg_catalog."default",
+    updated_by text COLLATE pg_catalog."default"
+);
+
+CREATE OR REPLACE TRIGGER update_documents_updated_at
+    BEFORE UPDATE 
+    ON documents
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+`;
+

@@ -111,6 +111,8 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return 'Please! check your current password and try again.';
         case 'INFO_FETCHED':
             return 'Details fetched successfully.';
+        case 'CUSTOMER_PASSWORD_NOT_FOUND':
+            return 'Customer password not found.';
 
         default:
             return '';

@@ -2,7 +2,7 @@ import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import AWS from 'aws-sdk';
 const s3 = new AWS.S3();
-import { INSERT_LOG, GET_LEAD_BY_ID, GET_EMAIL_TEMPLATE_BY_EVENT, GET_TERMS_DOC, GET_PACKING_DOC } from '../../sql/sqlScript';
+import { INSERT_LOG, GET_LEAD_BY_ID, GET_EMAIL_TEMPLATE_BY_EVENT, GET_TERMS_DOC, GET_PACKING_DOC, CREATE_DOC_TABLE_IF_NOT_EXISTS } from '../../sql/sqlScript';
 import { getLatestEstimates } from './getLatestEstimates ';
 import { generatePdfAndUploadToS3 } from './generatePdf';
 import generateEstimateHtml from './generateEstimateHtml';
@@ -20,6 +20,7 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         }
 
         await client.query(`SET search_path TO ${schema}`);
+        await client.query(CREATE_DOC_TABLE_IF_NOT_EXISTS);
 
         // Check if lead exists
         const leadCheckResult = await client.query(GET_LEAD_BY_ID, [leadId]);

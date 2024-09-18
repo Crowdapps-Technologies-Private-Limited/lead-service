@@ -77,9 +77,15 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                 // Email already exists in Cognito;
                 logger.info(`The email "${email}" is already registered in Cognito`);
                 const customerResult = await client.query(GET_CUSTOMER_BY_EMAIL, [email]);
+                logger.info('Customer result:', { customerResult });
                 if (customerResult.rows.length > 0) {
                     customer = customerResult.rows[0] as any;
-                    password = decryptPassword(customer.password);
+                    if (customer.password) {
+                        password = decryptPassword(customer.password);
+                    } else {
+                        throw new Error(getMessage('CUSTOMER_PASSWORD_NOT_FOUND'));
+                    }
+                  
                 } else {
                     throw new Error(getMessage('CUSTOMER_NOT_FOUND'));
                 }
@@ -152,6 +158,7 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
             }
 
             // Generate confirmation email
+            logger.info('Sending confirmation email to customer');
             await generateEmail('Confirmation Email', leadData?.customer_email, {
                 username: leadData?.customer_name,
                 lead: leadId,

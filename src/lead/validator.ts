@@ -438,6 +438,7 @@ export const assignSurveyorDTO = async (payload: AssignSurveyorPayload) => {
 };
 
 // Define the add quote schema
+
 export const addQuoteSchema = yup
     .object()
     .shape({
@@ -449,6 +450,7 @@ export const addQuoteSchema = yup
         notes: yup.string().nullable(),
         vatIncluded: yup.boolean().required('VAT inclusion status is required'),
         materialPriceChargeable: yup.boolean().required('Material price chargeable status is required'),
+        isTermConditonPdf: yup.boolean().nullable(),
         services: yup
             .array()
             .of(
