@@ -113,6 +113,8 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return 'Details fetched successfully.';
         case 'CUSTOMER_PASSWORD_NOT_FOUND':
             return 'Customer password not found.';
+        case 'LEAD_IS_NOT_IN_QUOTE_STATUS':
+            return 'Lead is not in quote state.';    
 
         default:
             return '';

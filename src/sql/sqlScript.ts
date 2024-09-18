@@ -1041,6 +1041,7 @@ export const UPDATE_QUOTE = `
 export const GET_LEAD_CUSTOMER_BY_LEAD_ID = `
     SELECT
         l.generated_id,
+        l.status,
         cust.id AS customer_id,
         cust.name AS customer_name,
         cust.phone AS customer_phone,
@@ -1256,10 +1257,9 @@ export const UPDATE_CONFIRMATION_TOOLTIP_DETAILS = `
     UPDATE confirmations
     SET
         is_seen = $1,
-        is_new_response = $2,
         updated_at = NOW(),
-        updated_by = $3
-    WHERE confirmation_id = $4`;
+        updated_by = $2
+    WHERE confirmation_id = $3`;
 
 export const GET_TERMS_DOC = `
     SELECT * FROM documents WHERE name = 'terms_conditions';
@@ -1450,8 +1450,6 @@ CREATE TABLE IF NOT EXISTS job_schedules (
     start_date_time TIMESTAMP NOT NULL,
     end_date_time TIMESTAMP,
     note TEXT,
-    vehicle_type VARCHAR(100),
-    vehicle_count INT,
     job_type VARCHAR(50),
     status VARCHAR(50),
     created_by VARCHAR(255),
@@ -1459,6 +1457,14 @@ CREATE TABLE IF NOT EXISTS job_schedules (
     updated_by VARCHAR(255),
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS job_vehicle (
+    vehicle_id SERIAL PRIMARY KEY,     
+    vehicleTypeId VARCHAR(100) NOT NULL, 
+    job_id UUID NOT NULL,
+    vehicleCount INT NOT NULL         
+);
+
 `;
 
 export const GET_CONFIRMATION_AND_CUSTOMER_BY_ID = `
@@ -1484,7 +1490,8 @@ SELECT
     a2.country AS delivery_country,
     c.moving_on_status,
     c.packing_on_date,
-    c.packing_on_status
+    c.packing_on_status,
+    l.status
 FROM 
     confirmations c
 JOIN 
@@ -1511,7 +1518,6 @@ export const INSERT_JOB_SCHEDULE = `
     note,
     job_type,
     status, 
-    vehicle_type,
     created_by, 
     created_at, 
     updated_by, 
@@ -1519,7 +1525,19 @@ export const INSERT_JOB_SCHEDULE = `
     lead_id
   ) 
   VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+  ) RETURNING job_id;;
+`;
+
+
+export const INSERT_JOB_VEHICLE = `
+  INSERT INTO job_vehicle (
+    vehicleTypeId, 
+    vehicleCount,
+    job_id
+  ) 
+  VALUES (
+    $1, $2, $3
   ) RETURNING *;
 `;
 

@@ -14,7 +14,8 @@ import {
     INSERT_CONFIRMATION_SERVICES,
     DELETE_CONFIRMATION_BY_LEAD_ID,
     GET_CONFIRMATION_BY_LEAD_ID,
-    GET_CUSTOMER_BY_EMAIL, // Make sure this query is added to your SQL scripts
+    GET_CUSTOMER_BY_EMAIL,
+    UPDATE_LEAD_STATUS, // Make sure this query is added to your SQL scripts
 } from '../../sql/sqlScript';
 import { getErrorMessage, getMessage } from '../../utils/errorMessages';
 import { generateEmail } from '../../utils/generateEmailService';
@@ -50,6 +51,9 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
 
         const leadData = leadCheckResult.rows[0];
         logger.info('Lead check result:', { leadData });
+        if(leadData.status === "JOB") { 
+            throw new Error(`lead status is JOB so cannot send confirmation email`);
+        }
         const userName = leadData?.customer_name?.replace(/\s+/g, '').toLowerCase() + generateRandomString();
         const email = leadData?.customer_email;
         logger.info('Customer email:', { email });
@@ -260,6 +264,8 @@ export const sendConfirmationEmail = async (leadId: string, tenant: any, user: a
                 ]);
             }
             logger.info('Services inserted successfully');
+            // Update lead status to QUOTE
+            await client.query(UPDATE_LEAD_STATUS, ['QUOTE', leadId]);
 
             // Commit transaction
             await client.query('COMMIT');
