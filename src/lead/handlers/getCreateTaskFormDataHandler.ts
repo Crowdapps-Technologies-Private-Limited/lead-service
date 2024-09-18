@@ -1,23 +1,22 @@
 import { APIGatewayProxyEventBase, APIGatewayProxyResult, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
-import { updateConfirmationTooltipDetails } from '../services';
+import { getCreateTaskFormData } from '../services';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 
-export const updateConfirmationTooltipHandler: RouteHandler = async (
+export const getCreateTaskFormDataHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('Received event at updateConfirmationTooltipHandler', { event });
-    const payload = JSON.parse(event.body || '{}');
+    logger.info('Received event at getCreateTaskFormDataHandler', { event });
     const leadId = event.pathParameters?.id;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
     const hasPermission = await checkPermission(
         user.role,
-        'Confirmation',
-        'update',
+        'Job',
+        'read',
         tenant?.schema || tenant?.tenant?.schema,
     );
     logger.info('hasPermission: -----------', { hasPermission });
@@ -27,13 +26,13 @@ export const updateConfirmationTooltipHandler: RouteHandler = async (
     if (!leadId) {
         return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
     }
-
+  
     try {
         // Update data
-        await updateConfirmationTooltipDetails(leadId, tenant);
-        return ResponseHandler.successResponse({ message: getMessage('CONFIRMATION_TOOLTIP_UPDATED') });
+        const result = await getCreateTaskFormData(leadId, tenant, user);
+        return ResponseHandler.successResponse({ message: "data fetched successfully", data: result });
     } catch (error: any) {
-        logger.error('Failed to update confirmation tooltip data at handler', { error });
+        logger.error('Failed to update confirmation', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

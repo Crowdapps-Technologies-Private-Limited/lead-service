@@ -49,9 +49,9 @@ export const updateConfirmationByClient = async (
         }
 
         logger.info('Confirmation retrieved:', { confirmation: confirmRes?.rows[0] });
-        // if (confirmRes?.rows[0]?.status === 'JOB') {
-        //     throw new Error("You can't update it now as lead status is JOB.");
-        // }
+        if (confirmRes?.rows[0]?.status === 'JOB') {
+            throw new Error("You can't update as lead status is JOB.");
+        }
 
         // Fetch Quote Information
         const quoteRes = await client.query(GET_QUOTE_BY_ID_FOR_CONFIRMATION, [confirmRes?.rows[0]?.quote_id]);
@@ -129,6 +129,7 @@ export const updateConfirmationByClient = async (
                         vehicle.vehicleTypeId,
                         vehicle.vehicleCount,
                         job_id,
+                        leadId
                     ]);
 
                 }

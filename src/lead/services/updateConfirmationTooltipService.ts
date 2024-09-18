@@ -46,7 +46,6 @@ export const updateConfirmationTooltipDetails = async (leadId: string, tenant: a
         logger.info('Confirmation Id:', { confirmationId });
 
         const confirmationResult = await client.query(UPDATE_CONFIRMATION_TOOLTIP_DETAILS, [
-            true,
             false,
             tenant.email,
             confirmationId,

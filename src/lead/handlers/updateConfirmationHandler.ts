@@ -1,11 +1,11 @@
 import { APIGatewayProxyEventBase, APIGatewayProxyResult, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
-import { updateConfirmationByClient, updateConfirmationTooltipDetails } from '../services';
+import { updateConfirmationByClient } from '../services';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
-import { updateConfirmationDTO, updateConfirmationTooltipDTO } from '../validator';
+import { updateConfirmationDTO } from '../validator';
 
 export const updateConfirmationHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,

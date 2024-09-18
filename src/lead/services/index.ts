@@ -1,3 +1,4 @@
+import { getCreateTaskFormData } from './getCreateTaskFormData';
 import { updateConfirmationByClient } from './updateConfirmationByClient';
 import { getConfirmation } from './getConfirmationService';
 import { sendConfirmationEmail } from './sendConfirmationEmailService';
@@ -50,4 +51,5 @@ export {
     updateConfirmationTooltipDetails,
     getConfirmation,
     updateConfirmationByClient,
+    getCreateTaskFormData
 };

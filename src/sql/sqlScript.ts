@@ -1458,13 +1458,13 @@ CREATE TABLE IF NOT EXISTS job_schedules (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS job_vehicle (
+CREATE TABLE IF NOT EXISTS job_vehicles (
     vehicle_id SERIAL PRIMARY KEY,     
-    vehicleTypeId VARCHAR(100) NOT NULL, 
+    vehicle_type_id VARCHAR(100) NOT NULL, 
+    lead_id VARCHAR(100) NOT NULL, 
     job_id UUID NOT NULL,
-    vehicleCount INT NOT NULL         
+    vehicle_count INT NOT NULL         
 );
-
 `;
 
 export const GET_CONFIRMATION_AND_CUSTOMER_BY_ID = `
@@ -1531,13 +1531,14 @@ export const INSERT_JOB_SCHEDULE = `
 
 
 export const INSERT_JOB_VEHICLE = `
-  INSERT INTO job_vehicle (
-    vehicleTypeId, 
-    vehicleCount,
-    job_id
+  INSERT INTO job_vehicles (
+    vehicle_type_id, 
+    vehicle_count,
+    job_id,
+    lead_id
   ) 
   VALUES (
-    $1, $2, $3
+    $1, $2, $3, $4
   ) RETURNING *;
 `;
 
@@ -1700,4 +1701,49 @@ CREATE OR REPLACE TRIGGER update_documents_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION public.update_updated_at_column();
 `;
+
+export const GET_JOB_SCHEDULE_BY_LEAD_ID = `
+SELECT  
+    js.lead_id,  
+    js.assigned_workers, 
+    js.customer_id, 
+    c.name AS customer_name, 
+    c.email AS customer_email
+FROM 
+    job_schedules js
+LEFT JOIN 
+    customers c ON js.customer_id = c.id
+WHERE 
+    js.lead_id = $1;
+`;
+
+export const GET_ALL_VEHICLE_TYPES = `
+SELECT 
+    id AS vehicle_type_id, 
+    type_name AS vehicle_type,
+    0 AS vehicle_count
+FROM 
+    public.vehicle_types
+WHERE 
+    is_active = true
+ORDER BY 
+    type_name;
+`;
+
+export const GET_JOB_VEHICLES_BY_LEAD_ID = `
+SELECT   
+    jv.vehicle_type_id, 
+    vt.type_name AS vehicle_type, 
+    jv.vehicle_count
+FROM 
+    job_vehicles jv
+LEFT JOIN 
+    public.vehicle_types vt ON jv.vehicle_type_id::UUID = vt.id
+WHERE 
+    jv.lead_id = $1
+ORDER BY 
+    vt.type_name;
+`;
+
+
 

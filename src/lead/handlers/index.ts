@@ -7,6 +7,7 @@ import { estimateSendEmailHandler } from './estimateSendEmailHandler';
 import { getAllSurveysHandler } from './getAllSurveysHandler';
 import { getConfirmationHandler } from './getConfirmationHandler';
 import { getConfirmationTooltipHandler } from './getConfirmationTooltipHandler';
+import { getCreateTaskFormDataHandler } from './getCreateTaskFormDataHandler';
 import { getDistanceHandler } from './getDistanceHandler';
 import { getLatestEstimatesHandler } from './getLatestEstimatesHandler';
 import { getLatestQuotesHandler } from './getLatestQuotesHandler';
@@ -47,7 +48,8 @@ const authHandlers = {
     getConfirmationTooltipHandler,
     updateConfirmationTooltipHandler,
     getConfirmationHandler,
-    updateConfirmationHandler
+    updateConfirmationHandler,
+    getCreateTaskFormDataHandler
 };
 
 export default authHandlers;

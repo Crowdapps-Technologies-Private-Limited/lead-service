@@ -18,6 +18,7 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/quote-send-email/{quoteId}': admiinHandlers.sendConfirmationHandler,
         '/leads/{id}/confirmation-tooltip': admiinHandlers.getConfirmationTooltipHandler,
         '/leads/{id}/confirmation': admiinHandlers.getConfirmationHandler,
+        '/leads/{id}/task-form-data': admiinHandlers.getCreateTaskFormDataHandler,
     },
     PUT: {
         '/leads/{id}': admiinHandlers.editLeadHandler,
