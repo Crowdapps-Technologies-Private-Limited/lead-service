@@ -118,14 +118,14 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
         const res = await client.query(query, [leadId]);
         // Manually convert string fields to numbers, if necessary
         const data = res.rows[0];
-        data.quoteTotal = parseFloat(data.quotetotal);
-        data.costTotal = parseFloat(data.costtotal);
-        data.estimateId = data.estimateid;
-        data.leadId = data.leadid;
-        data.quoteExpiresOn = data.quoteexpireson;
-        data.vatIncluded = data.vatincluded;
-        data.materialPriceChargeable = data.materialpricechargeable;
-        data.generalInfo = data.generalinfo;
+        data.quoteTotal = data?.quotetotal? parseFloat(data?.quotetotal) : 0;
+        data.costTotal = data?.costtotal? parseFloat(data?.costtotal): 0;
+        data.estimateId = data?.estimateid;
+        data.leadId = data?.leadid;
+        data.quoteExpiresOn = data?.quoteexpireson;
+        data.vatIncluded = data?.vatincluded;
+        data.materialPriceChargeable = data?.materialpricechargeable;
+        data.generalInfo = data?.generalinfo;
         delete data.quotetotal;
         delete data.costtotal;
         delete data.estimateid;

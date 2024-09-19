@@ -40,7 +40,7 @@ export const quoteSendEmailHandler: RouteHandler = async (
                 message: 'Invalid action. Please provide valid action (pdf or email)',
             });
         }
-        const result = await sendQuoteEmailOrPdf(leadId, quoteId, tenant, action);
+        const result = await sendQuoteEmailOrPdf(leadId, quoteId, tenant, user, action);
 
         return ResponseHandler.createdResponse({ message: result?.message, data: result?.data });
     } catch (error: any) {

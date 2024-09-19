@@ -1161,7 +1161,7 @@ SELECT
 FROM 
     quotes e
 WHERE 
-    e.lead_id = $1
+    e.id = $1
 ORDER BY 
     e.created_at DESC
 LIMIT 1;
@@ -1253,13 +1253,13 @@ export const GET_CONFIRMATION_TOOLTIP_DETAILS = `
     LIMIT 1;
 `;
 
-export const UPDATE_CONFIRMATION_TOOLTIP_DETAILS = `
+export const MARK_SEEN_CONFIRMATION_TOOLTIP = `
     UPDATE confirmations
     SET
-        is_seen = $1,
+        is_seen = true,
         updated_at = NOW(),
-        updated_by = $2
-    WHERE confirmation_id = $3`;
+        updated_by = $1
+    WHERE lead_id = $2`;
 
 export const GET_TERMS_DOC = `
     SELECT * FROM documents WHERE name = 'terms_conditions';

@@ -117,6 +117,8 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return 'Lead is not in quote state.'; 
         case 'JOB_NOT_FOUND':   
             return 'Job not found.';
+        case 'CONFIRMATION_ID_REQUIRED':
+            return 'Confirmation ID is required in query parameters.';
 
         default:
             return '';

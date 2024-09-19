@@ -12,6 +12,7 @@ export const updateConfirmationTooltipHandler: RouteHandler = async (
     logger.info('Received event at updateConfirmationTooltipHandler', { event });
     const payload = JSON.parse(event.body || '{}');
     const leadId = event.pathParameters?.id;
+    // const confirmationId = event.queryStringParameters?.confirmationId;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
     const hasPermission = await checkPermission(
@@ -27,6 +28,9 @@ export const updateConfirmationTooltipHandler: RouteHandler = async (
     if (!leadId) {
         return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
     }
+    // if (!confirmationId) {
+    //     return ResponseHandler.badRequestResponse({ message: getMessage('CONFIRMATION_ID_REQUIRED') });
+    // }
 
     try {
         // Update data

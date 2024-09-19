@@ -1,7 +1,6 @@
 import { getCreateTaskFormData } from './getCreateTaskFormData';
 import { updateConfirmationByClient } from './updateConfirmationByClient';
 import { getConfirmation } from './getConfirmationService';
-import { sendConfirmationEmail } from './sendConfirmationEmailService';
 import { getOwnSurveys } from './getOwnSurveyService';
 import { getLatestEstimates } from './getLatestEstimates ';
 import { addOrUpdateEstimate } from './addEstimate';
@@ -46,7 +45,6 @@ export {
     sendQuoteEmailOrPdf,
     downloadSecondLatestQuote,
     getOwnSurveys,
-    sendConfirmationEmail,
     getConfirmationTooltipDetails,
     updateConfirmationTooltipDetails,
     getConfirmation,

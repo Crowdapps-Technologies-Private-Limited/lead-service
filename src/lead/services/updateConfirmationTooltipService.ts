@@ -4,7 +4,7 @@ import {
     CHECK_TABLE_EXISTS,
     GET_CONFIRMATION_ID_BY_LEAD_ID,
     GET_LEAD_BY_ID,
-    UPDATE_CONFIRMATION_TOOLTIP_DETAILS,
+    MARK_SEEN_CONFIRMATION_TOOLTIP,
 } from '../../sql/sqlScript';
 import { getMessage } from '../../utils/errorMessages';
 
@@ -36,19 +36,10 @@ export const updateConfirmationTooltipDetails = async (leadId: string, tenant: a
             logger.info('Confirmations table does not exist');
         }
 
-        const confirmationIdRes = await client.query(GET_CONFIRMATION_ID_BY_LEAD_ID, [leadId]);
-        if (confirmationIdRes.rows.length === 0) {
-            logger.info('Confirmation Id does not exist');
-            new Error(getMessage('CONFIRMATION_NOT_FOUND'));
-        }
 
-        const confirmationId = confirmationIdRes.rows[0].confirmation_id;
-        logger.info('Confirmation Id:', { confirmationId });
-
-        const confirmationResult = await client.query(UPDATE_CONFIRMATION_TOOLTIP_DETAILS, [
-            false,
+        const confirmationResult = await client.query(MARK_SEEN_CONFIRMATION_TOOLTIP, [
             tenant.email,
-            confirmationId,
+            leadId,
         ]);
         const confirmation = confirmationResult.rows[0];
         return confirmation;

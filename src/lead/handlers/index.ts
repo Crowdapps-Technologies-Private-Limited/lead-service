@@ -19,7 +19,6 @@ import { getSingleLeadHandler } from './getSingleLeadHandler';
 import { getSurveyByIdHandler } from './getSurveyByIdHandler';
 import { getSurveyorListHandler } from './getSurveyorListHandler';
 import { quoteSendEmailHandler } from './quoteSendEmailHandler';
-import { sendConfirmationHandler } from './sendConfirmationHandler';
 import { sendEmailHandler } from './sendEmailHandler';
 import { updateConfirmationHandler } from './updateConfirmationHandler';
 import { updateConfirmationTooltipHandler } from './updateConfirmationTooltipHandler';
@@ -44,7 +43,6 @@ const authHandlers = {
     getLatestQuotesHandler,
     quoteSendEmailHandler,
     getSecondLatestQuotesHandler,
-    sendConfirmationHandler,
     getConfirmationTooltipHandler,
     updateConfirmationTooltipHandler,
     getConfirmationHandler,
