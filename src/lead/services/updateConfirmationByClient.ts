@@ -49,9 +49,9 @@ export const updateConfirmationByClient = async (
         }
 
         logger.info('Confirmation retrieved:', { confirmation: confirmRes?.rows[0] });
-        if (confirmRes?.rows[0]?.status === 'JOB') {
-            throw new Error("You can't update as lead status is JOB.");
-        }
+        // if (confirmRes?.rows[0]?.status === 'JOB') {
+        //     throw new Error("You can't update as lead status is JOB.");
+        // }
 
         // Fetch Quote Information
         const quoteRes = await client.query(GET_QUOTE_BY_ID_FOR_CONFIRMATION, [confirmRes?.rows[0]?.quote_id]);
@@ -137,28 +137,6 @@ export const updateConfirmationByClient = async (
             }
            
 
-            // Generate job schedule email
-            // await generateEmail('Job Email', leadData?.customer_email, {
-            //     username: leadData?.customer_name,
-            //     lead: leadId,
-            //     email: leadData?.customer_email,
-            //     password: password,
-            // });
-            // logger.info('Confirmation email sent');
-
-            // // Insert log
-            // await client.query(INSERT_LOG, [
-            //     tenant.id,
-            //     leadData?.customer_name,
-            //     leadData?.customer_email,
-            //     `Confirmation Email sent to customer`,
-            //     'CONFIRMATION',
-            //     leadCheckResult.rows[0].status,
-            //     leadId,
-            // ]);
-            // logger.info('Log entry created successfully');
-
-
             if(packingDate && packingDate.status === 'fixed') {
                 if (!packingDate?.date || !packingDate?.time) {
                     throw new Error(getMessage('INVALID_PACKAGING_DATE_OR_TIME'));
@@ -220,24 +198,7 @@ export const updateConfirmationByClient = async (
             
         }
     }
-        else{
-            for (const service of services) {
-                if (service.name === "Full Pack" && service.status === 'accept') {
-                    if (movingDate?.date && movingDate?.time) {
-                        await client.query(UPDATE_LEAD_STATUS, ['CONFIRMED', confirmRes?.rows[0]?.lead_id]);  
-                    }
-                   
-                }
-            }
-
-            // Update lead status to 'CONFIRMED'
-          
-            return { message: getMessage('CONFIRMATION_UPDATED') };
-
-        }
-
-       logger.info('Job schedule and lead status updated successfully');
-        // Update VAT included in quote
+       
         logger.info('Updating VAT included in quote:', { vatIncluded }); 
         logger.info('quoteId:', { quote_id: confirmRes?.rows[0]?.quote_id }); 
         await client.query(UPDATE_VAT_INCLUDED_IN_QUOTE, [vatIncluded, confirmRes?.rows[0]?.quote_id]);
@@ -256,7 +217,9 @@ export const updateConfirmationByClient = async (
         ]);
 
         // Update confirmation services
+        let serviceAccepted= 0;
         for (const service of services) {
+            logger.info('Updating service:', { service });
             if (service.serviceId) {
                 const serviceRes = await client.query(UPDATE_CONFIRMATION_SERVICE, [
                     service.name,
@@ -267,6 +230,26 @@ export const updateConfirmationByClient = async (
                 ]);
                 logger.info('Service updated successfully:', { service: serviceRes.rows[0] });
             }
+            if (service.name === "Full Pack" && service.status === 'accept') {
+                logger.info('Full pack service accepted');
+                logger.info('packingDate', {packingDate});
+              
+                if (packingDate?.date && packingDate?.time) {
+                    serviceAccepted++;         
+                }           
+            }
+            if (service.name === "Door to Door" && service.status === 'accept') {
+                logger.info('Door to Door service accepted');
+                logger.info('movingDate', {movingDate});
+              
+                if (movingDate?.date && movingDate?.time) {
+                    serviceAccepted++;         
+                }           
+            }
+        }
+        if(serviceAccepted > 0){
+            logger.info('any of service accepted', {serviceAccepted});
+            await client.query(UPDATE_LEAD_STATUS, ['CONFIRMED', confirmRes?.rows[0]?.lead_id]);  
         }
 
         // Insert log entry
