@@ -38,8 +38,8 @@ export const updateConfirmationHandler: RouteHandler = async (
 
     try {
         // Update data
-        await updateConfirmationByClient(leadId, payload, tenant, user);
-        return ResponseHandler.successResponse({ message: getMessage('CONFIRMATION_UPDATED') });
+        const result = await updateConfirmationByClient(leadId, payload, tenant, user);
+        return ResponseHandler.successResponse( result);
     } catch (error: any) {
         logger.error('Failed to update confirmation', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });

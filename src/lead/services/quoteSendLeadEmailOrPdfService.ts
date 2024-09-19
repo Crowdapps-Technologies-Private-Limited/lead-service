@@ -49,9 +49,9 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
         const leadData = leadCheckResult.rows[0];
         logger.info('Lead data:', { leadData });
 
-        // if (leadData.status === "JOB") {
-        //     throw new Error('Lead status is JOB so cannot send confirmation email');
-        // }
+        if (leadData.status === "JOB") {
+            throw new Error('Lead status is JOB so cannot send confirmation email');
+        }
 
         const quotationDoc = 'quotation.pdf';
         const quoteData = await getLatestQuote(leadId, tenant);
