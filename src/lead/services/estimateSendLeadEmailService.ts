@@ -2,7 +2,14 @@ import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import AWS from 'aws-sdk';
 const s3 = new AWS.S3();
-import { INSERT_LOG, GET_LEAD_BY_ID, GET_EMAIL_TEMPLATE_BY_EVENT, GET_TERMS_DOC, GET_PACKING_DOC, CREATE_DOC_TABLE_IF_NOT_EXISTS } from '../../sql/sqlScript';
+import {
+    INSERT_LOG,
+    GET_LEAD_BY_ID,
+    GET_EMAIL_TEMPLATE_BY_EVENT,
+    GET_TERMS_DOC,
+    GET_PACKING_DOC,
+    CREATE_DOC_TABLE_IF_NOT_EXISTS,
+} from '../../sql/sqlScript';
 import { getLatestEstimates } from './getLatestEstimates ';
 import { generatePdfAndUploadToS3 } from './generatePdf';
 import generateEstimateHtml from './generateEstimateHtml';
@@ -40,7 +47,7 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         // Generate PDF
         const pdfUrl = await generatePdfAndUploadToS3({ html, key: estimationDoc });
         if (action === 'pdf') {
-            return { message: getMessage("PDF_GENERATED"), data: { pdfUrl } };
+            return { message: getMessage('PDF_GENERATED'), data: { pdfUrl } };
         }
         const clientLogin = 'https://mmym-client-dev.crowdapps.info/';
 
@@ -48,48 +55,43 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         const termDocsResult = await client.query(GET_TERMS_DOC);
         const termDocs = termDocsResult?.rows;
         if (!termDocs?.length) {
-          logger.info('No terms and conditions found');
-    
+            logger.info('No terms and conditions found');
+        } else {
+            logger.info('Terms and conditions found:', { termDocs });
+            termPDF = termDocs[0].s3key;
         }
-        else {
-          logger.info('Terms and conditions found:', { termDocs });
-          termPDF = termDocs[0].s3key;
-        }
-    
-        if(termPDF) {
-          const config = await getconfigSecrets();
-    
-          // Generate signed URL for the photo
-          termPDF = s3.getSignedUrl('getObject', {
-              Bucket: config.s3BucketName,
-              Key: termPDF,
-              Expires: 60 * 60, // URL expires in 1 hour
-          });
+
+        if (termPDF) {
+            const config = await getconfigSecrets();
+
+            // Generate signed URL for the photo
+            termPDF = s3.getSignedUrl('getObject', {
+                Bucket: config.s3BucketName,
+                Key: termPDF,
+                Expires: 60 * 60, // URL expires in 1 hour
+            });
         }
 
         let packingGuidePDF = '';
         const packingDocsResult = await client.query(GET_PACKING_DOC);
         const packingDocs = packingDocsResult?.rows;
         if (!packingDocs?.length) {
-          logger.info('No packing guide found');
-    
-        }
-        else {
-          logger.info('Packing guide found:', { packingDocs });
-          packingGuidePDF = packingDocs[0].s3key;
+            logger.info('No packing guide found');
+        } else {
+            logger.info('Packing guide found:', { packingDocs });
+            packingGuidePDF = packingDocs[0].s3key;
         }
 
-        if(packingGuidePDF) {
-          const config = await getconfigSecrets();
-    
-          // Generate signed URL for the photo
-          packingGuidePDF = s3.getSignedUrl('getObject', {
-              Bucket: config.s3BucketName,
-              Key: packingGuidePDF,
-              Expires: 60 * 60, // URL expires in 1 hour
-          });
-        }
+        if (packingGuidePDF) {
+            const config = await getconfigSecrets();
 
+            // Generate signed URL for the photo
+            packingGuidePDF = s3.getSignedUrl('getObject', {
+                Bucket: config.s3BucketName,
+                Key: packingGuidePDF,
+                Expires: 60 * 60, // URL expires in 1 hour
+            });
+        }
 
         // Send email
         await generateEmail('Estimate Email', leadCheckResult.rows[0]?.customer_email, {

@@ -10,10 +10,20 @@ import { getconfigSecrets } from '../../utils/getConfig';
 import { encryptPassword, decryptPassword } from '../../utils/encryptionAndDecryption';
 import { generateRandomPassword, generateRandomString } from '../../utils/generateRandomPassword';
 import {
-    INSERT_LOG, GET_EMAIL_TEMPLATE_BY_EVENT, GET_TERMS_DOC, GET_PACKING_DOC, CREATE_DOC_TABLE_IF_NOT_EXISTS,
-    GET_LEAD_CUSTOMER_BY_LEAD_ID, UPDATE_CUSTOMER_WITH_CREDENTIAL, CREATE_CONFIRMATION_TABLES,
-    INSERT_CONFIRMATION, GET_QUOTE_SERVICES, INSERT_CONFIRMATION_SERVICES,
-    DELETE_CONFIRMATION_BY_LEAD_ID, GET_CONFIRMATION_BY_LEAD_ID, GET_CUSTOMER_BY_EMAIL,
+    INSERT_LOG,
+    GET_EMAIL_TEMPLATE_BY_EVENT,
+    GET_TERMS_DOC,
+    GET_PACKING_DOC,
+    CREATE_DOC_TABLE_IF_NOT_EXISTS,
+    GET_LEAD_CUSTOMER_BY_LEAD_ID,
+    UPDATE_CUSTOMER_WITH_CREDENTIAL,
+    CREATE_CONFIRMATION_TABLES,
+    INSERT_CONFIRMATION,
+    GET_QUOTE_SERVICES,
+    INSERT_CONFIRMATION_SERVICES,
+    DELETE_CONFIRMATION_BY_LEAD_ID,
+    GET_CONFIRMATION_BY_LEAD_ID,
+    GET_CUSTOMER_BY_EMAIL,
     UPDATE_LEAD_STATUS,
 } from '../../sql/sqlScript';
 
@@ -24,15 +34,13 @@ const cognito = new CognitoIdentityServiceProvider();
 export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenant: any, user: any, action: string) => {
     const client = await connectToDatabase();
     const schema = tenant.schema;
-    let cognitoSub: string | null = null;
+    const cognitoSub: string | null = null;
 
     logger.info('action:', { action });
     logger.info('leadId:', { leadId });
     const config = await getconfigSecrets();
 
     try {
-      
-
         if (tenant?.is_suspended) {
             throw new Error(getMessage('ACCOUNT_SUSPENDED'));
         }
@@ -49,7 +57,7 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
         const leadData = leadCheckResult.rows[0];
         logger.info('Lead data:', { leadData });
 
-        if (leadData.status === "JOB") {
+        if (leadData.status === 'JOB') {
             throw new Error('Lead status is JOB so cannot send confirmation email');
         }
 
@@ -71,20 +79,30 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
             throw new Error(getErrorMessage('CUSTOMER_NOT_FOUND', 'Email not found'));
         }
 
-        let password = '';
-        let customer = await findOrCreateCognitoUser(client, config, leadData, email, tenant);
+        const password = '';
+        const customer = await findOrCreateCognitoUser(client, config, leadData, email, tenant);
 
         // Start transaction
         await client.query('BEGIN');
 
         // Log, create confirmation, and update lead
-        await createConfirmation(client, leadData, leadId, quoteId, user, tenant, customer, pdfUrl, termPDF, packingGuidePDF);
+        await createConfirmation(
+            client,
+            leadData,
+            leadId,
+            quoteId,
+            user,
+            tenant,
+            customer,
+            pdfUrl,
+            termPDF,
+            packingGuidePDF,
+        );
 
         // Commit transaction
         await client.query('COMMIT');
 
         return { message: getMessage('EMAIL_SENT'), data: null };
-
     } catch (error: any) {
         logger.error('Failed to send confirmation email', { error });
         await client.query('ROLLBACK');
@@ -119,10 +137,12 @@ const findOrCreateCognitoUser = async (client: any, config: any, leadData: any, 
     let password = '';
     let cognitoSub: string | null = null;
 
-    const usersByEmail = await cognito.listUsers({
-        UserPoolId: config.cognitoUserPoolId,
-        Filter: `email = "${email}"`,
-    }).promise();
+    const usersByEmail = await cognito
+        .listUsers({
+            UserPoolId: config.cognitoUserPoolId,
+            Filter: `email = "${email}"`,
+        })
+        .promise();
 
     if (usersByEmail.Users?.length) {
         const customerResult = await client.query(GET_CUSTOMER_BY_EMAIL, [email]);
@@ -133,24 +153,31 @@ const findOrCreateCognitoUser = async (client: any, config: any, leadData: any, 
     } else {
         password = generateRandomPassword();
         const userName = leadData?.customer_name?.replace(/\s+/g, '').toLowerCase() + generateRandomString();
-        const signUpResult = await cognito.signUp({
-            ClientId: config.cognitoAppClientId as string,
-            Username: userName,
-            Password: password,
-            UserAttributes: [
-                { Name: 'email', Value: email },
-                { Name: 'name', Value: userName },
-                { Name: 'custom:role', Value: 'CUSTOMER' },
-                { Name: 'custom:tenant_id', Value: tenant.id },
-            ],
-        }).promise();
+        const signUpResult = await cognito
+            .signUp({
+                ClientId: config.cognitoAppClientId as string,
+                Username: userName,
+                Password: password,
+                UserAttributes: [
+                    { Name: 'email', Value: email },
+                    { Name: 'name', Value: userName },
+                    { Name: 'custom:role', Value: 'CUSTOMER' },
+                    { Name: 'custom:tenant_id', Value: tenant.id },
+                ],
+            })
+            .promise();
 
         cognitoSub = signUpResult.UserSub || null;
         await confirmAndVerifyUser(config, userName);
 
         const encryptedPassword = encryptPassword(password);
         await client.query(UPDATE_CUSTOMER_WITH_CREDENTIAL, [
-            encryptedPassword, cognitoSub, tenant.id, userName, tenant.id, leadData.customer_id,
+            encryptedPassword,
+            cognitoSub,
+            tenant.id,
+            userName,
+            tenant.id,
+            leadData.customer_id,
         ]);
     }
 
@@ -158,22 +185,42 @@ const findOrCreateCognitoUser = async (client: any, config: any, leadData: any, 
 };
 
 const confirmAndVerifyUser = async (config: any, userName: string) => {
-    await cognito.adminConfirmSignUp({
-        UserPoolId: config.cognitoUserPoolId,
-        Username: userName,
-    }).promise();
+    await cognito
+        .adminConfirmSignUp({
+            UserPoolId: config.cognitoUserPoolId,
+            Username: userName,
+        })
+        .promise();
 
-    await cognito.adminUpdateUserAttributes({
-        UserPoolId: config.cognitoUserPoolId,
-        Username: userName,
-        UserAttributes: [{ Name: 'email_verified', Value: 'true' }],
-    }).promise();
+    await cognito
+        .adminUpdateUserAttributes({
+            UserPoolId: config.cognitoUserPoolId,
+            Username: userName,
+            UserAttributes: [{ Name: 'email_verified', Value: 'true' }],
+        })
+        .promise();
 };
 
-const createConfirmation = async (client: any, leadData: any, leadId: string, quoteId: string, user: any, tenant: any, password: string, pdfUrl: string, termPDF: string, packingGuidePDF: string) => {
+const createConfirmation = async (
+    client: any,
+    leadData: any,
+    leadId: string,
+    quoteId: string,
+    user: any,
+    tenant: any,
+    password: string,
+    pdfUrl: string,
+    termPDF: string,
+    packingGuidePDF: string,
+) => {
     await client.query(INSERT_LOG, [
-        tenant.id, leadData?.customer_name, leadData?.customer_email, `Confirmation Email sent to customer`, 'CONFIRMATION',
-        leadData.status, leadId,
+        tenant.id,
+        leadData?.customer_name,
+        leadData?.customer_email,
+        `Confirmation Email sent to customer`,
+        'CONFIRMATION',
+        leadData.status,
+        leadId,
     ]);
 
     await client.query(CREATE_CONFIRMATION_TABLES);
@@ -190,8 +237,18 @@ const createConfirmation = async (client: any, leadData: any, leadId: string, qu
 
     const { services, notes: quoteNotes, quoteid: quote_id } = quoteDataResult.rows[0];
     const confirmationResult = await client.query(INSERT_CONFIRMATION, [
-        leadData.customer_id, leadId, leadData.moving_on_date, leadData.packing_on_date, false, false, false, false, false,
-        quoteNotes, user.email, quote_id,
+        leadData.customer_id,
+        leadId,
+        leadData.moving_on_date,
+        leadData.packing_on_date,
+        false,
+        false,
+        false,
+        false,
+        false,
+        quoteNotes,
+        user.email,
+        quote_id,
     ]);
 
     const confirmationId = confirmationResult.rows[0].confirmation_id;
@@ -201,18 +258,26 @@ const createConfirmation = async (client: any, leadData: any, leadId: string, qu
 
     await client.query(UPDATE_LEAD_STATUS, ['QUOTE', leadId]);
 
-
     await generateEmail('Quotation Email', leadData?.customer_email, {
-        username: leadData?.customer_name, leadid: leadId, pdfurl: pdfUrl, clientlogin: 'https://mmym-client-dev.crowdapps.info/', termsdoc: termPDF, packingguidedoc: packingGuidePDF, email: leadData?.customer_email, password,
+        username: leadData?.customer_name,
+        leadid: leadId,
+        pdfurl: pdfUrl,
+        clientlogin: 'https://mmym-client-dev.crowdapps.info/',
+        termsdoc: termPDF,
+        packingguidedoc: packingGuidePDF,
+        email: leadData?.customer_email,
+        password,
     });
 };
 
 const rollbackCognitoUser = async (config: any, cognitoSub: string) => {
     try {
-        await cognito.adminDeleteUser({
-            UserPoolId: config.cognitoUserPoolId,
-            Username: cognitoSub,
-        }).promise();
+        await cognito
+            .adminDeleteUser({
+                UserPoolId: config.cognitoUserPoolId,
+                Username: cognitoSub,
+            })
+            .promise();
         logger.info('Cognito user deleted due to rollback');
     } catch (cognitoDeleteError: any) {
         logger.error('Failed to delete Cognito user during rollback', { cognitoDeleteError });
