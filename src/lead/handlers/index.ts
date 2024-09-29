@@ -9,6 +9,7 @@ import { getConfirmationHandler } from './getConfirmationHandler';
 import { getConfirmationTooltipHandler } from './getConfirmationTooltipHandler';
 import { getCreateTaskFormDataHandler } from './getCreateTaskFormDataHandler';
 import { getDistanceHandler } from './getDistanceHandler';
+import { jobsListHandler } from './getJobListHandler';
 import { getLatestEstimatesHandler } from './getLatestEstimatesHandler';
 import { getLatestQuotesHandler } from './getLatestQuotesHandler';
 import { getLeadListHandler } from './getLeadListHandler';
@@ -47,7 +48,8 @@ const authHandlers = {
     updateConfirmationTooltipHandler,
     getConfirmationHandler,
     updateConfirmationHandler,
-    getCreateTaskFormDataHandler
+    getCreateTaskFormDataHandler,
+    jobsListHandler
 };
 
 export default authHandlers;

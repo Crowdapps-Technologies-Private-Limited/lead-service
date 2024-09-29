@@ -1,3 +1,4 @@
+import { getJobsList } from './getJobsListService';
 import { getCreateTaskFormData } from './getCreateTaskFormData';
 import { updateConfirmationByClient } from './updateConfirmationByClient';
 import { getConfirmation } from './getConfirmationService';
@@ -49,5 +50,6 @@ export {
     updateConfirmationTooltipDetails,
     getConfirmation,
     updateConfirmationByClient,
-    getCreateTaskFormData
+    getCreateTaskFormData,
+    getJobsList
 };

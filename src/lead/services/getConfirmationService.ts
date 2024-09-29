@@ -3,6 +3,7 @@ import {
     GET_LEAD_DETAILS_FOR_CUSTOMER,
     GET_CONFIRMATION_DETAILS,
     GET_LEAD_QUOTES_CONFIRMATION,
+    GET_INVOICE_BY_LEAD_AND_TYPE,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
@@ -43,6 +44,12 @@ export const getConfirmation = async (tenant: any, leadId: string) => {
         }
         const quoteDetails = quotesResult?.rows[0];
         logger.info('Quote details:', { quoteDetails });
+        const invoiceResult = await client.query(GET_INVOICE_BY_LEAD_AND_TYPE, [leadId, 'deposit' ]);
+        if (!invoiceResult?.rows?.length) {
+            logger.info('No quotes found');
+        }
+        const invoice = invoiceResult?.rows[0];
+        logger.info('Invoice:', { invoice });
         const data = {
             colectionVolume: leadDetails?.collection_volume,
             collectionVolumeUnit: leadDetails?.collection_volume_unit,
@@ -64,6 +71,8 @@ export const getConfirmation = async (tenant: any, leadId: string) => {
             },
             confirmationId: confirmationDetails?.confirmationId,
             ...quoteDetails,
+            invoiceNumber: invoice?.invoice_number? invoice?.invoice_number : null, 
+            invoiceType: invoice?.invoice_type? invoice?.invoice_type : null, 
         };
         logger.info('Data:', { data });
         return data;

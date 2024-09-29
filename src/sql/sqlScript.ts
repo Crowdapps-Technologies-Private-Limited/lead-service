@@ -1745,5 +1745,13 @@ ORDER BY
     vt.type_name;
 `;
 
+export const GET_INVOICE_BY_LEAD_AND_TYPE = `
+            SELECT 
+                i.invoice_number, 
+                i.invoice_type             
+            FROM invoices i
+            WHERE i.lead_id = $1 AND i.invoice_type ILIKE $2
+            LIMIT 1
+        `;
 
 
