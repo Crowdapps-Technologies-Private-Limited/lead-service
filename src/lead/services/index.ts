@@ -1,3 +1,4 @@
+import { getFeedbackResponseByLead } from './feedbackService';
 import { getJobsList } from './getJobsListService';
 import { getCreateTaskFormData } from './getCreateTaskFormData';
 import { updateConfirmationByClient } from './updateConfirmationByClient';
@@ -51,5 +52,6 @@ export {
     getConfirmation,
     updateConfirmationByClient,
     getCreateTaskFormData,
-    getJobsList
+    getJobsList,
+    getFeedbackResponseByLead,
 };

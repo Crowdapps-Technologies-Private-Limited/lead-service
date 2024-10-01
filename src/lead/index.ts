@@ -1,4 +1,3 @@
-import { getDistanceHandler } from './handlers/getDistanceHandler';
 import { RouteHandler } from '../types/interfaces';
 import admiinHandlers from './handlers';
 
@@ -19,6 +18,7 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/confirmation-tooltip': admiinHandlers.getConfirmationTooltipHandler,
         '/leads/{id}/confirmation': admiinHandlers.getConfirmationHandler,
         '/leads/jobs': admiinHandlers.jobsListHandler,
+        '/leads/{id}/feedback': admiinHandlers.getFeedbackResponseHandler,
     },
     PUT: {
         '/leads/{id}': admiinHandlers.editLeadHandler,
