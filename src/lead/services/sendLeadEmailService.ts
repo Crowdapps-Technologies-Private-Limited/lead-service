@@ -1,12 +1,7 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { SendEmailPayload } from '../interface';
-import {  
-    CREATE_LOG_TABLE, 
-    INSERT_LOG, 
-    GET_EMAIL_TEMPLATE_BY_ID,
-    SELECT_EMAIL_INFO
- } from '../../sql/sqlScript';
+import { CREATE_LOG_TABLE, INSERT_LOG, GET_EMAIL_TEMPLATE_BY_ID, SELECT_EMAIL_INFO } from '../../sql/sqlScript';
 import { isEmptyString, toFloat } from '../../utils/utility';
 import { initializeEmailService } from '../../utils/emailService';
 import { getMaxListeners } from 'events';
@@ -19,7 +14,7 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
         subject,
         body,
         templateId,
-        addClientSignature // Add client's signature to email
+        addClientSignature, // Add client's signature to email
     } = payload;
 
     const client = await connectToDatabase();
@@ -33,16 +28,19 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
         await client.query(`SET search_path TO ${schema}`);
 
         // Check if lead exists
-        const leadCheckResult = await client.query(`
+        const leadCheckResult = await client.query(
+            `
             SELECT * FROM leads WHERE generated_id = $1
-        `, [leadId]);
+        `,
+            [leadId],
+        );
 
         if (leadCheckResult.rows.length === 0) {
             throw new Error('Lead not found');
         }
         let emailSignature = '';
         let emailDisclaimer = '';
-        if(addClientSignature) {
+        if (addClientSignature) {
             const emailInfo = await client.query(SELECT_EMAIL_INFO, [tenant.id]);
             if (emailInfo.rows.length === 0) {
                 throw new Error('Email info not found');
@@ -52,21 +50,16 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
         } else {
             // default signature and disclaimer
             const templateRes = await client.query(GET_EMAIL_TEMPLATE_BY_ID, [templateId]);
-            if(templateRes.rows.length === 0) {
+            if (templateRes.rows.length === 0) {
                 throw new Error(getMessage('EMAIL_TEMPLATE_NOT_FOUND'));
-            } 
+            }
             emailSignature = templateRes.rows[0].signature;
             emailDisclaimer = templateRes.rows[0].disclaimer;
         }
-        const htmlBody = body + "<br/>" + emailSignature + "<br/>" + emailDisclaimer;
+        const htmlBody = body + '<br/>' + emailSignature + '<br/>' + emailDisclaimer;
         // Send email
         const emailService = await initializeEmailService();
-        await emailService.sendEmail(
-            to,
-            subject,
-            body,
-            htmlBody
-        );
+        await emailService.sendEmail(to, subject, body, htmlBody);
         // Insert log
         await client.query(INSERT_LOG, [
             tenant.id,

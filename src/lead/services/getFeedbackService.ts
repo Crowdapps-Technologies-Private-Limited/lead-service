@@ -7,6 +7,7 @@ import { CREATE_FEEDBACK_RELATED_TABLE } from '../../sql/sqlScript';
 export const getFeedbackResponseByLead = async (lead_id: string, tenant: any) => {
     const schema = tenant?.schema;
     const client = await connectToDatabase();
+    logger.info('Fetching feedback responses for lead:', { lead_id });
 
     try {
         if (tenant?.is_suspended) {
@@ -26,6 +27,7 @@ export const getFeedbackResponseByLead = async (lead_id: string, tenant: any) =>
                 fr.response_id,
                 fr.question_id,
                 fq.question_text,
+                fq.category,
                 fr.rating,
                 fr.comment,
                 fr.created_at

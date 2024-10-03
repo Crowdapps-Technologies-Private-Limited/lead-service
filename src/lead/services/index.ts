@@ -1,4 +1,7 @@
-import { getFeedbackResponseByLead } from './feedbackService';
+import { changeLeadStatusService } from './changeLeadStatusService';
+import { getAllNotesByLead } from './getAllNotesService';
+import { sendFeedbackEmail } from './sendFeedbackMail';
+import { getFeedbackResponseByLead } from './getFeedbackService';
 import { getJobsList } from './getJobsListService';
 import { getCreateTaskFormData } from './getCreateTaskFormData';
 import { updateConfirmationByClient } from './updateConfirmationByClient';
@@ -54,4 +57,7 @@ export {
     getCreateTaskFormData,
     getJobsList,
     getFeedbackResponseByLead,
+    sendFeedbackEmail,
+    getAllNotesByLead,
+    changeLeadStatusService,
 };

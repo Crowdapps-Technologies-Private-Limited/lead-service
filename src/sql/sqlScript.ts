@@ -1529,7 +1529,6 @@ export const INSERT_JOB_SCHEDULE = `
   ) RETURNING job_id;;
 `;
 
-
 export const INSERT_JOB_VEHICLE = `
   INSERT INTO job_vehicles (
     vehicle_type_id, 
@@ -1682,7 +1681,6 @@ ORDER BY
 LIMIT 1;
 `;
 
-
 export const CREATE_DOC_TABLE_IF_NOT_EXISTS = `
 CREATE TABLE IF NOT EXISTS documents
 (
@@ -1754,4 +1752,57 @@ export const GET_INVOICE_BY_LEAD_AND_TYPE = `
             LIMIT 1
         `;
 
+export const CREATE_FEEDBACK_RELATED_TABLE = `
+-- Table to store feedback questions
+CREATE TABLE IF NOT EXISTS feedback_questions (
+    question_id SERIAL PRIMARY KEY, -- serial ensures this is an auto-incrementing integer
+    question_text TEXT NOT NULL,
+    category VARCHAR(50) NULL,
+    created_by VARCHAR(255) NOT NULL,
+    updated_by VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+-- Table to store customer feedback responses
+CREATE TABLE IF NOT EXISTS feedback_responses (
+    response_id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+    question_id INT REFERENCES feedback_questions(question_id) ON DELETE CASCADE, -- References serial integer question_id
+    lead_id VARCHAR(50) REFERENCES leads(generated_id) ON DELETE CASCADE, -- Reference to the leads table
+    rating INT CHECK (rating >= 1 AND rating <= 5), -- Star rating between 1 and 5
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+`;
+export const GET_CONFIRMATION_NOTES = `
+SELECT 
+    c.notes AS confirmation_note
+FROM 
+    confirmations c
+WHERE
+    c.lead_id::VARCHAR(50) = $1::VARCHAR(50);`;
+
+export const GET_QUOTES_NOTE = `
+SELECT 
+    q.notes AS quote_note
+FROM 
+    quotes q
+WHERE 
+    q.lead_id::VARCHAR(50) = $1::VARCHAR(50);`;
+
+export const GET_JOB_NOTES = `
+SELECT 
+    js.note AS job_note
+FROM 
+    job_schedules js
+WHERE 
+    js.lead_id::VARCHAR(50) = $1::VARCHAR(50);`;
+
+export const GET_SURVEY_NOTE = `
+SELECT 
+    s.notes AS survey_note
+FROM 
+    surveys s
+WHERE 
+    s.lead_id::VARCHAR(50) = $1::VARCHAR(50);`;

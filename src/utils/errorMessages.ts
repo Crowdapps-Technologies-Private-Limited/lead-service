@@ -114,11 +114,17 @@ export const getMessage = (template: any, systemErr?: any): string => {
         case 'CUSTOMER_PASSWORD_NOT_FOUND':
             return 'Customer password not found.';
         case 'LEAD_IS_NOT_IN_QUOTE_STATUS':
-            return 'Lead is not in quote state.'; 
-        case 'JOB_NOT_FOUND':   
+            return 'Lead is not in quote state.';
+        case 'JOB_NOT_FOUND':
             return 'Job not found.';
         case 'CONFIRMATION_ID_REQUIRED':
             return 'Confirmation ID is required in query parameters.';
+        case 'PASSWORD_NOT_FOUND':
+            return 'Password not found.';
+        case 'FEEDBACK_EMAIL_SENT':
+            return 'Feedback email sent successfully';
+        case 'NOTES_FETCHED':
+            return 'Notes fetched successfully';
 
         default:
             return '';
@@ -142,6 +148,8 @@ export const getErrorMessage = (template: string, systemErr: string): string => 
             return `Failed to fetch client's activities due to ${systemErr}`;
         case 'CUSTOMER_NOT_FOUND':
             return 'Customer not found.';
+        case 'NOTES_NOT_FETCHED':
+            return `Failed to fetch notes due to ${systemErr}`;
         default:
             return '';
     }

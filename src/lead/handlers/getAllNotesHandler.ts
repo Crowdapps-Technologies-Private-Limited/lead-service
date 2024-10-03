@@ -1,23 +1,19 @@
-import { APIGatewayProxyEventBase, APIGatewayProxyResult, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
-import { RouteHandler } from '../../types/interfaces';
+import { APIGatewayProxyEventBase, APIGatewayEventDefaultAuthorizerContext, APIGatewayProxyResult } from 'aws-lambda';
 import logger from '../../utils/logger';
+import { getAllNotesByLead } from '../services';
 import { ResponseHandler } from '../../utils/ResponseHandler';
-
 import { getMessage } from '../../utils/errorMessages';
-import { getFeedbackResponseByLead } from '../services';
 import { checkPermission } from '../../utils/checkPermission';
 
-// Handler to fetch feedback responses by lead_id
-export const getFeedbackResponseHandler: RouteHandler = async (
+export const getAllNotesHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('getFeedbackResponseByLeadHandler event:', { event });
+    logger.info('getAllNotesHandler event:', { event });
 
     try {
         const lead_id = event.pathParameters?.id;
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
-
         if (!lead_id) {
             return ResponseHandler.badRequestResponse({ message: 'Lead ID is required.' });
         }
@@ -28,11 +24,12 @@ export const getFeedbackResponseHandler: RouteHandler = async (
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
 
-        // Call the service to get feedback responses
-        const responses = await getFeedbackResponseByLead(lead_id, tenant);
-        return ResponseHandler.successResponse({ message: getMessage('RESPONSES_FETCHED'), data: responses });
+        // Fetch all notes by lead_id
+        const notes = await getAllNotesByLead(lead_id, tenant);
+
+        return ResponseHandler.successResponse({ message: getMessage('NOTES_FETCHED'), data: notes });
     } catch (error: any) {
-        logger.error('Error in getFeedbackResponseByLeadHandler:', { error });
+        logger.error('Error in getAllNotesHandler:', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

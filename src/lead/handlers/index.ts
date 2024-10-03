@@ -1,9 +1,11 @@
 import { addLeadHandler } from './addLeadHandler';
 import { addQuoteHandler } from './addQuoteHandler';
 import { assignSurveyorHandler } from './assignSurveyorHandler';
+import { changeLeadStatusHandler } from './changeLeadStatusHandler';
 import { editLeadHandler } from './editLeadHandler';
 import { addEstimateHandler } from './estimateHandler';
 import { estimateSendEmailHandler } from './estimateSendEmailHandler';
+import { getAllNotesHandler } from './getAllNotesHandler';
 import { getAllSurveysHandler } from './getAllSurveysHandler';
 import { getConfirmationHandler } from './getConfirmationHandler';
 import { getConfirmationTooltipHandler } from './getConfirmationTooltipHandler';
@@ -22,6 +24,7 @@ import { getSurveyByIdHandler } from './getSurveyByIdHandler';
 import { getSurveyorListHandler } from './getSurveyorListHandler';
 import { quoteSendEmailHandler } from './quoteSendEmailHandler';
 import { sendEmailHandler } from './sendEmailHandler';
+import { sendFeedbackEmailHandler } from './sendFeedbackEmailHandler';
 import { updateConfirmationHandler } from './updateConfirmationHandler';
 import { updateConfirmationTooltipHandler } from './updateConfirmationTooltipHandler';
 
@@ -52,6 +55,9 @@ const authHandlers = {
     getCreateTaskFormDataHandler,
     jobsListHandler,
     getFeedbackResponseHandler,
+    sendFeedbackEmailHandler,
+    getAllNotesHandler,
+    changeLeadStatusHandler,
 };
 
 export default authHandlers;

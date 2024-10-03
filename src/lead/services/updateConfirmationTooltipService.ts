@@ -1,11 +1,6 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
-import {
-    CHECK_TABLE_EXISTS,
-    GET_CONFIRMATION_ID_BY_LEAD_ID,
-    GET_LEAD_BY_ID,
-    MARK_SEEN_CONFIRMATION_TOOLTIP,
-} from '../../sql/sqlScript';
+import { CHECK_TABLE_EXISTS, GET_LEAD_BY_ID, MARK_SEEN_CONFIRMATION_TOOLTIP } from '../../sql/sqlScript';
 import { getMessage } from '../../utils/errorMessages';
 
 export const updateConfirmationTooltipDetails = async (leadId: string, tenant: any) => {
@@ -36,11 +31,7 @@ export const updateConfirmationTooltipDetails = async (leadId: string, tenant: a
             logger.info('Confirmations table does not exist');
         }
 
-
-        const confirmationResult = await client.query(MARK_SEEN_CONFIRMATION_TOOLTIP, [
-            tenant.email,
-            leadId,
-        ]);
+        const confirmationResult = await client.query(MARK_SEEN_CONFIRMATION_TOOLTIP, [tenant.email, leadId]);
         const confirmation = confirmationResult.rows[0];
         return confirmation;
     } catch (error: any) {

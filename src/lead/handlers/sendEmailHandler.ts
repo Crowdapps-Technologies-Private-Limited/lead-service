@@ -9,9 +9,9 @@ import { checkPermission } from '../../utils/checkPermission';
 export const sendEmailHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('sendEmailHandler event ', { event });  
+    logger.info('sendEmailHandler event ', { event });
     try {
-        let payload = JSON.parse(event.body || '{}');
+        const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
         const leadId = event.pathParameters?.id;
@@ -20,7 +20,12 @@ export const sendEmailHandler: RouteHandler = async (
         if (!leadId) {
             return ResponseHandler.badRequestResponse({ message: 'Lead ID is required' });
         }
-        const hasPermission = await checkPermission(user.role, 'Estimate', 'create', tenant?.schema || tenant?.tenant?.schema);
+        const hasPermission = await checkPermission(
+            user.role,
+            'Estimate',
+            'create',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
