@@ -178,6 +178,8 @@ export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS lead_logs (
     actor_name VARCHAR(150),
 	actor_email VARCHAR(150),
     action TEXT,
+    action_type VARCHAR(50),
+    specific_detail VARCHAR(100),
     performed_on VARCHAR(150),
     lead_status VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1777,32 +1779,40 @@ CREATE TABLE IF NOT EXISTS feedback_responses (
 `;
 export const GET_CONFIRMATION_NOTES = `
 SELECT 
-    c.notes AS confirmation_note
+    notes AS confirmation_note
 FROM 
-    confirmations c
+    confirmations
 WHERE
-    c.lead_id::VARCHAR(50) = $1::VARCHAR(50);`;
+    lead_id::VARCHAR(50) = $1::VARCHAR(50)
+ORDER BY created_at DESC
+LIMIT 1;`;
 
 export const GET_QUOTES_NOTE = `
 SELECT 
-    q.notes AS quote_note
+    notes AS quote_note
 FROM 
-    quotes q
+    quotes
 WHERE 
-    q.lead_id::VARCHAR(50) = $1::VARCHAR(50);`;
+    lead_id::VARCHAR(50) = $1::VARCHAR(50)
+ORDER BY created_at DESC
+LIMIT 1;`;
 
 export const GET_JOB_NOTES = `
 SELECT 
-    js.note AS job_note
+    note AS job_note
 FROM 
-    job_schedules js
+    job_schedules
 WHERE 
-    js.lead_id::VARCHAR(50) = $1::VARCHAR(50);`;
+    lead_id::VARCHAR(50) = $1::VARCHAR(50)
+ORDER BY created_at DESC
+LIMIT 1;`;
 
 export const GET_SURVEY_NOTE = `
 SELECT 
-    s.notes AS survey_note
+    notes AS survey_note
 FROM 
-    surveys s
+    surveys
 WHERE 
-    s.lead_id::VARCHAR(50) = $1::VARCHAR(50);`;
+    lead_id::VARCHAR(50) = $1::VARCHAR(50)
+ORDER BY created_at DESC
+LIMIT 1;`;

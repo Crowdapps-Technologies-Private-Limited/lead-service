@@ -576,3 +576,29 @@ export const updateConfirmationDTO = async (payload: UpdateConfirmationPayload):
         throw new Error(`Payload Validation Failed: ${err.errors.join(', ')}`);
     }
 };
+
+// Define the schema for manual log entry validation
+export const addManualLogSchema = yup.object().shape({
+    lead_id: yup.string().required('Lead ID is required').max(20, 'Lead ID cannot exceed 20 characters'),
+    action: yup
+        .string()
+        .required('Action description is required')
+        .max(500, 'Action description cannot exceed 500 characters'),
+    action_type: yup
+        .string()
+        .required('Action type is required')
+        .oneOf(['Status Update', 'Follow Up', 'Lead Closed', 'Note Added'], 'Invalid action type'),
+    specific_detail: yup.string().nullable().max(100, 'Specific detail cannot exceed 100 characters'),
+    performed_on: yup.date().required('Performed on date is required'),
+    lead_status: yup.string().required('Lead status is required').max(100, 'Lead status cannot exceed 100 characters'),
+});
+
+// Validate the payload against the schema
+export const validateAddManualLogPayload = async (payload: any) => {
+    try {
+        await addManualLogSchema.validate(payload, { abortEarly: false });
+    } catch (err: any) {
+        const validationErrors = err.errors.join(', ');
+        throw new Error(`Payload Validation Failed: ${validationErrors}`);
+    }
+};

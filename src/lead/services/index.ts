@@ -1,3 +1,4 @@
+import { addManualLog } from './addManualLog';
 import { changeLeadStatusService } from './changeLeadStatusService';
 import { getAllNotesByLead } from './getAllNotesService';
 import { sendFeedbackEmail } from './sendFeedbackMail';
@@ -60,4 +61,5 @@ export {
     sendFeedbackEmail,
     getAllNotesByLead,
     changeLeadStatusService,
+    addManualLog,
 };

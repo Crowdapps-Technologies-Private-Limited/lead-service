@@ -26,6 +26,7 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/send-email': adminHandlers.sendEmailHandler,
     },
     POST: {
+        '/leads/{id}/audit': adminHandlers.addManualLogHandler,
         '/leads/{id}/feedback': adminHandlers.sendFeedbackEmailHandler,
         '/leads/change-status': adminHandlers.changeLeadStatusHandler,
         '/leads/{id}/confirmation': adminHandlers.updateConfirmationHandler,

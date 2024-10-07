@@ -19,6 +19,10 @@ export const changeLeadStatusHandler = async (
         if (!lead_id || !new_status) {
             return ResponseHandler.badRequestResponse({ message: 'Missing required fields: lead_id or new_status' });
         }
+        ['COMPLETED', 'JOB'].includes(new_status) ||
+            ResponseHandler.badRequestResponse({
+                message: 'Invalid status. Please provide one of the following: COMPLETED, JOB',
+            });
 
         // Call the service to change lead status
         const result = await changeLeadStatusService(lead_id, new_status, tenant, user);

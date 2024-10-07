@@ -1,4 +1,5 @@
 import { addLeadHandler } from './addLeadHandler';
+import { addManualLogHandler } from './addManualLogHandler';
 import { addQuoteHandler } from './addQuoteHandler';
 import { assignSurveyorHandler } from './assignSurveyorHandler';
 import { changeLeadStatusHandler } from './changeLeadStatusHandler';
@@ -58,6 +59,7 @@ const authHandlers = {
     sendFeedbackEmailHandler,
     getAllNotesHandler,
     changeLeadStatusHandler,
+    addManualLogHandler,
 };
 
 export default authHandlers;

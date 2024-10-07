@@ -20,12 +20,12 @@ export const changeLeadStatusService = async (lead_id: string, new_status: strin
         // Update the lead status
         const updateLeadStatusQuery = `
             UPDATE leads
-            SET status = $1, updated_by = $2, updated_at = CURRENT_TIMESTAMP
-            WHERE generated_id = $3
-            RETURNING generated_id, status, updated_at;
+            SET status = $1, updated_at = CURRENT_TIMESTAMP
+            WHERE generated_id = $2
+            RETURNING generated_id as lead_id, status, updated_at;
         `;
 
-        const result = await client.query(updateLeadStatusQuery, [new_status, user.email, lead_id]);
+        const result = await client.query(updateLeadStatusQuery, [new_status, lead_id]);
 
         if (result.rowCount === 0) {
             throw new Error(`No lead found with the id ${lead_id}`);

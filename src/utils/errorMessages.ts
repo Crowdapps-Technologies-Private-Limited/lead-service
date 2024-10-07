@@ -125,6 +125,8 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return 'Feedback email sent successfully';
         case 'NOTES_FETCHED':
             return 'Notes fetched successfully';
+        case 'LEAD_STATUS_UPDATED':
+            return 'Lead status updated successfully.';
 
         default:
             return '';
