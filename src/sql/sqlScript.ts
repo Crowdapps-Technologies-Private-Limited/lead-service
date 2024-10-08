@@ -178,8 +178,6 @@ export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS lead_logs (
     actor_name VARCHAR(150),
 	actor_email VARCHAR(150),
     action TEXT,
-    action_type VARCHAR(50),
-    specific_detail VARCHAR(100),
     performed_on VARCHAR(150),
     lead_status VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -520,7 +518,8 @@ export const GET_ALL_LEADS = `
 export const UPDATE_LEAD_STATUS = `
     UPDATE leads
     SET status = $1
-    WHERE generated_id = $2;
+    WHERE generated_id = $2
+    returning status;
 `;
 
 export const GET_EMAIL_TEMPLATE_BY_ID = `
@@ -1816,3 +1815,16 @@ WHERE
     lead_id::VARCHAR(50) = $1::VARCHAR(50)
 ORDER BY created_at DESC
 LIMIT 1;`;
+
+export const UPDATE_FOLLOWUP_DATE = `
+    UPDATE leads
+    SET follow_up_date = $1
+    WHERE generated_id = $2;
+`;
+
+// SQL queries
+export const GET_LEAD_STATUS_BY_ID = `
+    SELECT status , generated_id AS lead_id
+    FROM leads 
+    WHERE generated_id = $1;
+`;

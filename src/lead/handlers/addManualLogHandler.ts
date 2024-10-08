@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
-import { addManualLog } from '../services';
+import { addManualLogAndChangeLeadStatus } from '../services';
 import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { checkPermission } from '../../utils/checkPermission';
@@ -37,10 +37,11 @@ export const addManualLogHandler = async (
         } catch (validationError: any) {
             return ResponseHandler.badRequestResponse({ message: validationError.message });
         }
-
+        logger.info('Manual log validated payload:', { payload });
         // Call service to add manual log entry
-        const logEntry = await addManualLog(payload, leadId, tenant, user);
-
+        logger.info('Manual log entry started:');
+        const logEntry = await addManualLogAndChangeLeadStatus(payload, leadId, tenant, user);
+        logger.info('Manual log entry completed:', { logEntry });
         return ResponseHandler.successResponse({
             message: getMessage('LOG_ENTRY_ADDED'),
             data: logEntry,

@@ -127,7 +127,8 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return 'Notes fetched successfully';
         case 'LEAD_STATUS_UPDATED':
             return 'Lead status updated successfully.';
-
+        case 'LOG_ENTRY_ADDED':
+            return 'Log entry added successfully.';
         default:
             return '';
     }
