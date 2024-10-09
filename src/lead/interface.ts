@@ -157,40 +157,40 @@ export interface SendEmailPayload {
 }
 
 export interface AddSurveyItemTab1 {
-    room: string; 
-    item: string; 
-    ft3: number; 
-    quantity: number; 
-    isLeave: boolean; 
-    isWeee: boolean; 
-    isCust: boolean; 
-    isClear: boolean; 
+    room: string;
+    item: string;
+    ft3: number;
+    quantity: number;
+    isLeave: boolean;
+    isWeee: boolean;
+    isCust: boolean;
+    isClear: boolean;
     materialId?: string | null;
     price?: number | null;
 }
 
 export interface AddSurveyTab1Payload {
-    surveyItems: AddSurveyItemTab1[]; 
+    surveyItems: AddSurveyItemTab1[];
 }
 
 export interface AddSurveyItemTab3 {
     surveyItemId: string;
-    room: string; 
-    item: string; 
-    ft3: number; 
-    dismantleCharges: number; 
-    sortOrder: number; 
+    room: string;
+    item: string;
+    ft3: number;
+    dismantleCharges: number;
+    sortOrder: number;
     linkedItem?: string | null;
 }
 
 export interface AddSurveyTab2Payload {
     surveyId: string;
-    notes?: string | null; 
+    notes?: string | null;
 }
 
 export interface AddSurveyTab3Payload {
     surveyId: string;
-    surveyItems: AddSurveyItemTab3[]; 
+    surveyItems: AddSurveyItemTab3[];
 }
 
 export interface AssignSurveyorPayload {
@@ -237,7 +237,6 @@ export interface DateStruct {
     time?: string;
     status: string;
 }
-
 
 export interface UpdateConfirmationPayload {
     confirmationId?: string | null;

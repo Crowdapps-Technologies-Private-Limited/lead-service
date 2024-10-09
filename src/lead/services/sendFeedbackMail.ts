@@ -43,10 +43,10 @@ export const sendFeedbackEmail = async (leadId: string, tenant: any, user: any) 
         }
         const password = customer.password ? decryptPassword(customer.password) : '';
         await generateEmail('Feedback Email', leadData?.customer_email, {
-            username: leadData?.customer_name,
+            name: leadData?.customer_name,
             leadid: leadId,
             link: 'https://mmym-client-dev.crowdapps.info/',
-            email: leadData?.customer_email,
+            username: customer.username,
             password,
         });
 

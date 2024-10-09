@@ -1228,6 +1228,7 @@ SELECT
     name AS customer_name,
     phone AS customer_phone,
     email AS customer_email,
+    username,
     password,
     cognito_sub,
     tenant_id,

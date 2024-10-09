@@ -79,8 +79,7 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
             throw new Error(getErrorMessage('CUSTOMER_NOT_FOUND', 'Email not found'));
         }
 
-        const password = '';
-        const customer = await findOrCreateCognitoUser(client, config, leadData, email, tenant);
+        const { customer, password } = await findOrCreateCognitoUser(client, config, leadData, email, tenant);
 
         // Start transaction
         await client.query('BEGIN');
@@ -94,6 +93,7 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
             user,
             tenant,
             customer,
+            password,
             pdfUrl,
             termPDF,
             packingGuidePDF,
@@ -137,30 +137,31 @@ const findOrCreateCognitoUser = async (client: any, config: any, leadData: any, 
     let password = '';
     let cognitoSub: string | null = null;
 
-    const usersByEmail = await cognito
+    // get customer
+    const customerResult = await client.query(GET_CUSTOMER_BY_EMAIL, [email]);
+    logger.info('customer detail', { customerResult });
+    const customer = customerResult.rows[0];
+
+    const usersByUsername = await cognito
         .listUsers({
             UserPoolId: config.cognitoUserPoolId,
-            Filter: `email = "${email}"`,
+            Filter: `name = "${customer?.username}"`,
         })
         .promise();
 
-    if (usersByEmail.Users?.length) {
-        const customerResult = await client.query(GET_CUSTOMER_BY_EMAIL, [email]);
-        if (customerResult.rows.length > 0) {
-            const customer = customerResult.rows[0];
-            password = customer.password ? decryptPassword(customer.password) : '';
-        }
+    if (usersByUsername.Users?.length) {
+        password = customer.password ? decryptPassword(customer.password) : '';
     } else {
         password = generateRandomPassword();
-        const userName = leadData?.customer_name?.replace(/\s+/g, '').toLowerCase() + generateRandomString();
+        const username = leadData?.customer_name?.replace(/\s+/g, '').toLowerCase() + generateRandomString();
         const signUpResult = await cognito
             .signUp({
                 ClientId: config.cognitoAppClientId as string,
-                Username: userName,
+                Username: username,
                 Password: password,
                 UserAttributes: [
                     { Name: 'email', Value: email },
-                    { Name: 'name', Value: userName },
+                    { Name: 'name', Value: username },
                     { Name: 'custom:role', Value: 'CUSTOMER' },
                     { Name: 'custom:tenant_id', Value: tenant.id },
                 ],
@@ -168,20 +169,20 @@ const findOrCreateCognitoUser = async (client: any, config: any, leadData: any, 
             .promise();
 
         cognitoSub = signUpResult.UserSub || null;
-        await confirmAndVerifyUser(config, userName);
-
+        await confirmAndVerifyUser(config, username);
+        customer.username = username;
         const encryptedPassword = encryptPassword(password);
         await client.query(UPDATE_CUSTOMER_WITH_CREDENTIAL, [
             encryptedPassword,
             cognitoSub,
             tenant.id,
-            userName,
+            username,
             tenant.id,
             leadData.customer_id,
         ]);
     }
 
-    return password;
+    return { customer, password };
 };
 
 const confirmAndVerifyUser = async (config: any, userName: string) => {
@@ -208,11 +209,14 @@ const createConfirmation = async (
     quoteId: string,
     user: any,
     tenant: any,
+    customer: any,
     password: string,
     pdfUrl: string,
     termPDF: string,
     packingGuidePDF: string,
 ) => {
+    logger.info('customer', { customer });
+    logger.info('password', { password });
     await client.query(INSERT_LOG, [
         tenant.id,
         leadData?.customer_name,
@@ -259,13 +263,13 @@ const createConfirmation = async (
     await client.query(UPDATE_LEAD_STATUS, ['QUOTE', leadId]);
 
     await generateEmail('Quotation Email', leadData?.customer_email, {
-        username: leadData?.customer_name,
+        name: leadData?.customer_name,
         leadid: leadId,
         pdfurl: pdfUrl,
         clientlogin: 'https://mmym-client-dev.crowdapps.info/',
         termsdoc: termPDF,
         packingguidedoc: packingGuidePDF,
-        email: leadData?.customer_email,
+        username: customer.username,
         password,
     });
 };
