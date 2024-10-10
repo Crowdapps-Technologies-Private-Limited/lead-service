@@ -10,10 +10,12 @@ import logger from './utils/logger';
 import { getUserProfile } from './utils/getProfileService';
 import { getTenantProfile } from './utils/getTenantProfile';
 import { getMessage } from './utils/errorMessages';
+import { checkWebsiteMode } from './utils/checkWebsiteMode';
 
 const routes = merge(adminRoutes);
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    await checkWebsiteMode();
     logger.info('Received event', { event });
     let response: APIGatewayProxyResult;
 
@@ -33,7 +35,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 body: JSON.stringify({ message: 'Unauthorized' }),
             };
         }
-        
+
         const config: Config = await getconfigSecrets();
 
         // Validate the token and extract user payload
@@ -42,13 +44,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const userPayload = await verifyToken(token, userPoolId, region);
         const user: any = await getUserBySub({ userPoolId: config.cognitoUserPoolId, sub: userPayload.sub });
         logger.info('user:', { user });
-        
+
         if (!user || user.role === 'SUPER_ADMIN') {
             logger.info('In if SuperAdmin:', { user });
             return {
                 statusCode: 401,
                 headers: defaultHeaders,
-                body: JSON.stringify({ message: 'Forbidden' })
+                body: JSON.stringify({ message: 'Forbidden' }),
             };
         }
 
@@ -56,63 +58,61 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return {
                 statusCode: 401,
                 headers: defaultHeaders,
-                body: JSON.stringify({ message: 'Forbidden' })
+                body: JSON.stringify({ message: 'Forbidden' }),
             };
         }
 
         if (user.role === 'TENANT') {
             logger.info(' In if TenantAdmin:', { user });
-            const clientDetail= await getTenantProfile(user.tenant_id);
+            const clientDetail = await getTenantProfile(user.tenant_id);
             logger.info('TenantAdminDetail:', { clientDetail });
-            if(clientDetail.is_deleted === true){   
+            if (clientDetail.is_deleted === true) {
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: getMessage('ACCOUNT_DELETED') })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_DELETED') }),
                 };
             }
-            if(clientDetail.is_active === false ){   
+            if (clientDetail.is_active === false) {
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: getMessage('ACCOUNT_NOT_ACTIVE') })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_NOT_ACTIVE') }),
                 };
             }
-            if(clientDetail.is_suspended === true){   
+            if (clientDetail.is_suspended === true) {
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: getMessage('ACCOUNT_SUSPENDED') })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_SUSPENDED') }),
                 };
             }
             // Attach userPayload to the request context
             (event.requestContext as any).user = user;
             (event.requestContext as any).tenant = clientDetail;
             (event.requestContext as any).isTenant = true;
-    
-        }
-        else {
+        } else {
             const clientDetail = await getUserProfile(user.tenant_id, user.sub);
             logger.info('clientStaffDetail:', { clientDetail });
-            if(clientDetail.tenant.is_deleted === true){   
+            if (clientDetail.tenant.is_deleted === true) {
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: getMessage('ACCOUNT_DELETED') })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_DELETED') }),
                 };
             }
-            if(clientDetail.tenant.is_active === false && clientDetail.tenant.status !== 'PENDING'){   
+            if (clientDetail.tenant.is_active === false && clientDetail.tenant.status !== 'PENDING') {
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: getMessage('ACCOUNT_NOT_ACTIVE') })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_NOT_ACTIVE') }),
                 };
             }
-            if(clientDetail.tenant.is_suspended === true){   
+            if (clientDetail.tenant.is_suspended === true) {
                 return {
                     statusCode: 401,
                     headers: defaultHeaders,
-                    body: JSON.stringify({ message: getMessage('ACCOUNT_SUSPENDED') })
+                    body: JSON.stringify({ message: getMessage('ACCOUNT_SUSPENDED') }),
                 };
             }
 
@@ -140,7 +140,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             (event.requestContext as any).tenant = clientDetail;
             (event.requestContext as any).isTenant = false;
         }
-        
     } catch (error: any) {
         logger.error('Token not verified', { error });
         return {
