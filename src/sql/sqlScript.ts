@@ -98,6 +98,11 @@ export const GET_LEAD_COUNT = `
     SELECT COUNT(*) 
     FROM leads
 `;
+export const GET_LEAD_COUNT_WITH_FILTER = `
+    SELECT COUNT(*) 
+    FROM leads
+    WHERE ($1::TEXT IS NULL OR status = $1::TEXT)
+`;
 
 export const GET_LEAD_BY_ID = `
 SELECT 
