@@ -1,4 +1,4 @@
-import { GET_LEAD_COUNT, CHECK_TABLE_EXISTS, GET_LEAD_COUNT_WITH_FILTER } from '../../sql/sqlScript';
+import { GET_LEAD_COUNT_WITH_FILTER, CHECK_TABLE_EXISTS } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { setPaginationData } from '../../utils/utility';
 import logger from '../../utils/logger';
@@ -44,10 +44,20 @@ export const getAllLeads = async (
             };
         }
 
-        // Fetch lead count with filterStatus
-        const resultCount = await client.query(GET_LEAD_COUNT_WITH_FILTER, [filterStatus ? filterStatus : null]);
+        // Fetch lead count with both filterStatus and search condition
+        const resultCount = await client.query(
+            `
+            SELECT COUNT(*) 
+            FROM leads l
+            LEFT JOIN customers c ON l.customer_id = c.id
+            WHERE 
+                ($1::TEXT IS NULL OR l.status = $1::TEXT) AND 
+                (c.name ILIKE $2 OR l.status ILIKE $2 OR l.generated_id::TEXT ILIKE $2)
+            `,
+            [filterStatus ? filterStatus : null, searchQuery],
+        );
 
-        // Fetch lead list with filterStatus
+        // Fetch lead list with filterStatus and search condition
         const res = await client.query(
             `
             SELECT 
@@ -70,8 +80,6 @@ export const getAllLeads = async (
                 customers c ON l.customer_id = c.id
             LEFT JOIN 
                 addresses ca ON l.collection_address_id = ca.id
-            LEFT JOIN 
-                addresses da ON l.delivery_address_id = da.id
             WHERE 
                 ($3::TEXT IS NULL OR l.status = $3::TEXT) AND 
                 (c.name ILIKE $4 OR l.status ILIKE $4 OR l.generated_id::TEXT ILIKE $4)
