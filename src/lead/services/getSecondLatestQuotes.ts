@@ -115,7 +115,7 @@ export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => 
         if (leadCheckResult.rows.length === 0) {
             throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
-        const quotationDoc = 'Quote_previous.pdf';
+        const quotationDoc = 'Quote_previous';
         const res = await client.query(query, [leadId]);
         // Manually convert string fields to numbers, if necessary
         if (res.rows.length === 0) {
@@ -148,7 +148,14 @@ export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => 
         });
         logger.info('html:', { html });
         // Generate PDF
-        const pdfUrl = await generatePdfAndUploadToS3({ html, key: quotationDoc });
+        // Generate PDF
+        const { pdfUrl, file, s3FileUrl } = await generatePdfAndUploadToS3({
+            html,
+            key: 'previous_quote',
+            leadId,
+            tenantId: tenant.id,
+            folderName: 'quotation',
+        });
         return { message: getMessage('PREV_QUOTE_PDF_GENERATED'), data: { pdfUrl } };
     } catch (error: any) {
         logger.error('Failed to download prevoius quote', { error });

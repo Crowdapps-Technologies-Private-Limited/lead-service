@@ -3,7 +3,6 @@ import { RouteHandler } from '../../types/interfaces';
 import { getLatestEstimates } from '../services';
 import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
-import { generatePdfAndUploadToS3 } from '../services/generatePdf';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 
@@ -28,14 +27,18 @@ export const getLatestEstimatesHandler: RouteHandler = async (
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
 
-        
-        const hasPermission = await checkPermission(user.role, 'Estimate', 'read', tenant?.schema || tenant?.tenant?.schema);
+        const hasPermission = await checkPermission(
+            user.role,
+            'Estimate',
+            'read',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         const result = await getLatestEstimates(leadId, tenant);
-        // const url = await generatePdfAndUploadToS3({ html: '<p>Hello, World</p>', key: 'test.pdf' });
+
         if (result) {
             return ResponseHandler.successResponse({ message: getMessage('ESTIMATE_FETCHED'), data: result });
         } else {

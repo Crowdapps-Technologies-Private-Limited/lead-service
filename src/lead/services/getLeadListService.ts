@@ -53,7 +53,7 @@ export const getAllLeads = async (
             LEFT JOIN customers c ON l.customer_id = c.id
             WHERE 
                 ($1::TEXT IS NULL OR l.status = $1::TEXT) AND 
-                (c.name ILIKE $2 OR l.status ILIKE $2 OR l.generated_id::TEXT ILIKE $2)
+                (c.name ILIKE $2 OR c.phone ILIKE $2 OR l.status ILIKE $2 OR l.generated_id::TEXT ILIKE $2)
             `,
             [filterStatus ? filterStatus : null, searchQuery],
         );
@@ -73,6 +73,7 @@ export const getAllLeads = async (
                 ca.county AS collection_county,
                 ca.postcode AS collection_postcode,
                 ca.country AS collection_country,
+                l.follow_up_date,
                 l.status,
                 l.created_at
             FROM 
@@ -83,7 +84,7 @@ export const getAllLeads = async (
                 addresses ca ON l.collection_address_id = ca.id
             WHERE 
                 ($3::TEXT IS NULL OR l.status = $3::TEXT) AND 
-                (c.name ILIKE $4 OR l.status ILIKE $4 OR l.generated_id::TEXT ILIKE $4)
+                (c.name ILIKE $4 OR c.phone ILIKE $4 OR l.status ILIKE $4 OR l.generated_id::TEXT ILIKE $4)
             ORDER BY ${allowedOrderFields[orderBy]} ${orderIn.toUpperCase()}
             LIMIT $1 
             OFFSET $2`,

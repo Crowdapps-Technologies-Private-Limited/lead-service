@@ -3,7 +3,6 @@ import { RouteHandler } from '../../types/interfaces';
 import { getLatestQuote } from '../services';
 import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
-import { generatePdfAndUploadToS3 } from '../services/generatePdf';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 

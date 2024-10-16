@@ -26,6 +26,7 @@ import {
     GET_CUSTOMER_BY_EMAIL,
     UPDATE_LEAD_STATUS,
 } from '../../sql/sqlScript';
+import { sendAttachmentEmail } from '../../utils/sendAttachmentEmail';
 
 const s3 = new AWS.S3();
 const { CognitoIdentityServiceProvider } = AWS;
@@ -65,8 +66,14 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
         const quotationDoc = 'quotation.pdf';
         const quoteData = await getLatestQuote(leadId, tenant);
         const html = await generateQuoteHtml({ client: tenant, lead: leadData, quote: quoteData.data });
-        const pdfUrl = await generatePdfAndUploadToS3({ html, key: quotationDoc });
 
+        const { pdfUrl, file, s3FileUrl } = await generatePdfAndUploadToS3({
+            html,
+            key: 'quotation',
+            leadId,
+            tenantId: tenant.id,
+            folderName: 'quotation',
+        });
         if (action === 'pdf') {
             return { message: getMessage('PDF_GENERATED'), data: { pdfUrl } };
         }
@@ -98,8 +105,8 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
             pdfUrl,
             termPDF,
             packingGuidePDF,
+            file,
         );
-
         // Commit transaction
         await client.query('COMMIT');
 
@@ -218,6 +225,7 @@ const createConfirmation = async (
     pdfUrl: string,
     termPDF: string,
     packingGuidePDF: string,
+    file: any,
 ) => {
     logger.info('customer', { customer });
     logger.info('password', { password });
@@ -265,17 +273,29 @@ const createConfirmation = async (
     }
 
     await client.query(UPDATE_LEAD_STATUS, ['QUOTE', leadId]);
-
-    await generateEmail('Quotation Email', leadData?.customer_email, {
-        name: leadData?.customer_name,
-        leadid: leadId,
-        pdfurl: pdfUrl,
-        clientlogin: 'https://mmym-client-dev.crowdapps.info/',
-        termsdoc: termPDF,
-        packingguidedoc: packingGuidePDF,
-        username: customer.username,
-        password,
-    });
+    // Prepare the email attachment (PDF file as a buffer)
+    const attachments = [
+        {
+            Name: `${leadId}.pdf`, // Name the file appropriately
+            Content: file.toString('base64'), // Convert file buffer to base64
+            ContentType: 'application/pdf', // PDF content type
+        },
+    ];
+    await sendAttachmentEmail(
+        'Quotation Email',
+        leadData?.customer_email,
+        {
+            name: leadData?.customer_name,
+            leadid: leadId,
+            pdfurl: pdfUrl,
+            clientlogin: 'https://mmym-client-dev.crowdapps.info/',
+            termsdoc: termPDF,
+            packingguidedoc: packingGuidePDF,
+            username: customer.username,
+            password,
+        },
+        attachments,
+    );
 };
 
 const rollbackCognitoUser = async (config: any, cognitoSub: string) => {

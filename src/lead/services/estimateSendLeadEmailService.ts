@@ -16,6 +16,7 @@ import generateEstimateHtml from './generateEstimateHtml';
 import { generateEmail } from '../../utils/generateEmailService';
 import { getMessage } from '../../utils/errorMessages';
 import { getconfigSecrets } from '../../utils/getConfig';
+import { sendAttachmentEmail } from '../../utils/sendAttachmentEmail';
 
 export const sendEstimateEmail = async (leadId: string, estimateId: string, tenant: any, action: string) => {
     const client = await connectToDatabase();
@@ -36,7 +37,6 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         if (leadCheckResult.rows.length === 0) {
             throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
-        const estimationDoc = 'estimation.pdf';
         // Get estimate data
         const estimateData = await getLatestEstimates(leadId, tenant);
 
@@ -46,7 +46,13 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
             estimate: estimateData,
         });
         // Generate PDF
-        const pdfUrl = await generatePdfAndUploadToS3({ html, key: estimationDoc });
+        const { pdfUrl, file, s3FileUrl } = await generatePdfAndUploadToS3({
+            html,
+            key: 'estimation',
+            leadId,
+            tenantId: tenant.id,
+            folderName: 'estimate',
+        });
         if (action === 'pdf') {
             return { message: getMessage('PDF_GENERATED'), data: { pdfUrl } };
         }
@@ -93,16 +99,30 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
                 Expires: 60 * 60, // URL expires in 1 hour
             });
         }
+        // Prepare the email attachment (PDF file as a buffer)
+        const attachments = [
+            {
+                Name: `${leadId}.pdf`, // Name the file appropriately
+                Content: file.toString('base64'), // Convert file buffer to base64
+                ContentType: 'application/pdf', // PDF content type
+            },
+        ];
 
         // Send email
-        await generateEmail('Estimate Email', leadCheckResult.rows[0]?.customer_email, {
-            username: leadCheckResult.rows[0]?.customer_name,
-            leadid: leadId,
-            pdfurl: pdfUrl,
-            clientlogin: clientLogin,
-            termsdoc: termPDF,
-            packingguidedoc: packingGuidePDF,
-        });
+
+        await sendAttachmentEmail(
+            'Estimate Email',
+            leadCheckResult.rows[0]?.customer_email,
+            {
+                username: leadCheckResult.rows[0]?.customer_name,
+                leadid: leadId,
+                pdfurl: pdfUrl,
+                clientlogin: clientLogin,
+                termsdoc: termPDF,
+                packingguidedoc: packingGuidePDF,
+            },
+            attachments,
+        );
         const templateRes = await client.query(GET_EMAIL_TEMPLATE_BY_EVENT, ['Estimate Email']);
         await client.query(INSERT_LOG, [
             tenant.id,

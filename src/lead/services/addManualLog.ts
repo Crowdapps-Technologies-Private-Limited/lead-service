@@ -75,10 +75,6 @@ export const addManualLogAndChangeLeadStatus = async (payload: any, lead_id: str
         // Start transaction
         await client.query('BEGIN');
 
-        if (!LEAD_STAGES.includes(action_type)) {
-            throw new Error(`Invalid action type. Action type must be one of ${LEAD_STAGES.join(', ')}`);
-        }
-
         // Check if the lead exists
         const leadCheckResult = await client.query(GET_LEAD_STATUS_BY_ID, [lead_id]);
         if (leadCheckResult.rows.length === 0) {
@@ -106,21 +102,24 @@ export const addManualLogAndChangeLeadStatus = async (payload: any, lead_id: str
             // Update action note to include the follow-up date
             updatedActionNote += ` | Follow-up date set to: ${providedFollowUpDate.toISOString().split('T')[0]}`;
         }
-
-        // Validate the lead status transition as per the PDF rules
-        if (action_type && !isValidTransition(lead.status, action_type)) {
-            const errorMessage = ERROR_MESSAGES[lead.status]?.[action_type] || 'Invalid status transition.';
-            throw new Error(errorMessage);
-        }
-
-        logger.info('action_type:', { action_type });
-
-        // Update lead status if necessary
         let updatedLeadStatus = lead.status;
-        if (action_type && lead.status !== action_type) {
-            const updatedLeadStatusResult = await client.query(UPDATE_LEAD_STATUS, [action_type, lead_id]);
-            updatedLeadStatus = updatedLeadStatusResult.rows[0].status;
-            logger.info(`Lead status changed successfully for lead ${lead_id} to ${action_type}`);
+        if (action_type) {
+            if (!LEAD_STAGES.includes(action_type)) {
+                throw new Error(`Invalid action type. Action type must be one of ${LEAD_STAGES.join(', ')}`);
+            }
+            // Validate the lead status transition as per the PDF rules
+            if (action_type && !isValidTransition(lead.status, action_type)) {
+                const errorMessage = ERROR_MESSAGES[lead.status]?.[action_type] || 'Invalid status transition.';
+                throw new Error(errorMessage);
+            }
+
+            logger.info('action_type:', { action_type });
+
+            if (action_type && lead.status !== action_type) {
+                const updatedLeadStatusResult = await client.query(UPDATE_LEAD_STATUS, [action_type, lead_id]);
+                updatedLeadStatus = updatedLeadStatusResult.rows[0].status;
+                logger.info(`Lead status changed successfully for lead ${lead_id} to ${action_type}`);
+            }
         }
 
         // Prepare data for the log entry
