@@ -9,6 +9,7 @@ import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import AWS from 'aws-sdk';
 const s3 = new AWS.S3();
+
 export const getConfirmation = async (tenant: any, leadId: string) => {
     // Connect to PostgreSQL database
     const client = await connectToDatabase();
@@ -23,13 +24,16 @@ export const getConfirmation = async (tenant: any, leadId: string) => {
             logger.info('Confirmations table does not exist');
             return {};
         }
+
         const confirmationDetailsRes = await client.query(GET_CONFIRMATION_DETAILS, [leadId]);
         if (!confirmationDetailsRes?.rows?.length) {
             logger.info('No confirmation details found');
             return {};
         }
+
         const confirmationDetails = confirmationDetailsRes?.rows[0];
         logger.info('Confirmation details:', { confirmationDetails });
+
         const leadDetailsRes = await client.query(GET_LEAD_DETAILS_FOR_CUSTOMER, [leadId]);
         if (!leadDetailsRes?.rows?.length) {
             logger.info('No lead details found');
@@ -44,18 +48,29 @@ export const getConfirmation = async (tenant: any, leadId: string) => {
         }
         const quoteDetails = quotesResult?.rows[0];
         logger.info('Quote details:', { quoteDetails });
-        const invoiceResult = await client.query(GET_INVOICE_BY_LEAD_AND_TYPE, [leadId, 'deposit' ]);
+
+        const invoiceResult = await client.query(GET_INVOICE_BY_LEAD_AND_TYPE, [leadId, 'deposit']);
         if (!invoiceResult?.rows?.length) {
-            logger.info('No quotes found');
+            logger.info('No invoice found');
         }
         const invoice = invoiceResult?.rows[0];
         logger.info('Invoice:', { invoice });
+
+        // Sort services so that 'Door to Door' is at index 0 and 'Full Pack' is at index 1
+        const sortedServices = confirmationDetails?.services?.sort((a: any, b: any) => {
+            if (a.name === 'Door to Door') return -1;
+            if (b.name === 'Door to Door') return 1;
+            if (a.name === 'Full Pack') return -1;
+            if (b.name === 'Full Pack') return 1;
+            return 0; // Keep the rest in the same order
+        });
+
         const data = {
             colectionVolume: leadDetails?.collection_volume,
             collectionVolumeUnit: leadDetails?.collection_volume_unit,
             deliveryVolume: leadDetails?.delivery_volume,
             deliveryVolumeUnit: leadDetails?.delivery_volume_unit,
-            services: confirmationDetails?.services,
+            services: sortedServices, // Updated sorted services
             comments: confirmationDetails?.comments,
             confirmedOn: confirmationDetails?.confirmedOn,
             isDepositeRecieved: confirmationDetails?.isDepositReceived,
@@ -71,9 +86,10 @@ export const getConfirmation = async (tenant: any, leadId: string) => {
             },
             confirmationId: confirmationDetails?.confirmationId,
             ...quoteDetails,
-            invoiceNumber: invoice?.invoice_number? invoice?.invoice_number : null, 
-            invoiceType: invoice?.invoice_type? invoice?.invoice_type : null, 
+            invoiceNumber: invoice?.invoice_number ? invoice?.invoice_number : null,
+            invoiceType: invoice?.invoice_type ? invoice?.invoice_type : null,
         };
+
         logger.info('Data:', { data });
         return data;
     } catch (error: any) {

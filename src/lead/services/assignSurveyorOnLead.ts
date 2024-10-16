@@ -5,7 +5,7 @@ import {
     INSERT_SURVEY,
     CHECK_SURVEY,
     CHECK_SURVEYOR_AVAILABILITY,
-    UPDATE_LEAD_STATUS
+    UPDATE_LEAD_STATUS,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { getMessage } from '../../utils/errorMessages';
@@ -14,21 +14,18 @@ import logger from '../../utils/logger';
 import { toFloat } from '../../utils/utility';
 import { AssignSurveyorPayload } from '../interface';
 
-export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayload, tenant: any, isTenant: boolean) => {
+export const assignSurveyor = async (
+    leadId: string,
+    payload: AssignSurveyorPayload,
+    tenant: any,
+    isTenant: boolean,
+) => {
     logger.info('addSurvey service is running:');
     logger.info('payload:', { payload });
     logger.info('leadId:', { leadId });
     logger.info('tenant:', { tenant });
 
-    const {
-        surveyorId,
-        surveyType,
-        surveyDate,
-        remarks,
-        startTime,
-        endTime,
-        description
-    } = payload;
+    const { surveyorId, surveyType, surveyDate, remarks, startTime, endTime, description } = payload;
 
     const client = await connectToDatabase();
     const schema = tenant.schema;
@@ -49,9 +46,12 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
         // CHECK IF LEAD EXISTS
-        const leadCheckResult = await client.query(`
+        const leadCheckResult = await client.query(
+            `
             SELECT * FROM leads WHERE generated_id = $1
-        `, [leadId]);
+        `,
+            [leadId],
+        );
         if (leadCheckResult.rows.length === 0) {
             throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
@@ -62,16 +62,18 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
         }
         // CHECK IF SURVEYOR EXISTS
-        let surveyorCheckResult
-        if(surveyorId.startsWith('EMP')){
-         surveyorCheckResult = await client.query(`
+        let surveyorCheckResult;
+        if (surveyorId.startsWith('EMP')) {
+            surveyorCheckResult = await client.query(
+                `
             SELECT * FROM staffs WHERE staff_id = $1
-        `, [surveyorId]);
+        `,
+                [surveyorId],
+            );
             if (surveyorCheckResult.rows.length === 0) {
                 throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
             }
-        }
-        else if(surveyorId !== tenant.id){
+        } else if (surveyorId !== tenant.id) {
             throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
         }
         await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
@@ -86,7 +88,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         const surveyorAvailabilityResult = await client.query(CHECK_SURVEYOR_AVAILABILITY, [
             surveyorId,
             startTime,
-            endTime
+            endTime,
         ]);
         if (surveyorAvailabilityResult.rows[0].has_conflict) {
             throw new Error(getMessage('NO_SURVEYOR_AVAILABILITY'));
@@ -114,7 +116,7 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
             endTime || null,
             description,
             surveyDate || null,
-            isTenantAssigned
+            isTenantAssigned,
         ]);
         // Update lead status
         await client.query(UPDATE_LEAD_STATUS, ['SURVEY', leadId]);
@@ -131,14 +133,15 @@ export const assignSurveyor = async (leadId: string, payload: AssignSurveyorPayl
         ]);
         logger.info('Log inserted successfully');
         // Send nofitication to surveyor on email
-        if(surveyorId.startsWith('EMP'))
-        {
-        await generateEmail('Assign Survey', surveyorCheckResult?.rows[0]?.email, { username: surveyorCheckResult?.rows[0]?.name });
-    }
-   
+        if (surveyorId.startsWith('EMP')) {
+            await generateEmail('Assign Survey', surveyorCheckResult?.rows[0]?.email, {
+                username: surveyorCheckResult?.rows[0]?.name,
+            });
+        }
+
         await client.query('COMMIT');
-        return { 
-            message: getMessage('SURVEYOR_ASSIGNED')
+        return {
+            message: getMessage('SURVEYOR_ASSIGNED'),
         };
     } catch (error: any) {
         await client.query('ROLLBACK');

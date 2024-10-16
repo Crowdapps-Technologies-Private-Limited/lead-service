@@ -10,16 +10,21 @@ import { getMessage } from '../../utils/errorMessages';
 export const assignSurveyorHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('assignSurveyorHandler event ', { event });  
+    logger.info('assignSurveyorHandler event ', { event });
     try {
-        let payload = JSON.parse(event.body || '{}');
+        const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
         const isTenant = (event.requestContext as any).isTenant;
         logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
 
-        const hasPermission = await checkPermission(user.role, 'Survey', 'create', tenant?.schema || tenant?.tenant?.schema);
+        const hasPermission = await checkPermission(
+            user.role,
+            'Survey',
+            'create',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
@@ -36,7 +41,6 @@ export const assignSurveyorHandler: RouteHandler = async (
             const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
             return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         }
-      
 
         const result = await assignSurveyor(leadId, payload, tenant, isTenant);
 

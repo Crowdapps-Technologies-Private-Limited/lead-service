@@ -231,7 +231,7 @@ export const updateConfirmationByClient = async (
                         companyname: tenant?.name,
                     });
                     logger.info('Confirmation email sent');
-                    message = 'data saved and confirmation email sent to customer and lead status updated to JOB';
+                    message = 'Data saved and confirmation email sent to customer and lead status updated to JOB';
                     // Insert log
                     await client.query(INSERT_LOG, [
                         tenant.id,

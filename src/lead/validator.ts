@@ -3,31 +3,18 @@ import {
     AddEstimatePayload,
     AddLeadPayload,
     EditEstimatePayload,
-    EditLeadPayload,
     SendEmailPayload,
     AddSurveyTab1Payload,
     AddSurveyTab2Payload,
     AddSurveyTab3Payload,
     AssignSurveyorPayload,
     AddQuotePayload,
-    TooltipConfirmationPayload,
     UpdateConfirmationPayload,
 } from './interface';
-import logger from '../utils/logger';
-
-// Define the password schema
-const passwordSchema = yup
-    .string()
-    .min(8, 'Password must be at least 8 characters long')
-    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .matches(/[0-9]/, 'Password must contain at least one number')
-    .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character')
-    .required('Password is required');
 
 // Define the add lead schema
 export const addLeadSchema = yup.object().shape({
-    referrerId: yup.string().nullable(),
+    referrerId: yup.string().required('Referrer is required'),
     followUpDate: yup.string().nullable(),
     movingOnDate: yup.string().nullable(),
     packingOnDate: yup.string().nullable(),
@@ -76,10 +63,6 @@ export const addLeadSchema = yup.object().shape({
             phone: yup
                 .string()
                 .transform((value, originalValue) => (originalValue.trim() === '' ? null : value))
-                .matches(/^\d{11}$/, {
-                    message: 'Mobile number must be 11 digits long',
-                    excludeEmptyString: true,
-                })
                 .nullable(),
             email: yup.string().required('Customer email is required').email('Invalid email format').max(100),
         })
