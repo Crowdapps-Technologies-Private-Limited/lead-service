@@ -5,6 +5,7 @@ import { getMessage } from '../../utils/errorMessages';
 export const changeLeadStatusService = async (lead_id: string, new_status: string, tenant: any, user: any) => {
     const schema = tenant?.schema;
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
 
     try {
         if (tenant?.is_suspended) {
@@ -38,6 +39,9 @@ export const changeLeadStatusService = async (lead_id: string, new_status: strin
         logger.error('Error updating lead status:', { error });
         throw new Error(error.message);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

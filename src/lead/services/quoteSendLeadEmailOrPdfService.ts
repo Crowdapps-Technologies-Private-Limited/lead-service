@@ -33,6 +33,7 @@ const cognito = new CognitoIdentityServiceProvider();
 
 export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenant: any, user: any, action: string) => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
     const cognitoSub: string | null = null;
 
@@ -113,7 +114,10 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
         }
         throw new Error(error.message);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };
 

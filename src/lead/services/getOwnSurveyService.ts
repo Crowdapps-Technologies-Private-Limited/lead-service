@@ -1,14 +1,16 @@
-import {  GET_SURVEYS_COUNT_SURVEYOR, GET_SURVEYS_LIST_BASE, GET_SURVEYS_LIST_TENANT, GET_TENANT_SURVEYS_COUNT } from "../../sql/sqlScript";
-import { connectToDatabase } from "../../utils/database";
-import logger from "../../utils/logger";
+import {
+    GET_SURVEYS_COUNT_SURVEYOR,
+    GET_SURVEYS_LIST_BASE,
+    GET_SURVEYS_LIST_TENANT,
+    GET_TENANT_SURVEYS_COUNT,
+} from '../../sql/sqlScript';
+import { connectToDatabase } from '../../utils/database';
+import logger from '../../utils/logger';
 
-export const getOwnSurveys = async (
-    tenant: any,
-    isTenant: boolean,
-    filterBy: string
-) => {
+export const getOwnSurveys = async (tenant: any, isTenant: boolean, filterBy: string) => {
     const client = await connectToDatabase();
-    
+    let clientReleased = false; // Track if client is released
+
     try {
         if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
             throw new Error('Tenant is suspended');
@@ -29,7 +31,7 @@ export const getOwnSurveys = async (
         // }
 
         let result: any;
-        
+
         if (isTenant) {
             // Logic for client
 
@@ -47,7 +49,7 @@ export const getOwnSurveys = async (
             logger.info('Fetching surveys list');
 
             result = {
-                list: res.rows || []
+                list: res.rows || [],
             };
         } else {
             // Logic for surveyor
@@ -67,7 +69,7 @@ export const getOwnSurveys = async (
             logger.info('Fetching surveys list');
 
             result = {
-                list: res.rows || []
+                list: res.rows || [],
             };
         }
         return result;
@@ -76,7 +78,10 @@ export const getOwnSurveys = async (
         throw new Error(`Failed to fetch surveys list: ${error.message}`);
     } finally {
         try {
-            await client.end();
+            if (!clientReleased) {
+                client.release();
+                clientReleased = true;
+            }
         } catch (endError: any) {
             logger.error(`Failed to close database connection: ${endError.message}`);
             throw new Error('Failed to close database connection');

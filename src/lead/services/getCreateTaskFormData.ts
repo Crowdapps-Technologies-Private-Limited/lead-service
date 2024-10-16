@@ -1,14 +1,16 @@
-import { GET_ALL_VEHICLE_TYPES, GET_JOB_SCHEDULE_BY_LEAD_ID, GET_JOB_VEHICLES_BY_JOB_ID, GET_JOB_VEHICLES_BY_LEAD_ID } from './../../sql/sqlScript';
+import {
+    GET_ALL_VEHICLE_TYPES,
+    GET_JOB_SCHEDULE_BY_LEAD_ID,
+    GET_JOB_VEHICLES_BY_JOB_ID,
+    GET_JOB_VEHICLES_BY_LEAD_ID,
+} from './../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { getMessage } from '../../utils/errorMessages';
 
-export const getCreateTaskFormData = async (
-    leadId: string,
-    tenant: any,
-    user: any,
-) => {
+export const getCreateTaskFormData = async (leadId: string, tenant: any, user: any) => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
 
     try {
         // Ensure tenant is not suspended
@@ -23,10 +25,7 @@ export const getCreateTaskFormData = async (
         await client.query(`SET search_path TO ${schema}`);
 
         // Check if the lead exists
-        const leadCheckResult = await client.query(
-            `SELECT * FROM leads WHERE generated_id = $1`, 
-            [leadId]
-        );
+        const leadCheckResult = await client.query(`SELECT * FROM leads WHERE generated_id = $1`, [leadId]);
 
         if (leadCheckResult.rows.length === 0) {
             throw new Error(getMessage('LEAD_NOT_FOUND'));
@@ -42,7 +41,7 @@ export const getCreateTaskFormData = async (
         }
 
         logger.info('Job schedule retrieved:', { job: jobsRes.rows });
-        const jobVehicles =  await client.query(GET_JOB_VEHICLES_BY_LEAD_ID, [leadId]);
+        const jobVehicles = await client.query(GET_JOB_VEHICLES_BY_LEAD_ID, [leadId]);
         logger.info('Job vehicles retrieved:', { jobVehicles: jobVehicles.rows });
         const vehiclesRes = await client.query(GET_ALL_VEHICLE_TYPES);
         logger.info('Vehicles retrieved:', { vehicles: vehiclesRes.rows });
@@ -61,12 +60,15 @@ export const getCreateTaskFormData = async (
             return acc;
         }, []);
 
-        return {...jobsRes.rows[0], vehicles: uniqueVehicles};
+        return { ...jobsRes.rows[0], vehicles: uniqueVehicles };
     } catch (error: any) {
         logger.error('Error fetching job schedule:', { error });
         throw new Error(error.message);
     } finally {
         // Close the database connection
-        await client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

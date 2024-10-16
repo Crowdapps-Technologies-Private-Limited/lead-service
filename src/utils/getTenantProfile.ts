@@ -1,4 +1,3 @@
-
 import AWS from 'aws-sdk';
 import logger from './logger';
 import { connectToDatabase } from './database';
@@ -11,6 +10,7 @@ const s3 = new AWS.S3();
 export const getTenantProfile = async (userId: string) => {
     logger.info('Fetching tenant profile', { userId });
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
 
     try {
         const result = await client.query(GET_TENANT_BY_ID, [userId]);
@@ -19,7 +19,7 @@ export const getTenantProfile = async (userId: string) => {
             throw new Error('User not found');
         }
         const user = result.rows[0];
-   
+
         const company = await client.query(SELECT_COMPANY_INFO, [result.rows[0].id]);
         if (company.rows.length === 0) {
             throw new Error('User company not found');
@@ -40,13 +40,16 @@ export const getTenantProfile = async (userId: string) => {
                 Expires: 60 * 60, // URL expires in 1 hour
             });
         }
-       
+
         logger.info('User profile final  :', { user });
         return user;
     } catch (error: any) {
         logger.error('Failed to fetch user profile', { error });
         throw new Error(`Failed to fetch user profile: ${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

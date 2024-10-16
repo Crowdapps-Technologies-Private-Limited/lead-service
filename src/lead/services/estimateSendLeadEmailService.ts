@@ -19,6 +19,7 @@ import { getconfigSecrets } from '../../utils/getConfig';
 
 export const sendEstimateEmail = async (leadId: string, estimateId: string, tenant: any, action: string) => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
 
     try {
@@ -117,6 +118,9 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         logger.error('Failed to send lead email or pdf', { error });
         throw new Error(`${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

@@ -19,6 +19,7 @@ export const getAllLeads = async (
     tenant: any,
 ) => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const offset = pageSize * (pageNumber - 1);
     const searchQuery = `%${search}%`; // For partial matching
     logger.info('Fetching lead list', { pageSize, pageNumber, orderBy, orderIn, searchQuery, offset, filterStatus });
@@ -100,7 +101,10 @@ export const getAllLeads = async (
         throw new Error(`${error.message}`);
     } finally {
         try {
-            await client.end();
+            if (!clientReleased) {
+                client.release();
+                clientReleased = true;
+            }
         } catch (endError: any) {
             logger.error('Failed to close database connection', { endError });
             throw new Error(`Failed to close database connection: ${endError.message}`);

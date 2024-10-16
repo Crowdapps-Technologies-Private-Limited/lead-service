@@ -5,6 +5,7 @@ import logger from './logger';
 
 export const generateEmail = async (event: string, to: string, data: any) => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     logger.info('generateEmail event', { event });
     logger.info('to', { to });
     logger.info('data', { data });
@@ -69,6 +70,9 @@ export const generateEmail = async (event: string, to: string, data: any) => {
         logger.error('Failed to generate email content:', { error });
         throw new Error(`Failed to send email: ${error.message}`);
     } finally {
-        await client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

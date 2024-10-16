@@ -18,6 +18,7 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
     } = payload;
 
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
 
     try {
@@ -75,6 +76,9 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
         logger.error('Failed to send lead email', { error });
         throw new Error(`${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

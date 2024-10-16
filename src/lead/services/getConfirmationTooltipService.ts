@@ -5,6 +5,7 @@ import { getMessage } from '../../utils/errorMessages';
 
 export const getConfirmationTooltipDetails = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
 
     try {
         if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
@@ -41,7 +42,10 @@ export const getConfirmationTooltipDetails = async (leadId: string, tenant: any)
         throw new Error(`${error.message}`);
     } finally {
         try {
-            await client.end();
+             if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
             logger.info('Database connection closed successfully');
         } catch (endError: any) {
             logger.error(`Failed to close database connection: ${endError.message}`);

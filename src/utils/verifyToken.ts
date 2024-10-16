@@ -27,13 +27,17 @@ export const verifyToken = async (token: string, userPoolId: string, region: str
             }
 
             const client = await connectToDatabase();
+            let clientReleased = false; // Track if client is released
             const sessionCheckQuery = `
         SELECT is_active 
         FROM user_sessions 
         WHERE access_token = $1 AND is_active = TRUE;
       `;
             const sessionResult = await client.query(sessionCheckQuery, [token]);
-            client.end();
+            if (!clientReleased) {
+                client.release();
+                clientReleased = true;
+            }
 
             if (sessionResult.rows.length === 0) {
                 return reject(new Error('Session has been terminated or token is blacklisted'));

@@ -49,6 +49,7 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
     logger.info('quoteId:', { quoteId });
 
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
 
@@ -76,7 +77,7 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
                 notes || null,
                 vatIncluded,
                 materialPriceChargeable,
-                quoteId
+                quoteId,
             ]);
             logger.info('Quote updated successfully', { quoteId });
 
@@ -199,6 +200,9 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
         logger.error('Failed to process quote', { error });
         throw new Error(`${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

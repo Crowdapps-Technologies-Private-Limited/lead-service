@@ -58,6 +58,7 @@ const isValidTransition = (fromStage: string, toStage: string): boolean => {
 export const addManualLogAndChangeLeadStatus = async (payload: any, lead_id: string, tenant: any, user: any) => {
     const { action, action_type, specific_detail, follow_up_date } = payload;
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant?.schema;
 
     try {
@@ -149,6 +150,9 @@ export const addManualLogAndChangeLeadStatus = async (payload: any, lead_id: str
         logger.error('Error adding manual log or changing lead status:', { error });
         throw new Error(error.message);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

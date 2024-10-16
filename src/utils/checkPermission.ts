@@ -1,15 +1,15 @@
-import { connectToDatabase } from "./database";
-import logger from "./logger";
+import { connectToDatabase } from './database';
+import logger from './logger';
 
 export const checkPermission = async (
     userRole: string,
     moduleName: string,
     permissionName: string,
-    schema: string
+    schema: string,
 ): Promise<boolean> => {
     logger.info('Checking permission', { userRole, moduleName, permissionName });
 
-    let role = userRole === 'TENANT' ? 'Admin' : userRole;
+    const role = userRole === 'TENANT' ? 'Admin' : userRole;
     logger.info('Role:', { role });
 
     // Admin has all permissions
@@ -18,6 +18,7 @@ export const checkPermission = async (
     }
 
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     logger.info('Schema:', { schema });
 
     try {
@@ -52,6 +53,9 @@ export const checkPermission = async (
         logger.error('Error checking permission', { error });
         throw new Error(`Failed to check permission: ${error.message}`);
     } finally {
-        await client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

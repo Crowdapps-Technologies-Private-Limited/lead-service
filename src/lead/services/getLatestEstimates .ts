@@ -5,6 +5,7 @@ import logger from '../../utils/logger';
 
 export const getLatestEstimates = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     // if (tenant?.is_suspended) {
     //     throw new Error('Tenant is suspended');
     // }
@@ -14,14 +15,14 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
     logger.info('Schema created successfully');
     await client.query(`SET search_path TO ${schema}`);
     logger.info('Schema set successfully');
-    let tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'estimates']);
+    const tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'estimates']);
     const checkTableExists = tableCheckRes.rows[0].exists;
     if (!checkTableExists) {
-      logger.info('Estimates table does not exist');
-      return {
-        message: getMessage('ESTIMATE_NOT_FOUND'),
-        data: {}
-      };
+        logger.info('Estimates table does not exist');
+        return {
+            message: getMessage('ESTIMATE_NOT_FOUND'),
+            data: {},
+        };
     }
 
     const query = `
@@ -118,8 +119,8 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
         const res = await client.query(query, [leadId]);
         // Manually convert string fields to numbers, if necessary
         const data = res.rows[0];
-        data.quoteTotal = data?.quotetotal? parseFloat(data?.quotetotal) : 0;
-        data.costTotal = data?.costtotal? parseFloat(data?.costtotal): 0;
+        data.quoteTotal = data?.quotetotal ? parseFloat(data?.quotetotal) : 0;
+        data.costTotal = data?.costtotal ? parseFloat(data?.costtotal) : 0;
         data.estimateId = data?.estimateid;
         data.leadId = data?.leadid;
         data.quoteExpiresOn = data?.quoteexpireson;
@@ -140,6 +141,9 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
         logger.error('Failed to get latest estimates', { error });
         throw new Error(`${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

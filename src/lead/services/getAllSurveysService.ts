@@ -1,20 +1,17 @@
-import { 
+import {
     CHECK_TABLE_EXISTS,
-    GET_SURVEYS_COUNT, 
-    GET_SURVEYS_LIST_BASE, 
-    GET_SURVEYS_LIST_TENANT, 
-} from "../../sql/sqlScript";
-import { connectToDatabase } from "../../utils/database";
-import { getMessage } from "../../utils/errorMessages";
-import logger from "../../utils/logger";
+    GET_SURVEYS_COUNT,
+    GET_SURVEYS_LIST_BASE,
+    GET_SURVEYS_LIST_TENANT,
+} from '../../sql/sqlScript';
+import { connectToDatabase } from '../../utils/database';
+import { getMessage } from '../../utils/errorMessages';
+import logger from '../../utils/logger';
 
-export const getAllSurveys = async (
-    tenant: any,
-    isTenant: boolean,
-    filterBy: string
-) => {
+export const getAllSurveys = async (tenant: any, isTenant: boolean, filterBy: string) => {
     const client = await connectToDatabase();
-    
+    let clientReleased = false; // Track if client is released
+
     try {
         // if (tenant?.is_suspended || tenant?.tenant?.is_suspended) {
         //     throw new Error(getMessage('ACCOUNT_SUSPENDED'));
@@ -33,7 +30,7 @@ export const getAllSurveys = async (
             logger.info('Surveys table does not exist');
             return {
                 count: 0,
-                list: []
+                list: [],
             };
         }
 
@@ -71,12 +68,12 @@ export const getAllSurveys = async (
         // Combine the results
         const combinedResult = {
             count: count,
-            list: [...result1, ...result2]
+            list: [...result1, ...result2],
         };
 
         // Commit transaction
         await client.query('COMMIT');
-        
+
         return combinedResult;
     } catch (error: any) {
         // Rollback transaction in case of an error
@@ -85,7 +82,10 @@ export const getAllSurveys = async (
         throw new Error(`${error.message}`);
     } finally {
         try {
-            await client.end();
+            if (!clientReleased) {
+                client.release();
+                clientReleased = true;
+            }
         } catch (endError: any) {
             logger.error(`Failed to close database connection: ${endError.message}`);
             throw new Error('Failed to close database connection');

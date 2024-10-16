@@ -22,6 +22,7 @@ export const updateConfirmationByClient = async (
     user: any,
 ) => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const { confirmationId, movingDate, packingDate, isDepositeRecieved, services, vatIncluded } = payload;
 
     try {
@@ -262,6 +263,9 @@ export const updateConfirmationByClient = async (
         logger.error('Failed to update confirmation:', { error });
         throw new Error(`${error.message}`);
     } finally {
-        await client.end(); // Close the database connection
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        } // Close the database connection
     }
 };

@@ -8,6 +8,7 @@ interface SubscriptionStatus {
 
 export const checkSubscriptionStatus = async (tenantId: string): Promise<SubscriptionStatus> => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     try {
         const query = `
             SELECT 
@@ -50,6 +51,9 @@ export const checkSubscriptionStatus = async (tenantId: string): Promise<Subscri
         logger.error('Error checking subscription status:', { tenantId, error });
         throw new Error('Failed to check subscription status');
     } finally {
-        await client.end();
+         if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

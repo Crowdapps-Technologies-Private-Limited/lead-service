@@ -49,6 +49,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
     logger.info('estimateId:', { estimateId });
 
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
 
@@ -60,15 +61,18 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         }
 
         await client.query(`SET search_path TO ${schema}`);
-        const leadCheckResult = await client.query(`
+        const leadCheckResult = await client.query(
+            `
             SELECT * FROM leads WHERE generated_id = $1
-        `, [leadId]);
+        `,
+            [leadId],
+        );
 
         if (leadCheckResult.rows.length === 0) {
             throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
         const status = ['NEW', 'ESTIMATES', 'NEW LEAD'];
-        if(!status.includes(leadCheckResult.rows[0].status)) {
+        if (!status.includes(leadCheckResult.rows[0].status)) {
             throw new Error(getMessage('LEAD_STATUS_NOT_ALLOWED'));
         }
         await client.query(CREATE_ESTIMATE_AND_RELATED_TABLE);
@@ -86,7 +90,7 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
                 notes || null,
                 vatIncluded,
                 materialPriceChargeable,
-                estimateId
+                estimateId,
             ]);
             logger.info('Estimate updated successfully', { estimateId });
 
@@ -203,12 +207,18 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         logger.info('Log entry created successfully');
 
         await client.query('COMMIT'); // Commit transaction
-        return { message: estimateId ? 'Estimate updated successfully' : 'Estimate added successfully', estimateId: finalEstimateId };
+        return {
+            message: estimateId ? 'Estimate updated successfully' : 'Estimate added successfully',
+            estimateId: finalEstimateId,
+        };
     } catch (error: any) {
         await client.query('ROLLBACK'); // Rollback transaction on error
         logger.error('Failed to process estimate', { error });
         throw new Error(`${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

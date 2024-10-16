@@ -7,6 +7,7 @@ export const getJobsList = async (tenant: any) => {
     logger.info('Fetching jobs list for tenant:', { tenant });
 
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
 
     try {
@@ -53,11 +54,13 @@ export const getJobsList = async (tenant: any) => {
         logger.info('Jobs fetched successfully:', { rowCount: jobsResult.rowCount });
 
         return jobsResult.rows;
-
     } catch (error: any) {
         logger.error('Error fetching jobs list:', { error });
         throw new Error(error.message);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

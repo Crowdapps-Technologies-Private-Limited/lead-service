@@ -9,6 +9,7 @@ const s3 = new AWS.S3();
 export const getUserProfile = async (tenantId: string, userSub: string) => {
     logger.info('tenantId', { tenantId });
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
 
     try {
         const result = await client.query(GET_TENANT_BY_ID, [tenantId]);
@@ -43,16 +44,19 @@ export const getUserProfile = async (tenantId: string, userSub: string) => {
         logger.info('Tenant profile final  :', { tenant });
         await client.query(`SET search_path TO ${result.rows[0].schema}`);
         const staffCheck = await client.query(GET_STAFF_BY_SUB, [userSub]);
-        const staff = staffCheck.rows[0] ;
+        const staff = staffCheck.rows[0];
         logger.info('Staff:', { staff });
         return {
             tenant,
-            ...staff
+            ...staff,
         };
     } catch (error: any) {
         logger.error('Failed to fetch user profile', { error });
         throw new Error(`Failed to fetch user profile: ${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

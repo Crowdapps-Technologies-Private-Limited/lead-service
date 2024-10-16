@@ -7,6 +7,7 @@ import generateQuoteHtml from './generateQuoteHtml';
 
 export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     if (tenant?.is_suspended) {
         throw new Error(getMessage('ACCOUNT_SUSPENDED'));
     }
@@ -117,7 +118,7 @@ export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => 
         const quotationDoc = 'Quote_previous.pdf';
         const res = await client.query(query, [leadId]);
         // Manually convert string fields to numbers, if necessary
-        if(res.rows.length === 0) {
+        if (res.rows.length === 0) {
             throw new Error(getMessage('PREV_QUOTE_NOT_FOUND'));
         }
         const data = res.rows[0];
@@ -153,6 +154,9 @@ export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => 
         logger.error('Failed to download prevoius quote', { error });
         throw new Error(`${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

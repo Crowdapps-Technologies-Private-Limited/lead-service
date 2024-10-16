@@ -28,6 +28,7 @@ export const assignSurveyor = async (
     const { surveyorId, surveyType, surveyDate, remarks, startTime, endTime, description } = payload;
 
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
 
@@ -149,7 +150,10 @@ export const assignSurveyor = async (
         throw new Error(`${error.message}`);
     } finally {
         try {
-            await client.end();
+            if (!clientReleased) {
+                client.release();
+                clientReleased = true;
+            }
         } catch (endError: any) {
             logger.error(`Failed to close database connection: ${endError.message}`);
         }

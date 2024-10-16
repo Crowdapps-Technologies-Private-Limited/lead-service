@@ -32,6 +32,7 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
     } = payload;
 
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
 
     try {
@@ -240,6 +241,9 @@ export const editEstimate = async (estimateId: string, leadId: string, payload: 
         logger.error('Failed to edit estimate', { error });
         throw new Error(`Failed to edit estimate: ${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

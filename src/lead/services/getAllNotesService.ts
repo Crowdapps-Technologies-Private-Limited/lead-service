@@ -13,6 +13,7 @@ import {
 export const getAllNotesByLead = async (lead_id: string, tenant: any) => {
     const schema = tenant?.schema;
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     logger.info('Fetching all notes for lead:', { lead_id });
 
     try {
@@ -79,6 +80,9 @@ export const getAllNotesByLead = async (lead_id: string, tenant: any) => {
         logger.error('Error fetching all notes:', { error });
         throw new Error(error.message);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };

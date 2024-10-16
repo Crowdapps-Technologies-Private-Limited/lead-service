@@ -13,6 +13,7 @@ const s3 = new AWS.S3();
 export const getConfirmation = async (tenant: any, leadId: string) => {
     // Connect to PostgreSQL database
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant?.schema;
     logger.info('Schema:', { schema });
     try {
@@ -97,7 +98,10 @@ export const getConfirmation = async (tenant: any, leadId: string) => {
         throw new Error(`${error.message}`);
     } finally {
         try {
-            await client.end();
+            if (!clientReleased) {
+                client.release();
+                clientReleased = true;
+            }
         } catch (endError: any) {
             logger.error('Failed to close database connection', { endError });
             throw new Error(`Failed to close database connection: ${endError.message}`);

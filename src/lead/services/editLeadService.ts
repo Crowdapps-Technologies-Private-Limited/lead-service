@@ -7,11 +7,13 @@ import { isEmptyString, toFloat } from '../../utils/utility';
 import { getMessage } from '../../utils/errorMessages';
 
 const isAddressEmpty = (address: any) => {
-    return isEmptyString(address.street) &&
+    return (
+        isEmptyString(address.street) &&
         isEmptyString(address.town) &&
         isEmptyString(address.county) &&
         isEmptyString(address.postcode) &&
-        isEmptyString(address.country);
+        isEmptyString(address.country)
+    );
 };
 
 export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: any) => {
@@ -38,10 +40,11 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         customerNotes,
         batch,
         inceptBatch,
-        leadDate
+        leadDate,
     } = payload;
 
     const client = await connectToDatabase();
+    let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
 
     try {
@@ -54,9 +57,12 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         await client.query(`SET search_path TO ${schema}`);
 
         // Check if lead exists
-        const leadCheckResult = await client.query(`
+        const leadCheckResult = await client.query(
+            `
             SELECT * FROM leads WHERE generated_id = $1
-        `, [leadId]);
+        `,
+            [leadId],
+        );
 
         if (leadCheckResult.rows.length === 0) {
             throw new Error(getMessage('LEAD_NOT_FOUND'));
@@ -66,16 +72,22 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         // Update customer information
         let customerId = leadCheckResult.rows[0].customer_id;
         if (customerId) {
-            await client.query(`
+            await client.query(
+                `
                 UPDATE customers 
                 SET name = $1, phone = $2, email = $3 
                 WHERE id = $4
-            `, [customer.name, customer.phone, customer.email, customerId]);
+            `,
+                [customer.name, customer.phone, customer.email, customerId],
+            );
         } else {
-            const customerResult = await client.query(`
+            const customerResult = await client.query(
+                `
                 INSERT INTO customers (name, phone, email)
                 VALUES ($1, $2, $3) RETURNING id
-            `, [customer.name, customer.phone, customer.email]);
+            `,
+                [customer.name, customer.phone, customer.email],
+            );
             customerId = customerResult.rows[0].id;
         }
 
@@ -83,7 +95,8 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         let collectionAddressId = leadCheckResult.rows[0].collection_address_id;
         if (!isAddressEmpty(collectionAddress)) {
             if (collectionAddressId) {
-                await client.query(`
+                await client.query(
+                    `
                     UPDATE addresses 
                     SET 
                         county = $1, 
@@ -92,25 +105,30 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
                         town = $4, 
                         postcode = $5 
                     WHERE id = $6
-                `, [
-                    collectionAddress.county, 
-                    collectionAddress.country, 
-                    collectionAddress.street, 
-                    collectionAddress.town, 
-                    collectionAddress.postcode, 
-                    collectionAddressId
-                ]);
+                `,
+                    [
+                        collectionAddress.county,
+                        collectionAddress.country,
+                        collectionAddress.street,
+                        collectionAddress.town,
+                        collectionAddress.postcode,
+                        collectionAddressId,
+                    ],
+                );
             } else {
-                const collectionAddressResult = await client.query(`
+                const collectionAddressResult = await client.query(
+                    `
                     INSERT INTO addresses (street, town, county, postcode, country)
                     VALUES ($1, $2, $3, $4, $5) RETURNING id
-                `, [
-                    collectionAddress.street,
-                    collectionAddress.town,
-                    collectionAddress.county,
-                    collectionAddress.postcode,
-                    collectionAddress.country
-                ]);
+                `,
+                    [
+                        collectionAddress.street,
+                        collectionAddress.town,
+                        collectionAddress.county,
+                        collectionAddress.postcode,
+                        collectionAddress.country,
+                    ],
+                );
                 collectionAddressId = collectionAddressResult.rows[0].id;
             }
         } else {
@@ -122,7 +140,8 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         let deliveryAddressId = leadCheckResult.rows[0].delivery_address_id;
         if (!isAddressEmpty(deliveryAddress)) {
             if (deliveryAddressId) {
-                await client.query(`
+                await client.query(
+                    `
                     UPDATE addresses 
                     SET 
                         county = $1, 
@@ -131,25 +150,30 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
                         town = $4, 
                         postcode = $5 
                     WHERE id = $6
-                `, [
-                    deliveryAddress.county, 
-                    deliveryAddress.country, 
-                    deliveryAddress.street, 
-                    deliveryAddress.town, 
-                    deliveryAddress.postcode, 
-                    deliveryAddressId
-                ]);
+                `,
+                    [
+                        deliveryAddress.county,
+                        deliveryAddress.country,
+                        deliveryAddress.street,
+                        deliveryAddress.town,
+                        deliveryAddress.postcode,
+                        deliveryAddressId,
+                    ],
+                );
             } else {
-                const deliveryAddressResult = await client.query(`
+                const deliveryAddressResult = await client.query(
+                    `
                     INSERT INTO addresses (street, town, county, postcode, country)
                     VALUES ($1, $2, $3, $4, $5) RETURNING id
-                `, [
-                    deliveryAddress.street,
-                    deliveryAddress.town,
-                    deliveryAddress.county,
-                    deliveryAddress.postcode,
-                    deliveryAddress.country
-                ]);
+                `,
+                    [
+                        deliveryAddress.street,
+                        deliveryAddress.town,
+                        deliveryAddress.county,
+                        deliveryAddress.postcode,
+                        deliveryAddress.country,
+                    ],
+                );
                 deliveryAddressId = deliveryAddressResult.rows[0].id;
             }
         } else {
@@ -158,7 +182,8 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         }
 
         // Update lead
-        await client.query(`
+        await client.query(
+            `
             UPDATE leads
             SET 
                 referrer_id = $1,
@@ -184,30 +209,32 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
                 customer_id = $21,
                 updated_at = NOW()
             WHERE generated_id = $22
-        `, [
-            isEmptyString(referrerId) ? null : referrerId,
-            isEmptyString(followUpDate) ? null : followUpDate, 
-            isEmptyString(movingOnDate) ? null : movingOnDate, 
-            isEmptyString(packingOnDate) ? null : packingOnDate, 
-            collectionPurchaseStatus, 
-            collectionHouseSize, 
-            toFloat(collectionDistance), 
-            toFloat(collectionVolume), 
-            collectionVolumeUnit,
-            deliveryPurchaseStatus, 
-            deliveryHouseSize, 
-            toFloat(deliveryDistance), 
-            toFloat(deliveryVolume), 
-            deliveryVolumeUnit,
-            customerNotes, 
-            batch, 
-            inceptBatch, 
-            isEmptyString(leadDate) ? null : leadDate,
-            collectionAddressId,
-            deliveryAddressId,
-            customerId,
-            leadId
-        ]);
+        `,
+            [
+                isEmptyString(referrerId) ? null : referrerId,
+                isEmptyString(followUpDate) ? null : followUpDate,
+                isEmptyString(movingOnDate) ? null : movingOnDate,
+                isEmptyString(packingOnDate) ? null : packingOnDate,
+                collectionPurchaseStatus,
+                collectionHouseSize,
+                toFloat(collectionDistance),
+                toFloat(collectionVolume),
+                collectionVolumeUnit,
+                deliveryPurchaseStatus,
+                deliveryHouseSize,
+                toFloat(deliveryDistance),
+                toFloat(deliveryVolume),
+                deliveryVolumeUnit,
+                customerNotes,
+                batch,
+                inceptBatch,
+                isEmptyString(leadDate) ? null : leadDate,
+                collectionAddressId,
+                deliveryAddressId,
+                customerId,
+                leadId,
+            ],
+        );
 
         // Insert log
         await client.query(CREATE_LOG_TABLE);
@@ -218,7 +245,7 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
             'You have edited a lead',
             'LEAD',
             leadCheckResult.rows[0].status,
-            leadId
+            leadId,
         ]);
 
         await client.query('COMMIT');
@@ -228,6 +255,9 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         logger.error('Failed to edit lead', { error });
         throw new Error(`${error.message}`);
     } finally {
-        client.end();
+        if (!clientReleased) {
+            client.release();
+            clientReleased = true;
+        }
     }
 };
