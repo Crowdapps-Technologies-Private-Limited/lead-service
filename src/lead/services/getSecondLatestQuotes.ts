@@ -13,8 +13,7 @@ export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => 
     }
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
-    await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
-    logger.info('Schema created successfully');
+
     await client.query(`SET search_path TO ${schema}`);
     logger.info('Schema set successfully');
 
