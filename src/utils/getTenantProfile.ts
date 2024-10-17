@@ -10,6 +10,7 @@ const s3 = new AWS.S3();
 export const getTenantProfile = async (userId: string) => {
     logger.info('Fetching tenant profile', { userId });
     const client = await connectToDatabase();
+    await client.query(`SET search_path TO public`);
     let clientReleased = false; // Track if client is released
 
     try {

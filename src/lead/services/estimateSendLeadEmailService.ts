@@ -46,7 +46,7 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
             estimate: estimateData,
         });
         // Generate PDF
-        const { pdfUrl, file, s3FileUrl } = await generatePdfAndUploadToS3({
+        const { pdfUrl, file } = await generatePdfAndUploadToS3({
             html,
             key: 'estimation',
             leadId,

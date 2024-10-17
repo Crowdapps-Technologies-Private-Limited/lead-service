@@ -27,6 +27,7 @@ export const verifyToken = async (token: string, userPoolId: string, region: str
             }
 
             const client = await connectToDatabase();
+            await client.query(`SET search_path TO public`);
             let clientReleased = false; // Track if client is released
             const sessionCheckQuery = `
         SELECT is_active 

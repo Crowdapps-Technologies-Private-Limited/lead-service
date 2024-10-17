@@ -2,7 +2,6 @@ import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import AWS from 'aws-sdk';
 import { generatePdfAndUploadToS3 } from './generatePdf';
-import { generateEmail } from '../../utils/generateEmailService';
 import { getLatestQuote } from './getLatestQuotes';
 import generateQuoteHtml from './generateQuoteHtml';
 import { getErrorMessage, getMessage } from '../../utils/errorMessages';
@@ -63,11 +62,11 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
             throw new Error('Lead status is JOB so cannot send confirmation email');
         }
 
-        const quotationDoc = 'quotation.pdf';
         const quoteData = await getLatestQuote(leadId, tenant);
+        logger.info('quote data', { quoteData });
         const html = await generateQuoteHtml({ client: tenant, lead: leadData, quote: quoteData.data });
 
-        const { pdfUrl, file, s3FileUrl } = await generatePdfAndUploadToS3({
+        const { pdfUrl, file } = await generatePdfAndUploadToS3({
             html,
             key: 'quotation',
             leadId,

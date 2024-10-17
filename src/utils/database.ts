@@ -13,9 +13,9 @@ export const connectToDatabase = async () => {
             password: config.password,
             database: config.database,
             port: parseInt(config.port, 10),
-            max: 50, // Set the maximum number of clients in the pool (default is 10)
-            idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-            connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection cannot be established
+            max: 200, // Set the maximum number of clients in the pool (default is 10)
+            idleTimeoutMillis: 30000, // Close idle clients after 5 seconds
+            connectionTimeoutMillis: 10000, // Return an error after 2 seconds if connection cannot be established
         });
     }
 

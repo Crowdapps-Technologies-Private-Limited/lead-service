@@ -16,7 +16,8 @@ const API2PDF_API_KEY = '3490e411-fdcd-4620-a174-8f2e5a952f44'; // Replace with 
 
 export const generatePdfAndUploadToS3 = async (
     options: GeneratePdfOptions,
-): Promise<{ pdfUrl: string; s3FileUrl: string; file: Buffer }> => {
+): Promise<{ pdfUrl: string; file: Buffer }> => {
+    logger.info('options', { options });
     const { html, key, leadId, tenantId, folderName = 'general' } = options;
 
     // Use ISO string to ensure date format works well for filenames
@@ -27,7 +28,7 @@ export const generatePdfAndUploadToS3 = async (
 
     // Construct the final S3 key
     const finalKey = `${tenantId}/${dateFolderName}/${leadId}/${folderName}/${key}-${dt}.pdf`;
-
+    logger.info('key', { key });
     if (!html) {
         throw new Error('HTML content must be provided');
     }
@@ -75,10 +76,16 @@ export const generatePdfAndUploadToS3 = async (
 
         logger.info('Successfully uploaded PDF to S3', { s3Url: s3UploadResponse.Location });
 
-        // Step 4: Return both the original PDF URL, the S3 file URL, and the file content (as a Buffer)
+        // Step 4: Generate a signed URL valid for 30 days (30 days = 2592000 seconds)
+        const signedUrl = s3.getSignedUrl('getObject', {
+            Bucket: 'dev-mmym-files', // Replace with your bucket name or use env var
+            Key: finalKey, // The key of the file
+            Expires: 604800, // 7 days in seconds
+        });
+
+        // Step 5: Return both the original PDF URL, the S3 file URL, the signed URL, and the file content (as a Buffer)
         return {
-            pdfUrl, // The original PDF URL from API2PDF
-            s3FileUrl: s3UploadResponse.Location, // The URL of the file uploaded to S3
+            pdfUrl: signedUrl, // The original PDF URL from API2PDF
             file: pdfFileBuffer, // The actual file content in Buffer format
         };
     } catch (error: any) {

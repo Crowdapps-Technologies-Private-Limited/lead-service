@@ -149,7 +149,7 @@ export const downloadSecondLatestQuote = async (leadId: string, tenant: any) => 
         logger.info('html:', { html });
         // Generate PDF
         // Generate PDF
-        const { pdfUrl, file, s3FileUrl } = await generatePdfAndUploadToS3({
+        const { pdfUrl, file } = await generatePdfAndUploadToS3({
             html,
             key: 'previous_quote',
             leadId,

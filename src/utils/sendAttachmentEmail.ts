@@ -15,7 +15,7 @@ export const sendAttachmentEmail = async (event: string, to: string, data: any, 
     logger.info('generateEmail event', { event });
     logger.info('to', { to });
     logger.info('data', { data });
-    logger.info('attachments', { attachments });
+    // logger.info('attachments', { attachments });
 
     try {
         // Fetch the email template by event
