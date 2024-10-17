@@ -13,10 +13,8 @@ import {
     GET_EMAIL_TEMPLATE_BY_EVENT,
     GET_TERMS_DOC,
     GET_PACKING_DOC,
-    CREATE_DOC_TABLE_IF_NOT_EXISTS,
     GET_LEAD_CUSTOMER_BY_LEAD_ID,
     UPDATE_CUSTOMER_WITH_CREDENTIAL,
-    CREATE_CONFIRMATION_TABLES,
     INSERT_CONFIRMATION,
     GET_QUOTE_SERVICES,
     INSERT_CONFIRMATION_SERVICES,
@@ -47,7 +45,6 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
         }
 
         await client.query(`SET search_path TO ${schema}`);
-        await client.query(CREATE_DOC_TABLE_IF_NOT_EXISTS);
 
         // Check if lead exists
         const leadCheckResult = await client.query(GET_LEAD_CUSTOMER_BY_LEAD_ID, [leadId]);
@@ -237,8 +234,6 @@ const createConfirmation = async (
         leadData.status,
         leadId,
     ]);
-
-    await client.query(CREATE_CONFIRMATION_TABLES);
 
     const confirmationCheckResult = await client.query(GET_CONFIRMATION_BY_LEAD_ID, [leadId]);
     if (confirmationCheckResult.rows.length > 0 && confirmationCheckResult.rows[0].moving_on_status !== 'fixed') {

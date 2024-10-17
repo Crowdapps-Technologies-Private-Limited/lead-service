@@ -2,7 +2,7 @@ import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { AddLeadPayload } from '../interface';
 import { generateEmail } from '../../utils/generateEmailService';
-import { CREATE_LOG_TABLE, INSERT_LOG } from '../../sql/sqlScript';
+import { INSERT_LOG } from '../../sql/sqlScript';
 import { isEmptyString, toFloat } from '../../utils/utility';
 import { getMessage } from '../../utils/errorMessages';
 
@@ -237,7 +237,6 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         );
 
         // Insert log
-        await client.query(CREATE_LOG_TABLE);
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,

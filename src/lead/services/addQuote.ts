@@ -11,7 +11,6 @@ import {
     INSERT_QUOTE_COST,
     INSERT_QUOTE_GENERAL_INFO,
     INSERT_QUOTE_ANCILLARY,
-    CREATE_QUOTE_AND_RELATED_TABLE,
     INSERT_LOG,
     UPDATE_LEAD_STATUS,
     DELETE_QUOTE_SERVICES,
@@ -61,8 +60,7 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
         }
 
         await client.query(`SET search_path TO ${schema}`);
-        // Create quote and related tables
-        await client.query(CREATE_QUOTE_AND_RELATED_TABLE);
+
         logger.info('Quote and related tables created successfully');
 
         let finalQuoteId = quoteId;

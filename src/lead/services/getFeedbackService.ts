@@ -1,8 +1,6 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { getMessage } from '../../utils/errorMessages';
-import { CREATE_FEEDBACK_RELATED_TABLE } from '../../sql/sqlScript';
-
 // Service to get feedback responses by lead_id
 export const getFeedbackResponseByLead = async (lead_id: string, tenant: any) => {
     const schema = tenant?.schema;
@@ -20,8 +18,6 @@ export const getFeedbackResponseByLead = async (lead_id: string, tenant: any) =>
         }
 
         await client.query(`SET search_path TO ${schema}`);
-        await client.query(CREATE_FEEDBACK_RELATED_TABLE); // Ensure feedback tables exist
-        logger.info('Feedback tables checked/created successfully');
 
         const query = `
             SELECT 

@@ -2,7 +2,7 @@ import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { AddLeadPayload } from '../interface';
 import { generateEmail } from '../../utils/generateEmailService';
-import { CREATE_LEAD_TABLE, CREATE_LOG_TABLE, INSERT_LOG, GET_ALL_LEADS } from '../../sql/sqlScript';
+import { INSERT_LOG, GET_ALL_LEADS } from '../../sql/sqlScript';
 import { isEmptyString, toFloat } from '../../utils/utility';
 import { getMessage } from '../../utils/errorMessages';
 
@@ -54,10 +54,6 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         }
 
         await client.query(`SET search_path TO ${schema}`);
-
-        // Create leads table if it doesn't exist
-        await client.query(CREATE_LEAD_TABLE);
-        logger.info('Lead table created successfully');
 
         // Check if customer exists
         let customerId;
@@ -215,8 +211,6 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
 
         logger.info('Lead added successfully');
 
-        // Insert log
-        await client.query(CREATE_LOG_TABLE);
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,

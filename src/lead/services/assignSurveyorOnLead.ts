@@ -1,6 +1,5 @@
 import {
     CHECK_TABLE_EXISTS,
-    CREATE_SURVEY_AND_RELATED_TABLE,
     INSERT_LOG,
     INSERT_SURVEY,
     CHECK_SURVEY,
@@ -77,8 +76,6 @@ export const assignSurveyor = async (
         } else if (surveyorId !== tenant.id) {
             throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
         }
-        await client.query(CREATE_SURVEY_AND_RELATED_TABLE);
-        logger.info('Survey and related tables created successfully');
 
         //Check if an incomplete survey exists for that lead
         const surveyCheckResult = await client.query(CHECK_SURVEY, [leadId]);

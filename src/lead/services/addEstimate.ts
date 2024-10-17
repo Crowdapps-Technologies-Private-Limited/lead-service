@@ -11,7 +11,6 @@ import {
     INSERT_ESTIMATE_COST,
     INSERT_ESTIMATE_GENERAL_INFO,
     INSERT_ESTIMATE_ANCILLARY,
-    CREATE_ESTIMATE_AND_RELATED_TABLE,
     INSERT_LOG,
     UPDATE_LEAD_STATUS,
     DELETE_ESTIMATE_SERVICES,
@@ -75,8 +74,6 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
         if (!status.includes(leadCheckResult.rows[0].status)) {
             throw new Error(getMessage('LEAD_STATUS_NOT_ALLOWED'));
         }
-        await client.query(CREATE_ESTIMATE_AND_RELATED_TABLE);
-        logger.info('Estimate and related tables created successfully');
 
         let finalEstimateId = estimateId;
 

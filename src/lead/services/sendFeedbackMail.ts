@@ -4,11 +4,7 @@ import { generateEmail } from '../../utils/generateEmailService';
 import { getMessage } from '../../utils/errorMessages';
 import { decryptPassword } from '../../utils/encryptionAndDecryption';
 
-import {
-    GET_LEAD_CUSTOMER_BY_LEAD_ID,
-    GET_CUSTOMER_BY_EMAIL,
-    CREATE_FEEDBACK_RELATED_TABLE,
-} from '../../sql/sqlScript';
+import { GET_LEAD_CUSTOMER_BY_LEAD_ID, GET_CUSTOMER_BY_EMAIL } from '../../sql/sqlScript';
 
 export const sendFeedbackEmail = async (leadId: string, tenant: any, user: any) => {
     const client = await connectToDatabase();
@@ -23,10 +19,6 @@ export const sendFeedbackEmail = async (leadId: string, tenant: any, user: any) 
 
         // Set schema for the tenant
         await client.query(`SET search_path TO ${schema}`);
-
-        // Ensure feedback-related tables exist
-        await client.query(CREATE_FEEDBACK_RELATED_TABLE);
-        logger.info('Feedback tables checked/created successfully');
 
         // Fetch lead and customer details based on lead ID
         const leadCheckResult = await client.query(GET_LEAD_CUSTOMER_BY_LEAD_ID, [leadId]);

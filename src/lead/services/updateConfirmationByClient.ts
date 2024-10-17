@@ -3,7 +3,6 @@ import { UpdateConfirmationPayload } from './../interface';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import {
-    CREATE_JOB_SCHEDULE_TABLE_IF_NOT_EXIST,
     GET_CONFIRMATION_AND_CUSTOMER_BY_ID,
     GET_QUOTE_BY_ID_FOR_CONFIRMATION,
     INSERT_JOB_SCHEDULE,
@@ -164,7 +163,6 @@ export const updateConfirmationByClient = async (
 
                 logger.info('Job schedule start time:', { movingDateObj });
 
-                await client.query(CREATE_JOB_SCHEDULE_TABLE_IF_NOT_EXIST);
                 const job = await client.query(INSERT_JOB_SCHEDULE, [
                     'Moving', // job title
                     totalWorker, // assigned workers

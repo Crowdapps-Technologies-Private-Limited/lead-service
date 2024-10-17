@@ -1,6 +1,5 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
-import { CREATE_JOB_SCHEDULE_TABLE_IF_NOT_EXIST } from '../../sql/sqlScript';
 
 // Service to fetch jobs list with details of customers, addresses, and vehicles
 export const getJobsList = async (tenant: any) => {
@@ -16,7 +15,6 @@ export const getJobsList = async (tenant: any) => {
         }
 
         await client.query(`SET search_path TO ${schema}`);
-        await client.query(CREATE_JOB_SCHEDULE_TABLE_IF_NOT_EXIST); // Ensure the job_schedules table exists
 
         const jobsQuery = `
             SELECT 

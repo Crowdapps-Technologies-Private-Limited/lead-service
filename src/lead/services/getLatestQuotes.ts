@@ -1,10 +1,5 @@
 import { log } from 'console';
-import {
-    CHECK_TABLE_EXISTS,
-    CREATE_DOC_TABLE_IF_NOT_EXISTS,
-    GET_LATEST_QUOTES,
-    GET_TERMS_DOC,
-} from '../../sql/sqlScript';
+import { CHECK_TABLE_EXISTS, GET_LATEST_QUOTES, GET_TERMS_DOC } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { getMessage } from '../../utils/errorMessages';
 import logger from '../../utils/logger';
@@ -37,9 +32,6 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
         const countQuery = `SELECT COUNT(*) FROM ${schema}.quotes WHERE lead_id = $1;`;
         const totalCount = await client.query(countQuery, [leadId]);
         logger.info('Total count:', { totalCount: totalCount.rows[0] });
-
-        await client.query(CREATE_DOC_TABLE_IF_NOT_EXISTS);
-        logger.info('Doc table available');
 
         const res = await client.query(GET_LATEST_QUOTES, [leadId]);
         const data = res.rows[0];

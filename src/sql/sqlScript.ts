@@ -12,8 +12,6 @@ export const GET_STAFF_BY_SUB = `
 
 export const GET_TENANT_BY_ID = 'SELECT * FROM public.tenants WHERE id = $1';
 
-export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-
 export const CHECK_LEAD_BY_EMAIL = `SELECT COUNT(*) FROM leads WHERE email = $1`;
 
 export const CHECK_LEAD_BY_NAME = `SELECT COUNT(*) FROM leads WHERE name = $1`;
