@@ -1,6 +1,6 @@
 import dayjs from '../../utils/dayjs';
 import logger from '../../utils/logger';
-import { Material, Cost, Service, Ancillary, GeneralInfo } from '../interface';
+import { Material, Service } from '../interface';
 
 const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: any; quote: any }) => {
     logger.info('Generating quote html');
@@ -135,10 +135,12 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
                 ${logoHtml}
             </div>
             <div class="company-info">
-                <p>${client.name && client.name !== ""? client.name : ""}</p>
-                <p>Address: ${client.address && client.address !== ""? client.address : ""}${client.postCode && client.postCode !== ""? ", " + client.postCode : ""}</p>
-                <p>Email: ${client.email && client.email !== ""? client.email : ""}</p>
-                <p>Website: ${client.general_website && client.general_website !== ""? client.general_website : ""}</p>
+                <p>${client.name && client.name !== '' ? client.name : ''}</p>
+                <p>Address: ${client.address && client.address !== '' ? client.address : ''}${
+        client.postCode && client.postCode !== '' ? ', ' + client.postCode : ''
+    }</p>
+                <p>Email: ${client.email && client.email !== '' ? client.email : ''}</p>
+                <p>Website: ${client.general_website && client.general_website !== '' ? client.general_website : ''}</p>
             </div>
         </div>
             <h1>Q U O T A T I O N</h1>
@@ -149,12 +151,14 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
                 <p><strong>Prepared For:</strong></p>
                 <p>${lead?.customer_name}</p>
                 <p>${lead?.customer_email}</p>
-                <p>${lead.customer_phone ? lead.customer_phone : ""}</p>
+                <p>${lead.customer_phone ? lead.customer_phone : ''}</p>
             </div>
             <div>
                 <p><strong>Client ID:</strong> ${lead?.generated_id}</p>
                 <p><strong>Date:</strong> ${createdAtFormatted}</p>
-                <p><strong>Volume:</strong> ${lead?.collection_volume} ${lead?.collection_volume_unit === 'm3' ? ' m' : ' ft'}<sup>3</sup></p>
+                <p><strong>Volume:</strong> ${lead?.collection_volume} ${
+        lead?.collection_volume_unit === 'm3' ? ' m' : ' ft'
+    }<sup>3</sup></p>
                 <p><strong>Quote Expires On:</strong> ${quoteExpiresOnFormatted}</p>
             </div>
         </div>

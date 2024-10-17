@@ -1,8 +1,7 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { AddLeadPayload } from '../interface';
-import { generateEmail } from '../../utils/generateEmailService';
-import { INSERT_LOG } from '../../sql/sqlScript';
+import { INSERT_ADDRESS, INSERT_LOG, UPDATE_ADDRESS, UPDATE_LEAD } from '../../sql/sqlScript';
 import { isEmptyString, toFloat } from '../../utils/utility';
 import { getMessage } from '../../utils/errorMessages';
 
@@ -95,40 +94,22 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         let collectionAddressId = leadCheckResult.rows[0].collection_address_id;
         if (!isAddressEmpty(collectionAddress)) {
             if (collectionAddressId) {
-                await client.query(
-                    `
-                    UPDATE addresses 
-                    SET 
-                        county = $1, 
-                        country = $2, 
-                        street = $3, 
-                        town = $4, 
-                        postcode = $5 
-                    WHERE id = $6
-                `,
-                    [
-                        collectionAddress.county,
-                        collectionAddress.country,
-                        collectionAddress.street,
-                        collectionAddress.town,
-                        collectionAddress.postcode,
-                        collectionAddressId,
-                    ],
-                );
+                await client.query(UPDATE_ADDRESS, [
+                    collectionAddress.county,
+                    collectionAddress.country,
+                    collectionAddress.street,
+                    collectionAddress.town,
+                    collectionAddress.postcode,
+                    collectionAddressId,
+                ]);
             } else {
-                const collectionAddressResult = await client.query(
-                    `
-                    INSERT INTO addresses (street, town, county, postcode, country)
-                    VALUES ($1, $2, $3, $4, $5) RETURNING id
-                `,
-                    [
-                        collectionAddress.street,
-                        collectionAddress.town,
-                        collectionAddress.county,
-                        collectionAddress.postcode,
-                        collectionAddress.country,
-                    ],
-                );
+                const collectionAddressResult = await client.query(INSERT_ADDRESS, [
+                    collectionAddress.street,
+                    collectionAddress.town,
+                    collectionAddress.county,
+                    collectionAddress.postcode,
+                    collectionAddress.country,
+                ]);
                 collectionAddressId = collectionAddressResult.rows[0].id;
             }
         } else {
@@ -140,40 +121,22 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         let deliveryAddressId = leadCheckResult.rows[0].delivery_address_id;
         if (!isAddressEmpty(deliveryAddress)) {
             if (deliveryAddressId) {
-                await client.query(
-                    `
-                    UPDATE addresses 
-                    SET 
-                        county = $1, 
-                        country = $2, 
-                        street = $3, 
-                        town = $4, 
-                        postcode = $5 
-                    WHERE id = $6
-                `,
-                    [
-                        deliveryAddress.county,
-                        deliveryAddress.country,
-                        deliveryAddress.street,
-                        deliveryAddress.town,
-                        deliveryAddress.postcode,
-                        deliveryAddressId,
-                    ],
-                );
+                await client.query(UPDATE_ADDRESS, [
+                    deliveryAddress.county,
+                    deliveryAddress.country,
+                    deliveryAddress.street,
+                    deliveryAddress.town,
+                    deliveryAddress.postcode,
+                    deliveryAddressId,
+                ]);
             } else {
-                const deliveryAddressResult = await client.query(
-                    `
-                    INSERT INTO addresses (street, town, county, postcode, country)
-                    VALUES ($1, $2, $3, $4, $5) RETURNING id
-                `,
-                    [
-                        deliveryAddress.street,
-                        deliveryAddress.town,
-                        deliveryAddress.county,
-                        deliveryAddress.postcode,
-                        deliveryAddress.country,
-                    ],
-                );
+                const deliveryAddressResult = await client.query(INSERT_ADDRESS, [
+                    deliveryAddress.street,
+                    deliveryAddress.town,
+                    deliveryAddress.county,
+                    deliveryAddress.postcode,
+                    deliveryAddress.country,
+                ]);
                 deliveryAddressId = deliveryAddressResult.rows[0].id;
             }
         } else {
@@ -182,59 +145,30 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         }
 
         // Update lead
-        await client.query(
-            `
-            UPDATE leads
-            SET 
-                referrer_id = $1,
-                follow_up_date = $2,
-                moving_on_date = $3,
-                packing_on_date = $4,
-                collection_purchase_status = $5,
-                collection_house_size = $6,
-                collection_distance = $7,
-                collection_volume = $8,
-                collection_volume_unit = $9,
-                delivery_purchase_status = $10,
-                delivery_house_size = $11,
-                delivery_distance = $12,
-                delivery_volume = $13,
-                delivery_volume_unit = $14,
-                customer_notes = $15,
-                batch = $16,
-                incept_batch = $17,
-                lead_date = $18,
-                collection_address_id = $19,
-                delivery_address_id = $20,
-                customer_id = $21,
-                updated_at = NOW()
-            WHERE generated_id = $22
-        `,
-            [
-                isEmptyString(referrerId) ? null : referrerId,
-                isEmptyString(followUpDate) ? null : followUpDate,
-                isEmptyString(movingOnDate) ? null : movingOnDate,
-                isEmptyString(packingOnDate) ? null : packingOnDate,
-                collectionPurchaseStatus,
-                collectionHouseSize,
-                toFloat(collectionDistance),
-                toFloat(collectionVolume),
-                collectionVolumeUnit,
-                deliveryPurchaseStatus,
-                deliveryHouseSize,
-                toFloat(deliveryDistance),
-                toFloat(deliveryVolume),
-                deliveryVolumeUnit,
-                customerNotes,
-                batch,
-                inceptBatch,
-                isEmptyString(leadDate) ? null : leadDate,
-                collectionAddressId,
-                deliveryAddressId,
-                customerId,
-                leadId,
-            ],
-        );
+        await client.query(UPDATE_LEAD, [
+            isEmptyString(referrerId) ? null : referrerId,
+            isEmptyString(followUpDate) ? null : followUpDate,
+            isEmptyString(movingOnDate) ? null : movingOnDate,
+            isEmptyString(packingOnDate) ? null : packingOnDate,
+            collectionPurchaseStatus,
+            collectionHouseSize,
+            toFloat(collectionDistance),
+            toFloat(collectionVolume),
+            collectionVolumeUnit,
+            deliveryPurchaseStatus,
+            deliveryHouseSize,
+            toFloat(deliveryDistance),
+            toFloat(deliveryVolume),
+            deliveryVolumeUnit,
+            customerNotes,
+            batch,
+            inceptBatch,
+            isEmptyString(leadDate) ? null : leadDate,
+            collectionAddressId,
+            deliveryAddressId,
+            customerId,
+            leadId,
+        ]);
 
         // Insert log
         await client.query(INSERT_LOG, [

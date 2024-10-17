@@ -1,4 +1,3 @@
-import { get } from 'http';
 import { GET_LEAD_BY_ID, GET_REFERRER_BY_ID, CHECK_TABLE_EXISTS, GET_SURVEY_BY_LEAD } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';

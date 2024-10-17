@@ -328,13 +328,6 @@ export const GET_ALL_LEADS = `
     order by generated_id DESC
     `;
 
-export const UPDATE_LEAD_STATUS = `
-    UPDATE leads
-    SET status = $1
-    WHERE generated_id = $2
-    returning status;
-`;
-
 export const GET_EMAIL_TEMPLATE_BY_ID = `
     SELECT template_id, template_name, subject, salutation, body, links, signature, disclaimer, placeholders
     FROM public.email_templates 
@@ -1349,4 +1342,288 @@ export const GET_LEAD_STATUS_BY_ID = `
     SELECT status , generated_id AS lead_id
     FROM leads 
     WHERE generated_id = $1;
+`;
+
+export const DELETE_EXISTING_RESPONSES = `
+DELETE FROM feedback_responses 
+WHERE lead_id = $1;
+`;
+
+export const GET_QUOTE_BY_LEAD_ID = `
+SELECT 
+    e.id AS quoteId,
+    e.lead_id AS leadId,
+    e.quote_total AS quoteTotal,
+    e.cost_total AS costTotal,
+    e.quote_expires_on AS quoteExpiresOn,
+    e.notes,
+    e.vat_included AS vatIncluded,
+    e.material_price_chargeable AS materialPriceChargeable,
+    (
+        SELECT json_agg(json_build_object(
+            'serviceId', s.id,
+            'typeName', s.service_name,
+            'description', s.description,
+            'price', s.price
+        ))
+        FROM quote_services es
+        JOIN services s ON es.service_id = s.id
+        WHERE es.quote_id = e.id
+    ) AS services,
+    (
+        SELECT json_agg(json_build_object(
+            'materialId', m.id,
+            'name', m.name,
+            'dimensions', m.dimensions,
+            'surveyedQty', m.surveyed_qty,
+            'chargeQty', m.charge_qty,
+            'price', m.price,
+            'total', m.total,
+            'volume', m.volume,
+            'cost', m.cost
+        ))
+        FROM quote_materials em
+        JOIN materials m ON em.material_id = m.id
+        WHERE em.quote_id = e.id
+    ) AS materials,
+    (
+        SELECT json_agg(json_build_object(
+            'costId', c.id,
+            'driverQty', c.driver_qty,
+            'porterQty', c.porter_qty,
+            'packerQty', c.packer_qty,
+            'vehicleQty', c.vehicle_qty,
+            'vehicleTypeId', c.vehicle_type_id,
+            'vehicleTypeName', vt.type_name,
+            'fuelCharge', c.fuel_charge,
+            'wageCharge', c.wage_charge
+        ))
+        FROM quote_costs ec
+        JOIN costs c ON ec.cost_id = c.id
+        JOIN public.vehicle_types vt ON c.vehicle_type_id = vt.id
+        WHERE ec.quote_id = e.id
+    ) AS costs,
+    (
+        SELECT json_agg(json_build_object(
+            'generalInfoId', gi.id,
+            'driverWage', gi.driver_wage,
+            'porterWage', gi.porter_wage,
+            'packerWage', gi.packer_wage,
+            'contentsValue', gi.contents_value,
+            'paymentMethod', gi.payment_method,
+            'insuranceAmount', gi.insurance_amount,
+            'insurancePercentage', gi.insurance_percentage,
+            'insuranceType', gi.insurance_type
+        ))
+        FROM quote_general_info eg
+        JOIN general_information gi ON eg.general_info_id = gi.id
+        WHERE eg.quote_id = e.id
+    ) AS generalInfo,
+    (
+        SELECT json_agg(json_build_object(
+            'ancillaryId', a.id,
+            'name', a.name,
+            'charge', a.charge,
+            'isChargeable', a.ischargeable
+        ))
+        FROM quote_ancillaries ea
+        JOIN ancillaries a ON ea.ancillary_id = a.id
+        WHERE ea.quote_id = e.id
+    ) AS ancillaries
+FROM 
+   quotes e
+WHERE 
+    e.lead_id = $1
+ORDER BY 
+    e.created_at DESC
+OFFSET 1
+LIMIT 1;
+`;
+
+export const GET_ESTIMATE_BY_LEAD_ID = `
+SELECT 
+    e.id AS estimateId,
+    e.lead_id AS leadId,
+    e.quote_total AS quoteTotal,
+    e.cost_total AS costTotal,
+    e.quote_expires_on AS quoteExpiresOn,
+    e.notes,
+    e.vat_included AS vatIncluded,
+    e.material_price_chargeable AS materialPriceChargeable,
+    (
+        SELECT json_agg(json_build_object(
+            'serviceId', s.id,
+            'typeName', s.service_name,
+            'description', s.description,
+            'price', s.price
+        ))
+        FROM estimate_services es
+        JOIN services s ON es.service_id = s.id
+        WHERE es.estimate_id = e.id
+    ) AS services,
+    (
+        SELECT json_agg(json_build_object(
+            'materialId', m.id,
+            'name', m.name,
+            'dimensions', m.dimensions,
+            'surveyedQty', m.surveyed_qty,
+            'chargeQty', m.charge_qty,
+            'price', m.price,
+            'total', m.total,
+            'volume', m.volume,
+            'cost', m.cost
+        ))
+        FROM estimate_materials em
+        JOIN materials m ON em.material_id = m.id
+        WHERE em.estimate_id = e.id
+    ) AS materials,
+    (
+        SELECT json_agg(json_build_object(
+            'costId', c.id,
+            'driverQty', c.driver_qty,
+            'porterQty', c.porter_qty,
+            'packerQty', c.packer_qty,
+            'vehicleQty', c.vehicle_qty,
+            'vehicleTypeId', c.vehicle_type_id,
+            'vehicleTypeName', vt.type_name,
+            'fuelCharge', c.fuel_charge,
+            'wageCharge', c.wage_charge
+        ))
+        FROM estimate_costs ec
+        JOIN costs c ON ec.cost_id = c.id
+        JOIN public.vehicle_types vt ON c.vehicle_type_id = vt.id
+        WHERE ec.estimate_id = e.id
+    ) AS costs,
+    (
+        SELECT json_agg(json_build_object(
+            'generalInfoId', gi.id,
+            'driverWage', gi.driver_wage,
+            'porterWage', gi.porter_wage,
+            'packerWage', gi.packer_wage,
+            'contentsValue', gi.contents_value,
+            'paymentMethod', gi.payment_method,
+            'insuranceAmount', gi.insurance_amount,
+            'insurancePercentage', gi.insurance_percentage,
+            'insuranceType', gi.insurance_type
+        ))
+        FROM estimate_general_info eg
+        JOIN general_information gi ON eg.general_info_id = gi.id
+        WHERE eg.estimate_id = e.id
+    ) AS generalInfo,
+    (
+        SELECT json_agg(json_build_object(
+            'ancillaryId', a.id,
+            'name', a.name,
+            'charge', a.charge,
+            'isChargeable', a.ischargeable
+        ))
+        FROM estimate_ancillaries ea
+        JOIN ancillaries a ON ea.ancillary_id = a.id
+        WHERE ea.estimate_id = e.id
+    ) AS ancillaries
+FROM 
+    estimates e
+WHERE 
+    e.lead_id = $1
+ORDER BY 
+    e.created_at DESC
+LIMIT 1;
+`;
+
+export const GET_JOB_LIST = `
+SELECT 
+    js.job_id,
+    js.job_title,
+    js.lead_id,
+    js.start_date_time,
+    js.end_date_time,
+    js.note,
+    js.job_type,
+    js.status,
+    c.name AS customer_name,
+    c.email AS customer_email,
+    c.phone AS customer_phone,
+    ca.street AS collection_street,
+    ca.town AS collection_town,
+    ca.postcode AS collection_postcode,
+    ca.country AS collection_country,
+    da.street AS delivery_street,
+    da.town AS delivery_town,
+    da.postcode AS delivery_postcode,
+    da.country AS delivery_country,
+    vt.type_name AS vehicle_type, 
+    jv.vehicle_count
+FROM job_schedules js
+LEFT JOIN customers c ON js.customer_id = c.id
+LEFT JOIN addresses ca ON js.collection_address_id = ca.id
+LEFT JOIN addresses da ON js.delivery_address_id = da.id
+LEFT JOIN job_vehicles jv ON js.job_id = jv.job_id
+LEFT JOIN public.vehicle_types vt ON jv.vehicle_type_id::UUID = vt.id
+ORDER BY js.start_date_time DESC;
+`;
+
+export const GET_FEEDBACK = `
+SELECT 
+    fr.response_id,
+    fr.question_id,
+    fq.question_text,
+    fq.category,
+    fr.rating,
+    fr.comment,
+    fr.created_at
+FROM feedback_responses fr
+LEFT JOIN feedback_questions fq ON fr.question_id = fq.question_id
+WHERE fr.lead_id = $1
+ORDER BY fr.created_at DESC;
+        `;
+
+export const UPDATE_ADDRESS = `
+        UPDATE addresses 
+        SET 
+            county = $1, 
+            country = $2, 
+            street = $3, 
+            town = $4, 
+            postcode = $5 
+        WHERE id = $6
+    `;
+
+export const INSERT_ADDRESS = `
+INSERT INTO addresses (street, town, county, postcode, country)
+VALUES ($1, $2, $3, $4, $5) RETURNING id
+`;
+
+export const UPDATE_LEAD = `
+UPDATE leads
+SET 
+    referrer_id = $1,
+    follow_up_date = $2,
+    moving_on_date = $3,
+    packing_on_date = $4,
+    collection_purchase_status = $5,
+    collection_house_size = $6,
+    collection_distance = $7,
+    collection_volume = $8,
+    collection_volume_unit = $9,
+    delivery_purchase_status = $10,
+    delivery_house_size = $11,
+    delivery_distance = $12,
+    delivery_volume = $13,
+    delivery_volume_unit = $14,
+    customer_notes = $15,
+    batch = $16,
+    incept_batch = $17,
+    lead_date = $18,
+    collection_address_id = $19,
+    delivery_address_id = $20,
+    customer_id = $21,
+    updated_at = NOW()
+WHERE generated_id = $22
+`;
+
+export const UPDATE_LEAD_STATUS = `
+UPDATE leads
+SET status = $1, updated_at = CURRENT_TIMESTAMP
+WHERE generated_id = $2
+RETURNING generated_id as lead_id, status, updated_at;
 `;

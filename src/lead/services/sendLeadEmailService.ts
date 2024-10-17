@@ -1,10 +1,8 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { SendEmailPayload } from '../interface';
-import { CREATE_LOG_TABLE, INSERT_LOG, GET_EMAIL_TEMPLATE_BY_ID, SELECT_EMAIL_INFO } from '../../sql/sqlScript';
-import { isEmptyString, toFloat } from '../../utils/utility';
+import { INSERT_LOG, GET_EMAIL_TEMPLATE_BY_ID, SELECT_EMAIL_INFO } from '../../sql/sqlScript';
 import { initializeEmailService } from '../../utils/emailService';
-import { getMaxListeners } from 'events';
 import { getMessage } from '../../utils/errorMessages';
 
 export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, tenant: any) => {
@@ -60,7 +58,7 @@ export const sendLeadEmail = async (leadId: string, payload: SendEmailPayload, t
         const htmlBody = body + '<br/>' + emailSignature + '<br/>' + emailDisclaimer;
         // Send email
         const emailService = await initializeEmailService();
-        await emailService.sendEmail(to, subject, body, htmlBody);
+        await emailService.sendEmail(to, subject, body, htmlBody, []);
         // Insert log
         await client.query(INSERT_LOG, [
             tenant.id,

@@ -1,6 +1,5 @@
 import { GET_ALL_REFERRERS } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
-import { setPaginationData } from '../../utils/utility';
 import logger from '../../utils/logger';
 
 export const getAllReferrers = async () => {

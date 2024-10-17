@@ -1,6 +1,7 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { getMessage } from '../../utils/errorMessages';
+import { GET_FEEDBACK } from '../../sql/sqlScript';
 // Service to get feedback responses by lead_id
 export const getFeedbackResponseByLead = async (lead_id: string, tenant: any) => {
     const schema = tenant?.schema;
@@ -19,22 +20,7 @@ export const getFeedbackResponseByLead = async (lead_id: string, tenant: any) =>
 
         await client.query(`SET search_path TO ${schema}`);
 
-        const query = `
-            SELECT 
-                fr.response_id,
-                fr.question_id,
-                fq.question_text,
-                fq.category,
-                fr.rating,
-                fr.comment,
-                fr.created_at
-            FROM feedback_responses fr
-            LEFT JOIN feedback_questions fq ON fr.question_id = fq.question_id
-            WHERE fr.lead_id = $1
-            ORDER BY fr.created_at DESC;
-        `;
-
-        const result = await client.query(query, [lead_id]);
+        const result = await client.query(GET_FEEDBACK, [lead_id]);
 
         if (result.rows.length === 0) {
             throw new Error(`No feedback responses found for lead ID ${lead_id}`);

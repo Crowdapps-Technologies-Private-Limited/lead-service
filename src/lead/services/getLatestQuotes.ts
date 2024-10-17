@@ -1,4 +1,3 @@
-import { log } from 'console';
 import { CHECK_TABLE_EXISTS, GET_LATEST_QUOTES, GET_TERMS_DOC } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { getMessage } from '../../utils/errorMessages';
@@ -7,9 +6,6 @@ import logger from '../../utils/logger';
 export const getLatestQuote = async (leadId: string, tenant: any) => {
     const client = await connectToDatabase();
     let clientReleased = false; // Track if client is released
-    // if (tenant?.is_suspended) {
-    //     throw new Error('Tenant is suspended');
-    // }
     const schema = tenant.schema;
     logger.info('Schema:', { schema });
 

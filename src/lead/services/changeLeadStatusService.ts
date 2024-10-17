@@ -1,6 +1,7 @@
 import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { getMessage } from '../../utils/errorMessages';
+import { UPDATE_LEAD_STATUS } from '../../sql/sqlScript';
 
 export const changeLeadStatusService = async (lead_id: string, new_status: string, tenant: any, user: any) => {
     const schema = tenant?.schema;
@@ -19,14 +20,8 @@ export const changeLeadStatusService = async (lead_id: string, new_status: strin
         await client.query(`SET search_path TO ${schema}`);
 
         // Update the lead status
-        const updateLeadStatusQuery = `
-            UPDATE leads
-            SET status = $1, updated_at = CURRENT_TIMESTAMP
-            WHERE generated_id = $2
-            RETURNING generated_id as lead_id, status, updated_at;
-        `;
 
-        const result = await client.query(updateLeadStatusQuery, [new_status, lead_id]);
+        const result = await client.query(UPDATE_LEAD_STATUS, [new_status, lead_id]);
 
         if (result.rowCount === 0) {
             throw new Error(`No lead found with the id ${lead_id}`);

@@ -10,7 +10,6 @@ import { encryptPassword, decryptPassword } from '../../utils/encryptionAndDecry
 import { generateRandomPassword, generateRandomString } from '../../utils/generateRandomPassword';
 import {
     INSERT_LOG,
-    GET_EMAIL_TEMPLATE_BY_EVENT,
     GET_TERMS_DOC,
     GET_PACKING_DOC,
     GET_LEAD_CUSTOMER_BY_LEAD_ID,

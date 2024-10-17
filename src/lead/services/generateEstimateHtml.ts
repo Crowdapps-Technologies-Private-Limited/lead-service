@@ -1,6 +1,6 @@
 import dayjs from '../../utils/dayjs';
 import logger from '../../utils/logger';
-import { Material, Cost, Service, Ancillary, GeneralInfo } from '../interface';
+import { Material, Service } from '../interface';
 
 const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; lead: any; estimate: any }) => {
     logger.info('Generating estimate html');
@@ -57,7 +57,7 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
     `,
         )
         .join('');
-    
+
     const logoHtml = client?.logo ? `<img src="${client?.logo}" alt="Company Logo" style="max-height: 60px;">` : '';
 
     const servicesHtml = estimate?.services
@@ -135,10 +135,12 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
                 ${logoHtml}
             </div>
             <div class="company-info">
-                <p>${client.name && client.name !== ""? client.name : ""}</p>
-                <p>Address: ${client.address && client.address !== ""? client.address : ""}${client.postCode && client.postCode !== ""? ", " + client.postCode : ""}</p>
-                <p>Email: ${client.email ? client.email : ""}</p>
-                <p>Website: ${client.general_website ? client.general_website : ""}</p>
+                <p>${client.name && client.name !== '' ? client.name : ''}</p>
+                <p>Address: ${client.address && client.address !== '' ? client.address : ''}${
+        client.postCode && client.postCode !== '' ? ', ' + client.postCode : ''
+    }</p>
+                <p>Email: ${client.email ? client.email : ''}</p>
+                <p>Website: ${client.general_website ? client.general_website : ''}</p>
             </div>
         </div>
             <h1>E S T I M A T I O N</h1>
@@ -149,12 +151,14 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
                 <p><strong>Prepared For:</strong></p>
                 <p>${lead?.customer_name}</p>
                 <p>${lead?.customer_email}</p>
-                <p>${lead.customer_phone ? lead.customer_phone : ""}</p>
+                <p>${lead.customer_phone ? lead.customer_phone : ''}</p>
             </div>
             <div>
                 <p><strong>Client ID:</strong> ${lead?.generated_id}</p>
                 <p><strong>Date:</strong> ${createdAtFormatted}</p>
-                <p><strong>Volume:</strong> ${lead?.collection_volume} ${lead?.collection_volume_unit === 'm3' ? ' m' : ' ft'}<sup>3</sup></p>
+                <p><strong>Volume:</strong> ${lead?.collection_volume} ${
+        lead?.collection_volume_unit === 'm3' ? ' m' : ' ft'
+    }<sup>3</sup></p>
                 <p><strong>Estimate Expires On:</strong> ${quoteExpiresOnFormatted}</p>
             </div>
         </div>

@@ -4,7 +4,7 @@ import { generateEmail } from '../../utils/generateEmailService';
 import { getMessage } from '../../utils/errorMessages';
 import { decryptPassword } from '../../utils/encryptionAndDecryption';
 
-import { GET_LEAD_CUSTOMER_BY_LEAD_ID, GET_CUSTOMER_BY_EMAIL } from '../../sql/sqlScript';
+import { GET_LEAD_CUSTOMER_BY_LEAD_ID, GET_CUSTOMER_BY_EMAIL, DELETE_EXISTING_RESPONSES } from '../../sql/sqlScript';
 
 export const sendFeedbackEmail = async (leadId: string, tenant: any, user: any) => {
     const client = await connectToDatabase();
@@ -30,11 +30,8 @@ export const sendFeedbackEmail = async (leadId: string, tenant: any, user: any) 
         logger.info('Lead data:', { leadData });
 
         // Delete any existing feedback responses for the lead
-        const deleteExistingResponsesQuery = `
-            DELETE FROM feedback_responses 
-            WHERE lead_id = $1;
-        `;
-        await client.query(deleteExistingResponsesQuery, [leadId]);
+
+        await client.query(DELETE_EXISTING_RESPONSES, [leadId]);
 
         // Fetch customer details
         const customerResult = await client.query(GET_CUSTOMER_BY_EMAIL, [leadData?.customer_email]);

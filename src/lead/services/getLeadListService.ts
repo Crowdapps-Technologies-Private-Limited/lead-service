@@ -1,4 +1,4 @@
-import { GET_LEAD_COUNT_WITH_FILTER, CHECK_TABLE_EXISTS } from '../../sql/sqlScript';
+import { CHECK_TABLE_EXISTS } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { setPaginationData } from '../../utils/utility';
 import logger from '../../utils/logger';
