@@ -14,67 +14,6 @@ export const GET_TENANT_BY_ID = 'SELECT * FROM public.tenants WHERE id = $1';
 
 export const CREATE_EXTENSION = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-export const CREATE_LEAD_TABLE = `
-CREATE TABLE IF NOT EXISTS customers (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    username VARCHAR(100) UNIQUE NULL,
-    phone VARCHAR(20),
-    email VARCHAR(100) UNIQUE,
-    password VARCHAR(255) NULL,
-    cognito_sub VARCHAR(255) ,
-    tenant_id UUID,
-    created_by VARCHAR(255),
-    updated_by VARCHAR(255) DEFAULT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL
-);
-
--- Create addresses table
-CREATE TABLE IF NOT EXISTS addresses (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    street VARCHAR(300),
-    town VARCHAR(300),
-    county VARCHAR(300),
-    postcode VARCHAR(50),
-    country VARCHAR(100),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL
-);
-
--- Create leads table
-CREATE TABLE IF NOT EXISTS leads (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    generated_id VARCHAR(10) NOT NULL UNIQUE,
-    referrer_id UUID,
-    customer_id UUID REFERENCES customers(id) ON DELETE SET NULL,
-    collection_address_id UUID REFERENCES addresses(id),
-    delivery_address_id UUID REFERENCES addresses(id),
-    follow_up_date TIMESTAMP,
-    moving_on_date TIMESTAMP,
-    packing_on_date TIMESTAMP DEFAULT NULL,
-    survey_date TIMESTAMP DEFAULT NULL,
-    collection_purchase_status VARCHAR(100),
-    collection_house_size VARCHAR(100),
-    collection_distance DECIMAL(8, 2),
-    collection_volume DECIMAL(8, 2),
-    collection_volume_unit VARCHAR(20),
-    delivery_purchase_status VARCHAR(100),
-    delivery_house_size VARCHAR(100),
-    delivery_distance DECIMAL(8, 2),
-    delivery_volume DECIMAL(8, 2),
-    delivery_volume_unit VARCHAR(20),
-    status VARCHAR(100) NOT NULL DEFAULT 'NEW LEAD',
-    customer_notes TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL,
-    batch VARCHAR(20),
-    incept_batch VARCHAR(20),
-    lead_id VARCHAR(10),
-    lead_date TIMESTAMP,
-    FOREIGN KEY (referrer_id) REFERENCES public.referrers(id) ON DELETE SET NULL
-);`;
-
 export const CHECK_LEAD_BY_EMAIL = `SELECT COUNT(*) FROM leads WHERE email = $1`;
 
 export const CHECK_LEAD_BY_NAME = `SELECT COUNT(*) FROM leads WHERE name = $1`;
@@ -176,21 +115,6 @@ export const GET_EMAIL_TEMPLATE_BY_EVENT = `
     WHERE event = $1
 `;
 
-export const CREATE_LOG_TABLE = `CREATE TABLE IF NOT EXISTS lead_logs (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    actor_id UUID,
-    lead_id VARCHAR(20),
-    actor_name VARCHAR(150),
-	actor_email VARCHAR(150),
-    action TEXT,
-    performed_on VARCHAR(150),
-    lead_status VARCHAR(100),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL,
-    FOREIGN KEY (actor_id) REFERENCES public.tenants(id) ON DELETE CASCADE,
-    FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
-)`;
-
 export const INSERT_LOG = `INSERT INTO lead_logs (
     actor_id,
     actor_name,
@@ -247,120 +171,6 @@ SET
     packing_on_date = $28,
     updated_at = NOW()
 WHERE id = $29 RETURNING *`;
-
-export const CREATE_ESTIMATE_AND_RELATED_TABLE = `
-CREATE TABLE IF NOT EXISTS estimates (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    lead_id VARCHAR(20) NOT NULL,
-    quote_total NUMERIC,
-    cost_total NUMERIC,
-    quote_expires_on DATE,
-    notes TEXT,
-    vat_included BOOLEAN,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    material_price_chargeable BOOLEAN,
-    FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS services (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    service_name VARCHAR(255) NOT NULL,
-    description TEXT,
-    price DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS materials (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    dimensions VARCHAR(255),
-    surveyed_qty DECIMAL(10, 2),
-    charge_qty DECIMAL(10, 2),
-    price DECIMAL(10, 2),
-    total DECIMAL(10, 2),
-    volume DECIMAL(10, 2),
-    cost DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS costs (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    driver_qty INT,
-    porter_qty INT,
-    packer_qty INT,
-    vehicle_qty INT,
-    vehicle_type_id UUID,
-    wage_charge DECIMAL(10, 2),
-    fuel_charge DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS general_information (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    driver_wage DECIMAL(10, 2),
-    porter_wage DECIMAL(10, 2),
-    packer_wage DECIMAL(10, 2),
-    contents_value DECIMAL(10, 2),
-    payment_method VARCHAR(255),
-    insurance_amount DECIMAL(10, 2),
-    insurance_percentage DECIMAL(5, 2),
-    insurance_type VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS ancillaries (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    charge DECIMAL(10, 2),
-    isChargeable BOOLEAN,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS estimate_services (
-    estimate_id UUID NOT NULL,
-    service_id UUID NOT NULL,
-    PRIMARY KEY (estimate_id, service_id),
-    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
-    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS estimate_materials (
-    estimate_id UUID NOT NULL,
-    material_id UUID NOT NULL,
-    PRIMARY KEY (estimate_id, material_id),
-    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
-    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS estimate_costs (
-    estimate_id UUID NOT NULL,
-    cost_id UUID NOT NULL,
-    PRIMARY KEY (estimate_id, cost_id),
-    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
-    FOREIGN KEY (cost_id) REFERENCES costs(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS estimate_general_info (
-    estimate_id UUID NOT NULL,
-    general_info_id UUID NOT NULL,
-    PRIMARY KEY (estimate_id, general_info_id),
-    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
-    FOREIGN KEY (general_info_id) REFERENCES general_information(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS estimate_ancillaries (
-    estimate_id UUID NOT NULL,
-    ancillary_id UUID NOT NULL,
-    PRIMARY KEY (estimate_id, ancillary_id),
-    FOREIGN KEY (estimate_id) REFERENCES estimates(id) ON DELETE CASCADE,
-    FOREIGN KEY (ancillary_id) REFERENCES ancillaries(id) ON DELETE CASCADE
-);
-`;
 
 export const INSERT_ESTIMATE = `INSERT INTO estimates (
     lead_id,
@@ -534,72 +344,6 @@ export const GET_EMAIL_TEMPLATE_BY_ID = `
 `;
 
 export const GET_CUSTOMER_BY_ID = `SELECT * FROM customers WHERE id = $1`;
-
-export const CREATE_SURVEY_AND_RELATED_TABLE = `
-CREATE TABLE IF NOT EXISTS surveys (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    lead_id VARCHAR(20) NOT NULL,
-	surveyor_id VARCHAR(100),
-    survey_type VARCHAR(100),
-    notes text,
-    remarks text,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP default NULL,
-    survey_date TIMESTAMP default NULL,
-    description text,
-    status VARCHAR(100) NOT NULL DEFAULT 'PENDING',
-    is_cancelled BOOLEAN DEFAULT FALSE,
-    reason_to_cancel TEXT,
-    moving_from_paces INTEGER,
-    moving_from_flight_of_stairs INTEGER,
-    moving_from_lift_availability VARCHAR(100),
-    moving_from_bedrooms INTEGER,
-    moving_from_floors INTEGER,
-    is_moving_from_postcode_verified BOOLEAN,
-    moving_from_type VARCHAR(100),
-    moving_to_paces INTEGER,
-    moving_to_flight_of_stairs INTEGER,
-    moving_to_lift_availability VARCHAR(100),
-    moving_to_bedrooms INTEGER,
-    moving_to_floors INTEGER,
-    is_moving_to_postcode_verified BOOLEAN,
-    moving_to_type VARCHAR(100),
-    summary_status VARCHAR(100),
-    is_tenant_assigned BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS survey_items (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    survey_id UUID NOT NULL,
-	room VARCHAR(100),
-	item VARCHAR(100),
-	ft3	DECIMAL(5,2),
-	quantity INTEGER,
-	is_leave BOOLEAN,
-	is_weee BOOLEAN,
-	is_cust BOOLEAN,
-	is_clear BOOLEAN,
-	dismentle_charges DECIMAL(8,2),
-	sort_order INTEGER,
-	linked_item VARCHAR(200),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS survey_services (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    survey_id UUID NOT NULL,
-    service_name VARCHAR(100),
-    is_accepted BOOLEAN,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
-);
-`;
 
 export const INSERT_SURVEY = `INSERT INTO surveys (
     lead_id,
@@ -857,120 +601,6 @@ export const DELETE_ESTIMATE_ANCILLARIES = `
     WHERE estimate_id = $1;
 `;
 
-export const CREATE_QUOTE_AND_RELATED_TABLE = `
-CREATE TABLE IF NOT EXISTS quotes (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    lead_id VARCHAR(20) NOT NULL,
-    quote_total NUMERIC,
-    cost_total NUMERIC,
-    quote_expires_on DATE,
-    notes TEXT,
-    vat_included BOOLEAN,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    material_price_chargeable BOOLEAN,
-    FOREIGN KEY (lead_id) REFERENCES leads(generated_id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS services (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    service_name VARCHAR(255) NOT NULL,
-    description TEXT,
-    price DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS materials (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    dimensions VARCHAR(255),
-    surveyed_qty DECIMAL(10, 2),
-    charge_qty DECIMAL(10, 2),
-    price DECIMAL(10, 2),
-    total DECIMAL(10, 2),
-    volume DECIMAL(10, 2),
-    cost DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS costs (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    driver_qty INT,
-    porter_qty INT,
-    packer_qty INT,
-    vehicle_qty INT,
-    vehicle_type_id UUID,
-    wage_charge DECIMAL(10, 2),
-    fuel_charge DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS general_information (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    driver_wage DECIMAL(10, 2),
-    porter_wage DECIMAL(10, 2),
-    packer_wage DECIMAL(10, 2),
-    contents_value DECIMAL(10, 2),
-    payment_method VARCHAR(255),
-    insurance_amount DECIMAL(10, 2),
-    insurance_percentage DECIMAL(5, 2),
-    insurance_type VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS ancillaries (
-    id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    charge DECIMAL(10, 2),
-    isChargeable BOOLEAN,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS quote_services (
-    quote_id UUID NOT NULL,
-    service_id UUID NOT NULL,
-    PRIMARY KEY (quote_id, service_id),
-    FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE,
-    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS quote_materials (
-    quote_id UUID NOT NULL,
-    material_id UUID NOT NULL,
-    PRIMARY KEY (quote_id, material_id),
-    FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE,
-    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS quote_costs (
-    quote_id UUID NOT NULL,
-    cost_id UUID NOT NULL,
-    PRIMARY KEY (quote_id, cost_id),
-    FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE,
-    FOREIGN KEY (cost_id) REFERENCES costs(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS quote_general_info (
-    quote_id UUID NOT NULL,
-    general_info_id UUID NOT NULL,
-    PRIMARY KEY (quote_id, general_info_id),
-    FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE,
-    FOREIGN KEY (general_info_id) REFERENCES general_information(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS quote_ancillaries (
-    quote_id UUID NOT NULL,
-    ancillary_id UUID NOT NULL,
-    PRIMARY KEY (quote_id, ancillary_id),
-    FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE,
-    FOREIGN KEY (ancillary_id) REFERENCES ancillaries(id) ON DELETE CASCADE
-);
-`;
-
 export const INSERT_QUOTE = `INSERT INTO quotes (
     lead_id,
     quote_total,
@@ -1072,47 +702,6 @@ SET
     updated_by = $5,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = $6;
-`;
-
-export const CREATE_CONFIRMATION_TABLES = `
-CREATE TABLE IF NOT EXISTS confirmations (
-    confirmation_id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    customer_id UUID DEFAULT public.uuid_generate_v4(),
-    lead_id VARCHAR(20) REFERENCES leads(generated_id) ON DELETE CASCADE,
-    quote_id UUID REFERENCES quotes(id) ON DELETE CASCADE,
-    moving_on_date TIMESTAMP,
-    moving_on_time VARCHAR(100),
-    moving_on_status VARCHAR(100),
-    packing_on_date TIMESTAMP DEFAULT NULL,
-    packing_on_time VARCHAR(100),
-    packing_on_status VARCHAR(100),
-    is_accept_liability_cover BOOLEAN DEFAULT FALSE,
-    liability_cover NUMERIC DEFAULT NULL,
-    is_terms_accepted BOOLEAN DEFAULT FALSE,
-    is_quotation_accepted BOOLEAN DEFAULT FALSE,  -- Corrected from "is_quoation_accepted"
-    is_submitted BOOLEAN DEFAULT FALSE,
-    tool_tip_content VARCHAR(100) DEFAULT NULL,
-    is_new_response BOOLEAN DEFAULT FALSE,
-    is_deposit_received BOOLEAN DEFAULT FALSE,
-	is_seen BOOLEAN DEFAULT FALSE,
-    comments TEXT,
-    notes TEXT,
-    confirmed_on TIMESTAMP DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(255),
-    updated_by VARCHAR(255) DEFAULT NULL
-);
-
-CREATE TABLE IF NOT EXISTS confirmation_services (
-    service_id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    confirmation_id UUID REFERENCES confirmations(confirmation_id) ON DELETE CASCADE,
-    name VARCHAR(100),
-    cost DECIMAL(10, 2),
-    status VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 `;
 
 export const INSERT_CONFIRMATION = `
@@ -1445,35 +1034,6 @@ export const UPDATE_CONFIRMATION_BY_CLIENT = `
     RETURNING *;
 `;
 
-export const CREATE_JOB_SCHEDULE_TABLE_IF_NOT_EXIST = `
-CREATE TABLE IF NOT EXISTS job_schedules (
-    job_id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    job_title VARCHAR(255) NOT NULL,
-    lead_id INT NOT NULL,
-    assigned_workers INT,
-    customer_id UUID,
-    collection_address_id UUID,
-    delivery_address_id UUID,
-    start_date_time TIMESTAMP NOT NULL,
-    end_date_time TIMESTAMP,
-    note TEXT,
-    job_type VARCHAR(50),
-    status VARCHAR(50),
-    created_by VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_by VARCHAR(255),
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS job_vehicles (
-    vehicle_id SERIAL PRIMARY KEY,     
-    vehicle_type_id VARCHAR(100) NOT NULL, 
-    lead_id VARCHAR(100) NOT NULL, 
-    job_id UUID NOT NULL,
-    vehicle_count INT NOT NULL         
-);
-`;
-
 export const GET_CONFIRMATION_AND_CUSTOMER_BY_ID = `
 SELECT 
     c.confirmation_id,
@@ -1688,25 +1248,6 @@ ORDER BY
 LIMIT 1;
 `;
 
-export const CREATE_DOC_TABLE_IF_NOT_EXISTS = `
-CREATE TABLE IF NOT EXISTS documents
-(
-    doc_id uuid NOT NULL DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    name CHAR(50) COLLATE pg_catalog."default" NOT NULL UNIQUE,
-    s3key text COLLATE pg_catalog."default",
-    created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now(),
-    created_by text COLLATE pg_catalog."default",
-    updated_by text COLLATE pg_catalog."default"
-);
-
-CREATE OR REPLACE TRIGGER update_documents_updated_at
-    BEFORE UPDATE 
-    ON documents
-    FOR EACH ROW
-    EXECUTE FUNCTION public.update_updated_at_column();
-`;
-
 export const GET_JOB_SCHEDULE_BY_LEAD_ID = `
 SELECT  
     js.lead_id,  
@@ -1759,29 +1300,6 @@ export const GET_INVOICE_BY_LEAD_AND_TYPE = `
             LIMIT 1
         `;
 
-export const CREATE_FEEDBACK_RELATED_TABLE = `
--- Table to store feedback questions
-CREATE TABLE IF NOT EXISTS feedback_questions (
-    question_id SERIAL PRIMARY KEY, -- serial ensures this is an auto-incrementing integer
-    question_text TEXT NOT NULL,
-    category VARCHAR(50) NULL,
-    created_by VARCHAR(255) NOT NULL,
-    updated_by VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Table to store customer feedback responses
-CREATE TABLE IF NOT EXISTS feedback_responses (
-    response_id UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
-    question_id INT REFERENCES feedback_questions(question_id) ON DELETE CASCADE, -- References serial integer question_id
-    lead_id VARCHAR(50) REFERENCES leads(generated_id) ON DELETE CASCADE, -- Reference to the leads table
-    rating INT CHECK (rating >= 1 AND rating <= 5), -- Star rating between 1 and 5
-    comment TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-`;
 export const GET_CONFIRMATION_NOTES = `
 SELECT 
     notes AS confirmation_note
