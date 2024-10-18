@@ -5,6 +5,9 @@ import logger from '../../utils/logger';
 
 const allowedOrderFields: { [key: string]: string } = {
     generated_id: 'l.generated_id',
+    follow_up_date: 'l.follow_up_date',
+    updated_at: 'l.updated_at',
+    moving_on_date: 'l.moving_on_date',
     customer_name: 'c.name',
     created_at: 'l.created_at', // Assuming created_at is in the leads table
 };
