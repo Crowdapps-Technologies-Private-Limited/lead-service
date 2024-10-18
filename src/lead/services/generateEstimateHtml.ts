@@ -124,6 +124,9 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
                 display: flex;
                 justify-content: space-between;
             }
+            .signature { 
+                text-align: left;
+            }
         </style>
     </head>
     <body>
@@ -192,6 +195,13 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
         <div class="footer">
             <p>We aim to provide a first-class professional service to you during the course of any agreement made with us. If there is anything that we can assist you with either now or in the future, please be assured of our very best attention.</p>
             <p>Many thanks.</p>
+        </div>
+    <br>
+    <br>
+    <br>
+
+        <div class="signature">
+        <p>${client.signature}</p>
         </div>
     </div>
     

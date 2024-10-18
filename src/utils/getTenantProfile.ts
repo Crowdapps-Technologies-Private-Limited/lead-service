@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import logger from './logger';
 import { connectToDatabase } from './database';
-import { GET_TENANT_BY_ID, SELECT_COMPANY_INFO } from '../sql/sqlScript';
+import { GET_TENANT_BY_ID, SELECT_COMPANY_INFO, SELECT_EMAIL_INFO } from '../sql/sqlScript';
 import { checkSubscriptionStatus } from './checkSubscription';
 import { getconfigSecrets } from './getConfig';
 
@@ -25,6 +25,13 @@ export const getTenantProfile = async (userId: string) => {
         if (company.rows.length === 0) {
             throw new Error('User company not found');
         }
+
+        const emailInfo = await client.query(SELECT_EMAIL_INFO, [result.rows[0].id]);
+        if (emailInfo.rows.length === 0) {
+            throw new Error('User email information not found');
+        }
+
+        user.signature = emailInfo.rows[0].email_signature;
         user.logo = company.rows[0].logo;
         user.phoneNumber = company.rows[0].phone_number;
         user.transportCode = company.rows[0].transport_code;

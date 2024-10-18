@@ -1,4 +1,4 @@
-import { SELECT_COMPANY_INFO, GET_TENANT_BY_ID, GET_STAFF_BY_SUB } from '../sql/sqlScript';
+import { SELECT_COMPANY_INFO, GET_TENANT_BY_ID, GET_STAFF_BY_SUB, SELECT_EMAIL_INFO } from '../sql/sqlScript';
 import { connectToDatabase } from './database';
 import AWS from 'aws-sdk';
 import { getconfigSecrets } from './getConfig';
@@ -23,6 +23,13 @@ export const getUserProfile = async (tenantId: string, userSub: string) => {
         if (company.rows.length === 0) {
             throw new Error('Tenant company not found');
         }
+
+        const emailInfo = await client.query(SELECT_EMAIL_INFO, [result.rows[0].id]);
+        if (emailInfo.rows.length === 0) {
+            throw new Error('User email information not found');
+        }
+
+        tenant.signature = emailInfo.rows[0].email_signature;
         tenant.logo = company.rows[0].logo;
         tenant.phoneNumber = company.rows[0].phone_number;
         tenant.companyName = company.rows[0].company_name;
