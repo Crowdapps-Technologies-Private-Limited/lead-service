@@ -17,7 +17,7 @@ export const updateConfirmationHandler: RouteHandler = async (
     const user = (event.requestContext as any).user;
     const hasPermission = await checkPermission(
         user.role,
-        'Confirmation',
+        'Lead:Confirmation',
         'update',
         tenant?.schema || tenant?.tenant?.schema,
     );
@@ -39,7 +39,7 @@ export const updateConfirmationHandler: RouteHandler = async (
     try {
         // Update data
         const result = await updateConfirmationByClient(leadId, payload, tenant, user);
-        return ResponseHandler.successResponse( result);
+        return ResponseHandler.successResponse(result);
     } catch (error: any) {
         logger.error('Failed to update confirmation', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });

@@ -9,11 +9,16 @@ import { getMessage } from '../../utils/errorMessages';
 export const getSurveyorListHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('getSurveyorListHandler event ', { event });  
+    logger.info('getSurveyorListHandler event ', { event });
     try {
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
-        const hasPermission = await checkPermission(user.role, 'Lead', 'read', tenant?.schema || tenant?.tenant?.schema);
+        const hasPermission = await checkPermission(
+            user.role,
+            'Lead:Surveyor',
+            'read',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });

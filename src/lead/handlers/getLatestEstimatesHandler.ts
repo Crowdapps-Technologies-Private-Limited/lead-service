@@ -29,7 +29,7 @@ export const getLatestEstimatesHandler: RouteHandler = async (
 
         const hasPermission = await checkPermission(
             user.role,
-            'Estimate',
+            'Lead:Estimate',
             'read',
             tenant?.schema || tenant?.tenant?.schema,
         );

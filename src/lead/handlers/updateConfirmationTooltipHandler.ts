@@ -10,14 +10,14 @@ export const updateConfirmationTooltipHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
     logger.info('Received event at updateConfirmationTooltipHandler', { event });
-    const payload = JSON.parse(event.body || '{}');
+
     const leadId = event.pathParameters?.id;
     // const confirmationId = event.queryStringParameters?.confirmationId;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
     const hasPermission = await checkPermission(
         user.role,
-        'Confirmation',
+        'Lead:Confirmation',
         'update',
         tenant?.schema || tenant?.tenant?.schema,
     );

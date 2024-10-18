@@ -3,6 +3,7 @@ import logger from '../../utils/logger';
 import { sendFeedbackEmail } from '../services';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { getMessage } from '../../utils/errorMessages';
+import { checkPermission } from '../../utils/checkPermission';
 
 export const sendFeedbackEmailHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -12,7 +13,16 @@ export const sendFeedbackEmailHandler = async (
     try {
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
-
+        const hasPermission = await checkPermission(
+            user.role,
+            'Lead:Job',
+            'create',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
+        logger.info('hasPermission: -----------', { hasPermission });
+        if (!hasPermission) {
+            return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
+        }
         // Get the leadId and action from the path parameters or body
         const leadId = event.pathParameters?.id;
 

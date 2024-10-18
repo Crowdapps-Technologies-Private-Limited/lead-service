@@ -8,16 +8,16 @@ import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 
 export const addQuoteHandler: RouteHandler = async (
-    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
+    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
     logger.info('addQuoteHandler event', { event });
-    
+
     try {
         const payload = JSON.parse(event.body || '{}');
         logger.info('payload:', { payload });
         const leadId = event.pathParameters?.id;
         logger.info('leadId:', { leadId });
-        
+
         if (!leadId) {
             return {
                 statusCode: 400,
@@ -29,10 +29,12 @@ export const addQuoteHandler: RouteHandler = async (
         logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
-        
+
         const hasPermission = await checkPermission(
-            user.role, 'Quotation', 
-            'create', tenant?.schema || tenant?.tenant?.schema
+            user.role,
+            'Lead:Quotation',
+            'create',
+            tenant?.schema || tenant?.tenant?.schema,
         );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
@@ -48,13 +50,11 @@ export const addQuoteHandler: RouteHandler = async (
         logger.info('addQuoteDTO success:');
         const result = await addOrUpdateQuote(leadId, payload, tenant);
         logger.info('add or edit quote success:', { result });
-        if(payload?.quoteId){
+        if (payload?.quoteId) {
             return ResponseHandler.successResponse({ message: getMessage('QUOTE_UPDATED') });
-        }
-        else {
+        } else {
             return ResponseHandler.createdResponse({ message: getMessage('QUOTE_ADDED') });
         }
-      
     } catch (error: any) {
         logger.error('Error occurred in addQuoteHandler', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });

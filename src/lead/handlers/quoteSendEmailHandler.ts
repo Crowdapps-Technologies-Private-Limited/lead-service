@@ -18,7 +18,12 @@ export const quoteSendEmailHandler: RouteHandler = async (
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
 
-        const hasPermission = await checkPermission(user.role, 'Quotation', 'create', tenant?.schema || tenant?.tenant?.schema);
+        const hasPermission = await checkPermission(
+            user.role,
+            'Lead:Quotation',
+            'create',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
@@ -33,7 +38,7 @@ export const quoteSendEmailHandler: RouteHandler = async (
                 message: 'Quote ID and Lead ID are required in path parameters',
             });
         }
-        const array = ["pdf", "email"];
+        const array = ['pdf', 'email'];
         if (action && !array.includes(action)) {
             logger.error('Invalid action. Please provide valid action (pdf or email)', { action });
             return ResponseHandler.badRequestResponse({

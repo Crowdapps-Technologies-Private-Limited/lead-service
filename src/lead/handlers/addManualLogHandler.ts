@@ -24,7 +24,7 @@ export const addManualLogHandler = async (
         }
 
         // Ensure user has permission to add a manual log
-        const hasPermission = await checkPermission(user.role, 'Log', 'create', tenant.schema);
+        const hasPermission = await checkPermission(user.role, 'Lead:Log', 'create', tenant.schema);
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }

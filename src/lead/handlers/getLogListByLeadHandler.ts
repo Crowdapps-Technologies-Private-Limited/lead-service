@@ -20,7 +20,7 @@ export const getLogListByLeadHandler: RouteHandler = async (
         const user = (event.requestContext as any).user;
         const hasPermission = await checkPermission(
             user.role,
-            'Survey',
+            'Lead:Log',
             'read',
             tenant?.schema || tenant?.tenant?.schema,
         );

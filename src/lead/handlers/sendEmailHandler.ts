@@ -22,7 +22,7 @@ export const sendEmailHandler: RouteHandler = async (
         }
         const hasPermission = await checkPermission(
             user.role,
-            'Estimate',
+            'Email',
             'create',
             tenant?.schema || tenant?.tenant?.schema,
         );

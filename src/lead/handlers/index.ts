@@ -10,7 +10,6 @@ import { getAllNotesHandler } from './getAllNotesHandler';
 import { getAllSurveysHandler } from './getAllSurveysHandler';
 import { getConfirmationHandler } from './getConfirmationHandler';
 import { getConfirmationTooltipHandler } from './getConfirmationTooltipHandler';
-import { getCreateTaskFormDataHandler } from './getCreateTaskFormDataHandler';
 import { getDistanceHandler } from './getDistanceHandler';
 import { getFeedbackResponseHandler } from './getFeedbackResponseHandler';
 import { jobsListHandler } from './getJobListHandler';
@@ -53,7 +52,6 @@ const authHandlers = {
     updateConfirmationTooltipHandler,
     getConfirmationHandler,
     updateConfirmationHandler,
-    getCreateTaskFormDataHandler,
     jobsListHandler,
     getFeedbackResponseHandler,
     sendFeedbackEmailHandler,

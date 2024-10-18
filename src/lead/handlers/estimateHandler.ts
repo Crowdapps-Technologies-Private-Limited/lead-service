@@ -9,10 +9,10 @@ import { getMessage } from '../../utils/errorMessages';
 import { get } from 'http';
 
 export const addEstimateHandler: RouteHandler = async (
-    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
+    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
     logger.info('addEstimateHandler event', { event });
-    
+
     try {
         const payload = JSON.parse(event.body || '{}');
         logger.info('payload:', { payload });
@@ -21,14 +21,19 @@ export const addEstimateHandler: RouteHandler = async (
         if (!leadId) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'Lead ID is required in path parameters' })
+                body: JSON.stringify({ message: 'Lead ID is required in path parameters' }),
             };
         }
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
-        const hasPermission = await checkPermission(user.role, 'Estimate', 'create', tenant?.schema || tenant?.tenant?.schema);
+        const hasPermission = await checkPermission(
+            user.role,
+            'Lead:Estimate',
+            'update',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
@@ -43,7 +48,7 @@ export const addEstimateHandler: RouteHandler = async (
         logger.info('addEstimateDTO success:');
         const result = await addOrUpdateEstimate(leadId, payload, tenant);
         logger.info('addEstimate success:', { result });
-        if(payload?.estimateId){
+        if (payload?.estimateId) {
             return ResponseHandler.successResponse({ message: getMessage('ESTIMATE_UPDATED') });
         } else {
             return ResponseHandler.createdResponse({ message: getMessage('ESTIMATE_ADDED') });

@@ -21,7 +21,7 @@ export const assignSurveyorHandler: RouteHandler = async (
 
         const hasPermission = await checkPermission(
             user.role,
-            'Survey',
+            'Lead:Surveyor',
             'create',
             tenant?.schema || tenant?.tenant?.schema,
         );

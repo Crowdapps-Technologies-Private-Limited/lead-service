@@ -1,10 +1,9 @@
-import { addManualLog, addManualLogAndChangeLeadStatus } from './addManualLog';
+import { addManualLogAndChangeLeadStatus } from './addManualLog';
 import { changeLeadStatusService } from './changeLeadStatusService';
 import { getAllNotesByLead } from './getAllNotesService';
 import { sendFeedbackEmail } from './sendFeedbackMail';
 import { getFeedbackResponseByLead } from './getFeedbackService';
 import { getJobsList } from './getJobsListService';
-import { getCreateTaskFormData } from './getCreateTaskFormData';
 import { updateConfirmationByClient } from './updateConfirmationByClient';
 import { getConfirmation } from './getConfirmationService';
 import { getOwnSurveys } from './getOwnSurveyService';
@@ -55,7 +54,6 @@ export {
     updateConfirmationTooltipDetails,
     getConfirmation,
     updateConfirmationByClient,
-    getCreateTaskFormData,
     getJobsList,
     getFeedbackResponseByLead,
     sendFeedbackEmail,

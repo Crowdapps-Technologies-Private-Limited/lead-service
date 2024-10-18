@@ -3,6 +3,7 @@ import logger from '../../utils/logger';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { getMessage } from '../../utils/errorMessages';
 import { changeLeadStatusService } from '../services';
+import { checkPermission } from '../../utils/checkPermission';
 
 export const changeLeadStatusHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -13,7 +14,20 @@ export const changeLeadStatusHandler = async (
         const payload = JSON.parse(event.body || '{}');
         const { lead_id, new_status } = payload;
         const tenant = (event.requestContext as any).tenant;
+        logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
+        logger.info('user:', { user });
+
+        const hasPermission = await checkPermission(
+            user.role,
+            'Lead',
+            'update',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
+        logger.info('hasPermission: -----------', { hasPermission });
+        if (!hasPermission) {
+            return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
+        }
 
         // Validate the input
         if (!lead_id || !new_status) {

@@ -26,8 +26,8 @@ export const getConfirmationHandler: RouteHandler = async (
 
         const hasPermission = await checkPermission(
             user.role,
-            'Lead',
-            'create',
+            'Lead:Confirmation',
+            'read',
             tenant?.schema || tenant?.tenant?.schema,
         );
         logger.info('hasPermission: -----------', { hasPermission });

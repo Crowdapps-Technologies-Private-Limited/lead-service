@@ -19,7 +19,7 @@ export const getAllNotesHandler = async (
         }
 
         // Check permission
-        const hasPermission = await checkPermission(user.role, 'Feedback', 'read', tenant.schema);
+        const hasPermission = await checkPermission(user.role, 'Lead:job', 'read', tenant.schema);
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }

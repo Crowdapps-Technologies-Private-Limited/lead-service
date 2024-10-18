@@ -23,7 +23,7 @@ export const getFeedbackResponseHandler: RouteHandler = async (
         }
 
         // Check permission
-        const hasPermission = await checkPermission(user.role, 'Feedback', 'read', tenant.schema);
+        const hasPermission = await checkPermission(user.role, 'Lead:Job', 'read', tenant.schema);
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }

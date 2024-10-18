@@ -20,7 +20,12 @@ export const estimateSendEmailHandler: RouteHandler = async (
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
 
-        const hasPermission = await checkPermission(user.role, 'Estimate', 'create', tenant?.schema || tenant?.tenant?.schema);
+        const hasPermission = await checkPermission(
+            user.role,
+            'Lead:Estimate',
+            'create',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
@@ -35,7 +40,7 @@ export const estimateSendEmailHandler: RouteHandler = async (
                 message: getMessage('ESTIMATE_ID_LEAD_ID_REQUIRED'),
             });
         }
-        const array = ["pdf", "email"];
+        const array = ['pdf', 'email'];
         if (action && !array.includes(action)) {
             logger.error('Invalid action. Please provide valid action (pdf or email)', { action });
             return ResponseHandler.badRequestResponse({

@@ -28,7 +28,7 @@ export const getSecondLatestQuotesHandler: RouteHandler = async (
 
         const hasPermission = await checkPermission(
             user.role,
-            'Quotation',
+            'Lead:Quotation',
             'read',
             tenant?.schema || tenant?.tenant?.schema,
         );

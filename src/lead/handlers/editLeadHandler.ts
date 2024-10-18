@@ -3,21 +3,26 @@ import { editLead } from '../services';
 import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
-import {  validateEditLeadDTO } from '../validator';
+import { validateEditLeadDTO } from '../validator';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 
 export const editLeadHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('editLeadHandler event ', { event });  
+    logger.info('editLeadHandler event ', { event });
     try {
         const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
-        const hasPermission = await checkPermission(user.role, 'Lead', 'update', tenant?.schema || tenant?.tenant?.schema);
+        const hasPermission = await checkPermission(
+            user.role,
+            'Lead',
+            'update',
+            tenant?.schema || tenant?.tenant?.schema,
+        );
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
@@ -41,7 +46,7 @@ export const editLeadHandler: RouteHandler = async (
         const result = await editLead(leadId, payload, tenant);
 
         return ResponseHandler.successResponse({ message: result?.message });
-    }  catch (error: any) {
+    } catch (error: any) {
         logger.error('Error occurred in edit lead handler', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });
     }

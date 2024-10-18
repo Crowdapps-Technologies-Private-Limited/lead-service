@@ -7,14 +7,19 @@ import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 
 export const getSurveyByIdHandler: RouteHandler = async (
-    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
+    event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
     logger.info('Received event at getSurveyByIdHandler', { event });
 
     const surveyId = event.pathParameters?.id;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
-    const hasPermission = await checkPermission(user.role, 'Survey', 'read', tenant?.schema || tenant?.tenant?.schema);
+    const hasPermission = await checkPermission(
+        user.role,
+        'Lead:Survey',
+        'read',
+        tenant?.schema || tenant?.tenant?.schema,
+    );
     logger.info('hasPermission: -----------', { hasPermission });
     if (!hasPermission) {
         return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
