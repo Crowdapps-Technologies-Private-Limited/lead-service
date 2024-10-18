@@ -203,7 +203,7 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
     <br>
 
     <div class="signature">
-    <p>${client.signature}</p>
+    <p>${client?.signature}</p>
     </div>
     
     </body>
