@@ -29,29 +29,19 @@ const ERROR_MESSAGES: any = {
         CONFIRMED:
             'Quote stage is required to proceed with confirmation. Kindly fill in quote details to proceed with confirmation.',
     },
-    CONFIRMED: {
-        QUOTE: 'You cannot move back to QUOTE once you are in the CONFIRMED stage.',
-        SURVEY: 'Moving back to SURVEY stage is not allowed once the lead is CONFIRMED.',
-        ESTIMATES: 'Moving back to ESTIMATES stage is not allowed once the lead is CONFIRMED.',
-        'NEW LEAD': 'Moving back to NEW LEAD is not allowed once the lead is CONFIRMED.',
-    },
 };
 
 // Function to validate the transition from one stage to another as per the rules specified
 const isValidTransition = (fromStage: string, toStage: string): boolean => {
-    if (fromStage === 'NEW LEAD') {
-        return ['ESTIMATES', 'SURVEY'].includes(toStage);
-    } else if (fromStage === 'ESTIMATES') {
-        return ['SURVEY', 'QUOTE'].includes(toStage);
-    } else if (fromStage === 'SURVEY') {
-        return ['QUOTE'].includes(toStage);
-    } else if (fromStage === 'QUOTE') {
-        return ['CONFIRMED'].includes(toStage);
-    } else if (fromStage === 'CONFIRMED') {
-        // Allow backward movement as specified, but should trigger specific error messages
-        return false;
-    }
-    return false;
+    const validTransitions: any = {
+        'NEW LEAD': ['ESTIMATES', 'SURVEY'],
+        ESTIMATES: ['SURVEY', 'NEW LEAD'],
+        SURVEY: ['ESTIMATES', 'NEW LEAD'],
+        QUOTE: ['SURVEY', 'ESTIMATES', 'NEW LEAD'],
+    };
+
+    // If the fromStage has valid transitions and toStage is included in those transitions
+    return validTransitions[fromStage]?.includes(toStage) || false;
 };
 
 // Service to handle adding a manual log entry and changing the lead status
@@ -102,20 +92,22 @@ export const addManualLogAndChangeLeadStatus = async (payload: any, lead_id: str
             // Update action note to include the follow-up date
             updatedActionNote += ` | Follow-up date set to: ${providedFollowUpDate.toISOString().split('T')[0]}`;
         }
+
         let updatedLeadStatus = lead.status;
         if (action_type) {
             if (!LEAD_STAGES.includes(action_type)) {
                 throw new Error(`Invalid action type. Action type must be one of ${LEAD_STAGES.join(', ')}`);
             }
+            logger.info('action_type', action_type);
+            logger.info('lead.status', lead.status);
+
             // Validate the lead status transition as per the PDF rules
-            if (action_type && !isValidTransition(lead.status, action_type)) {
+            if (!isValidTransition(lead.status, action_type)) {
                 const errorMessage = ERROR_MESSAGES[lead.status]?.[action_type] || 'Invalid status transition.';
                 throw new Error(errorMessage);
             }
 
-            logger.info('action_type:', { action_type });
-
-            if (action_type && lead.status !== action_type) {
+            if (lead.status !== action_type) {
                 const updatedLeadStatusResult = await client.query(UPDATE_LEAD_STATUS, [action_type, lead_id]);
                 updatedLeadStatus = updatedLeadStatusResult.rows[0].status;
                 logger.info(`Lead status changed successfully for lead ${lead_id} to ${action_type}`);
