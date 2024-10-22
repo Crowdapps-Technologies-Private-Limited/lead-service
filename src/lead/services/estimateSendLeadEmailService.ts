@@ -12,7 +12,6 @@ import {
 import { getLatestEstimates } from './getLatestEstimates ';
 import { generatePdfAndUploadToS3 } from './generatePdf';
 import generateEstimateHtml from './generateEstimateHtml';
-import { generateEmail } from '../../utils/generateEmailService';
 import { getMessage } from '../../utils/errorMessages';
 import { getconfigSecrets } from '../../utils/getConfig';
 import { sendAttachmentEmail } from '../../utils/sendAttachmentEmail';
@@ -62,7 +61,6 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         if (!termDocs?.length) {
             logger.info('No terms and conditions found');
         } else {
-            logger.info('Terms and conditions found:', { termDocs });
             termPDF = termDocs[0].s3key;
         }
 
@@ -83,7 +81,6 @@ export const sendEstimateEmail = async (leadId: string, estimateId: string, tena
         if (!packingDocs?.length) {
             logger.info('No packing guide found');
         } else {
-            logger.info('Packing guide found:', { packingDocs });
             packingGuidePDF = packingDocs[0].s3key;
         }
 

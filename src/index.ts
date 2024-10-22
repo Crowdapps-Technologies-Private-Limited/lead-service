@@ -11,6 +11,7 @@ import { getUserProfile } from './utils/getProfileService';
 import { getTenantProfile } from './utils/getTenantProfile';
 import { getMessage } from './utils/errorMessages';
 import { checkWebsiteMode } from './utils/checkWebsiteMode';
+import { checkSubscriptionStatus } from './utils/checkSubscription';
 
 const routes = merge(adminRoutes);
 
@@ -87,6 +88,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                     body: JSON.stringify({ message: getMessage('ACCOUNT_SUSPENDED') }),
                 };
             }
+            // check subscription
+            const subscription = await checkSubscriptionStatus(clientDetail.id);
+            logger.info('subscription', subscription);
+            if (subscription.isExpired) {
+                throw new Error(`${subscription.reason}`);
+            }
             // Attach userPayload to the request context
             (event.requestContext as any).user = user;
             (event.requestContext as any).tenant = clientDetail;
@@ -134,7 +141,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                     }),
                 };
             }
-
+            logger.info('clientDetail2', { clientDetail });
+            // check subscription
+            if (clientDetail.tenant_id) {
+                const subscription = await checkSubscriptionStatus(clientDetail.tenant_id);
+                logger.info('subscription', subscription);
+                if (subscription.isExpired) {
+                    throw new Error(`${subscription.reason}`);
+                }
+            }
             // Attach userPayload to the request context
             (event.requestContext as any).user = user;
             (event.requestContext as any).tenant = clientDetail;

@@ -8,8 +8,6 @@ import { checkPermission } from '../../utils/checkPermission';
 export const sendFeedbackEmailHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
 ): Promise<APIGatewayProxyResult> => {
-    logger.info('sendFeedbackEmailHandler event:', { event });
-
     try {
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;

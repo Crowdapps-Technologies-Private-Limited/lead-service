@@ -15,9 +15,8 @@ export const assignSurveyorHandler: RouteHandler = async (
         const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
         const isTenant = (event.requestContext as any).isTenant;
-        logger.info('tenant:', { tenant });
+
         const user = (event.requestContext as any).user;
-        logger.info('user:', { user });
 
         const hasPermission = await checkPermission(
             user.role,
@@ -31,7 +30,7 @@ export const assignSurveyorHandler: RouteHandler = async (
         }
 
         const leadId = event.pathParameters?.id;
-        logger.info('leadId:', { leadId });
+
         if (!leadId) {
             return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
         }

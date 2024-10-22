@@ -13,9 +13,7 @@ export const sendEmailHandler: RouteHandler = async (
     try {
         const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
-        logger.info('tenant:', { tenant });
         const leadId = event.pathParameters?.id;
-        logger.info('leadId:', { leadId });
         const user = (event.requestContext as any).user;
         if (!leadId) {
             return ResponseHandler.badRequestResponse({ message: 'Lead ID is required' });

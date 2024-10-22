@@ -54,7 +54,7 @@ export const importLeads = async (importedData: any, tenant: any) => {
                 await addLead(payload, tenant);
             }
         }
-        logger.info('Leads imported successfully');
+
         return { message: 'Leads imported successfully' };
     } catch (error: any) {
         logger.error('Failed to import leads', { error });

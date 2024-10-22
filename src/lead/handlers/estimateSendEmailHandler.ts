@@ -15,10 +15,8 @@ export const estimateSendEmailHandler: RouteHandler = async (
     try {
         const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
-        logger.info('tenant:', { tenant });
 
         const user = (event.requestContext as any).user;
-        logger.info('user:', { user });
 
         const hasPermission = await checkPermission(
             user.role,
@@ -33,8 +31,7 @@ export const estimateSendEmailHandler: RouteHandler = async (
         const leadId = event.pathParameters?.id;
         const estimateId = event.pathParameters?.estimateId;
         const action = event.queryStringParameters?.action as string;
-        logger.info('action:', { action });
-        logger.info('leadId:', { leadId });
+
         if (!estimateId || !leadId) {
             return ResponseHandler.badRequestResponse({
                 message: getMessage('ESTIMATE_ID_LEAD_ID_REQUIRED'),
@@ -42,7 +39,6 @@ export const estimateSendEmailHandler: RouteHandler = async (
         }
         const array = ['pdf', 'email'];
         if (action && !array.includes(action)) {
-            logger.error('Invalid action. Please provide valid action (pdf or email)', { action });
             return ResponseHandler.badRequestResponse({
                 message: 'Invalid action. Please provide valid action (pdf or email)',
             });

@@ -1,5 +1,5 @@
-import { connectToDatabase } from "./database";
-import logger from "./logger";
+import { connectToDatabase } from './database';
+import logger from './logger';
 
 interface SubscriptionStatus {
     isExpired: boolean;
@@ -7,7 +7,9 @@ interface SubscriptionStatus {
 }
 
 export const checkSubscriptionStatus = async (tenantId: string): Promise<SubscriptionStatus> => {
+    logger.info('tenantId2', { tenantId });
     const client = await connectToDatabase();
+    await client.query(`SET search_path TO public`);
     let clientReleased = false; // Track if client is released
     try {
         const query = `
@@ -36,7 +38,10 @@ export const checkSubscriptionStatus = async (tenantId: string): Promise<Subscri
         const currentDate = new Date();
 
         if (subscription.status === 'inactive' || subscription.status === 'cancelled') {
-            logger.warn('Subscription status is inactive or cancelled for tenant:', { tenantId, status: subscription.status });
+            logger.warn('Subscription status is inactive or cancelled for tenant:', {
+                tenantId,
+                status: subscription.status,
+            });
             return { isExpired: true, reason: `Subscription is ${subscription.status}` };
         }
 
@@ -51,7 +56,7 @@ export const checkSubscriptionStatus = async (tenantId: string): Promise<Subscri
         logger.error('Error checking subscription status:', { tenantId, error });
         throw new Error('Failed to check subscription status');
     } finally {
-         if (!clientReleased) {
+        if (!clientReleased) {
             client.release();
             clientReleased = true;
         }

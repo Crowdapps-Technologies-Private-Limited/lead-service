@@ -14,9 +14,7 @@ export const addQuoteHandler: RouteHandler = async (
 
     try {
         const payload = JSON.parse(event.body || '{}');
-        logger.info('payload:', { payload });
         const leadId = event.pathParameters?.id;
-        logger.info('leadId:', { leadId });
 
         if (!leadId) {
             return {
@@ -26,9 +24,8 @@ export const addQuoteHandler: RouteHandler = async (
         }
 
         const tenant = (event.requestContext as any).tenant;
-        logger.info('tenant:', { tenant });
+
         const user = (event.requestContext as any).user;
-        logger.info('user:', { user });
 
         const hasPermission = await checkPermission(
             user.role,
@@ -47,9 +44,9 @@ export const addQuoteHandler: RouteHandler = async (
             const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
             return ResponseHandler.badRequestResponse({ message: cleanedMessage });
         }
-        logger.info('addQuoteDTO success:');
-        const result = await addOrUpdateQuote(leadId, payload, tenant);
-        logger.info('add or edit quote success:', { result });
+
+        await addOrUpdateQuote(leadId, payload, tenant);
+
         if (payload?.quoteId) {
             return ResponseHandler.successResponse({ message: getMessage('QUOTE_UPDATED') });
         } else {

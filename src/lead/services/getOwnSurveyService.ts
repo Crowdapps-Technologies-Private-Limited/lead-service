@@ -12,7 +12,7 @@ export const getOwnSurveys = async (tenant: any, isTenant: boolean, filterBy: st
         }
 
         const schema = tenant?.schema || tenant?.tenant?.schema;
-        logger.info('Schema:', { schema });
+
         await client.query(`SET search_path TO ${schema}`);
 
         let result: any;

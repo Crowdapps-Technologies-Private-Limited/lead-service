@@ -72,7 +72,6 @@ export const addManualLogAndChangeLeadStatus = async (payload: any, lead_id: str
         }
 
         const lead = leadCheckResult.rows[0];
-        logger.info('Lead data:', { lead });
 
         let updatedActionNote = `${action} ${specific_detail}`; // Default action note
 
@@ -87,7 +86,6 @@ export const addManualLogAndChangeLeadStatus = async (payload: any, lead_id: str
 
             // Update the lead's follow-up date
             await client.query(UPDATE_FOLLOWUP_DATE, [follow_up_date, lead_id]);
-            logger.info('Lead follow-up date updated successfully:', { lead_id, follow_up_date });
 
             // Update action note to include the follow-up date
             updatedActionNote += ` | Follow-up date set to: ${providedFollowUpDate.toISOString().split('T')[0]}`;
@@ -98,8 +96,6 @@ export const addManualLogAndChangeLeadStatus = async (payload: any, lead_id: str
             if (!LEAD_STAGES.includes(action_type)) {
                 throw new Error(`Invalid action type. Action type must be one of ${LEAD_STAGES.join(', ')}`);
             }
-            logger.info('action_type', action_type);
-            logger.info('lead.status', lead.status);
 
             // Validate the lead status transition as per the PDF rules
             if (!isValidTransition(lead.status, action_type)) {
@@ -130,15 +126,12 @@ export const addManualLogAndChangeLeadStatus = async (payload: any, lead_id: str
             lead_id,
         ]);
 
-        logger.info('Manual log entry added successfully:', { log: logResult.rows[0] });
-
         // Commit transaction
         await client.query('COMMIT');
         return logResult.rows[0];
     } catch (error: any) {
         // Rollback transaction in case of error
         await client.query('ROLLBACK');
-        logger.error('Error adding manual log or changing lead status:', { error });
         throw new Error(error.message);
     } finally {
         if (!clientReleased) {

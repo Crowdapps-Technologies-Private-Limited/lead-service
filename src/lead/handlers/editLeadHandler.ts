@@ -14,7 +14,6 @@ export const editLeadHandler: RouteHandler = async (
     try {
         const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
-        logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
         const hasPermission = await checkPermission(

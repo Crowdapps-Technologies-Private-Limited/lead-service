@@ -25,11 +25,6 @@ import logger from '../../utils/logger';
 import { AddEstimatePayload } from '../interface';
 
 export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePayload, tenant: any) => {
-    logger.info('addOrUpdateEstimate service is running:');
-    logger.info('payload:', { payload });
-    logger.info('leadId:', { leadId });
-    logger.info('tenant:', { tenant });
-
     const {
         quoteTotal,
         costTotal,
@@ -45,12 +40,10 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
     } = payload;
 
     const estimateId = payload.estimateId;
-    logger.info('estimateId:', { estimateId });
 
     const client = await connectToDatabase();
     let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
-    logger.info('Schema:', { schema });
 
     try {
         await client.query('BEGIN'); // Start transaction
@@ -89,15 +82,12 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
                 materialPriceChargeable,
                 estimateId,
             ]);
-            logger.info('Estimate updated successfully', { estimateId });
-
             // Delete existing services, materials, costs, general info, and ancillaries
             await client.query(DELETE_ESTIMATE_SERVICES, [estimateId]);
             await client.query(DELETE_ESTIMATE_MATERIALS, [estimateId]);
             await client.query(DELETE_ESTIMATE_COSTS, [estimateId]);
             await client.query(DELETE_ESTIMATE_GENERAL_INFO, [estimateId]);
             await client.query(DELETE_ESTIMATE_ANCILLARIES, [estimateId]);
-            logger.info('Existing services, materials, costs, general info, and ancillaries deleted successfully');
         } else {
             // Insert new estimate
             const result = await client.query(INSERT_ESTIMATE, [
@@ -110,7 +100,6 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
                 materialPriceChargeable,
             ]);
             finalEstimateId = result.rows[0].id;
-            logger.info('New estimate inserted successfully', { finalEstimateId });
         }
 
         // Handle Services
@@ -123,7 +112,6 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
             const serviceId = serviceResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_SERVICE, [finalEstimateId, serviceId]);
         }
-        logger.info('Services processed successfully');
 
         // Handle Materials
         for (const material of materials) {
@@ -140,7 +128,6 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
             const materialId = materialResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_MATERIAL, [finalEstimateId, materialId]);
         }
-        logger.info('Materials processed successfully');
 
         // Handle Costs
         for (const cost of costs) {
@@ -156,7 +143,6 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
             const costId = costResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_COST, [finalEstimateId, costId]);
         }
-        logger.info('Costs processed successfully');
 
         // Handle General Info
         for (const info of generalInfo) {
@@ -173,7 +159,6 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
             const infoId = infoResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_GENERAL_INFO, [finalEstimateId, infoId]);
         }
-        logger.info('General Info processed successfully');
 
         // Handle Ancillaries
         for (const ancillary of ancillaries) {
@@ -185,11 +170,9 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
             const ancillaryId = ancillaryResult.rows[0].id;
             await client.query(INSERT_ESTIMATE_ANCILLARY, [finalEstimateId, ancillaryId]);
         }
-        logger.info('Ancillaries processed successfully');
 
         // Update lead status
         await client.query(UPDATE_LEAD_STATUS, ['ESTIMATES', leadId]);
-        logger.info('Lead status updated successfully');
 
         // Insert log entry
         await client.query(INSERT_LOG, [
@@ -201,7 +184,6 @@ export const addOrUpdateEstimate = async (leadId: string, payload: AddEstimatePa
             'ESTIMATES',
             leadId,
         ]);
-        logger.info('Log entry created successfully');
 
         await client.query('COMMIT'); // Commit transaction
         return {

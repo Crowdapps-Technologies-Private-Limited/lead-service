@@ -20,9 +20,7 @@ export const getConfirmationHandler: RouteHandler = async (
             };
         }
         const tenant = (event.requestContext as any).tenant;
-        logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
-        logger.info('user:', { user });
 
         const hasPermission = await checkPermission(
             user.role,

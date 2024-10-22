@@ -1,13 +1,7 @@
 import dayjs from '../../utils/dayjs';
-import logger from '../../utils/logger';
 import { Material, Service } from '../interface';
 
 const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; lead: any; estimate: any }) => {
-    logger.info('Generating estimate html');
-    logger.info('Client:', { client });
-    logger.info('Lead:', { lead });
-    logger.info('Estimate:', { estimate });
-
     let collection_addr = '';
     if (lead.collection_street) {
         collection_addr += lead.collection_street;
@@ -159,7 +153,7 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
             <div>
                 <p><strong>Client ID:</strong> ${lead?.generated_id}</p>
                 <p><strong>Date:</strong> ${createdAtFormatted}</p>
-                <p><strong>Volume:</strong> ${lead?.collection_volume} ${
+                <p><strong>Volume:</strong> ${lead?.collection_volume ? lead?.collection_volume : 0} ${
         lead?.collection_volume_unit === 'm3' ? ' m' : ' ft'
     }<sup>3</sup></p>
                 <p><strong>Estimate Expires On:</strong> ${quoteExpiresOnFormatted}</p>

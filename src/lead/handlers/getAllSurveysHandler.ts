@@ -12,10 +12,8 @@ export const getAllSurveysHandler: RouteHandler = async (
     logger.info('Received event at get surveys list', { event });
     const tenant = (event.requestContext as any).tenant;
     const isTenant = (event.requestContext as any).isTenant;
-    logger.info('Tenant', { tenant });
 
     const user = (event.requestContext as any).user;
-    logger.info('user:', { user });
 
     const hasPermission = await checkPermission(
         user.role,

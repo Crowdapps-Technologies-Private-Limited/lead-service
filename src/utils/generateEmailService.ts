@@ -26,24 +26,21 @@ export const generateEmail = async (event: string, to: string, data: any) => {
         logger.info('Placeholders:', { placeholders });
 
         // Replace placeholders in salutation and body
-        let { salutation, body, signature, disclaimer } = template;
+        let { body, signature, disclaimer } = template;
 
         placeholders.forEach((placeholder: string) => {
             const ph = placeholder.toLowerCase(); // Convert to lowercase for case-insensitive matching
             const regex = new RegExp(`{{${ph}}}`, 'gi'); // Added 'i' flag for case-insensitive matching
             const value = data[ph] || `{{${ph}}}`;
-            logger.info('regex and value   ', { regex, value }); // Use provided value or keep the placeholder
-            salutation = salutation ? salutation.replace(regex, value) : salutation;
+            logger.info('regex and value   ', { regex, value }); // Use provided
             body = body.replace(regex, value);
-            logger.info('salutation and body   ', { salutation, body });
             signature = signature ? signature.replace(regex, value) : signature;
-            disclaimer = salutation ? disclaimer.replace(regex, value) : disclaimer;
+            disclaimer = disclaimer ? disclaimer.replace(regex, value) : disclaimer;
         });
 
         // Generate the final email content
         const emailContent = {
             subject: template.subject,
-            salutation: salutation,
             body: body,
             links: template.links,
             signature: template.signature,
@@ -51,15 +48,9 @@ export const generateEmail = async (event: string, to: string, data: any) => {
         };
         logger.info('Email content:', { emailContent });
 
-        const htmlBody =
-            (salutation ? salutation + '<br/>' : '') +
-            body +
-            '<br/>' +
-            template.signature +
-            '<br/>' +
-            template.disclaimer;
+        const htmlBody = body + '<br/>' + template.signature + '<br/>' + template.disclaimer;
         const emailService = await initializeEmailService();
-        await emailService.sendEmail(to, emailContent.subject, emailContent.body, htmlBody);
+        await emailService.sendEmail(to, emailContent.subject, emailContent.body, htmlBody, []);
 
         return {
             success: true,

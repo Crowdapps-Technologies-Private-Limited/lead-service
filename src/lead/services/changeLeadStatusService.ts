@@ -27,11 +27,8 @@ export const changeLeadStatusService = async (lead_id: string, new_status: strin
             throw new Error(`No lead found with the id ${lead_id}`);
         }
 
-        logger.info('Lead status updated successfully:', { lead_id, new_status });
-
         return result.rows[0];
     } catch (error: any) {
-        logger.error('Error updating lead status:', { error });
         throw new Error(error.message);
     } finally {
         if (!clientReleased) {

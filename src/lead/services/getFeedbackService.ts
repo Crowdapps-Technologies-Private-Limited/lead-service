@@ -7,7 +7,6 @@ export const getFeedbackResponseByLead = async (lead_id: string, tenant: any) =>
     const schema = tenant?.schema;
     const client = await connectToDatabase();
     let clientReleased = false; // Track if client is released
-    logger.info('Fetching feedback responses for lead:', { lead_id });
 
     try {
         if (tenant?.is_suspended) {
@@ -26,7 +25,6 @@ export const getFeedbackResponseByLead = async (lead_id: string, tenant: any) =>
             throw new Error(`No feedback responses found for lead ID ${lead_id}`);
         }
 
-        logger.info('Feedback responses fetched successfully for lead:', { lead_id });
         return result.rows;
     } catch (error: any) {
         logger.error('Error fetching feedback responses:', { error });

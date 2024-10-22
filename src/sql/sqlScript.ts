@@ -564,7 +564,7 @@ export const GET_ALL_SURVEYORS = `
   SELECT *
   FROM staffs s
   INNER JOIN staff_roles sr ON s.role_id = sr.id
-  WHERE sr.role = $1
+  WHERE sr.role = $1 AND status='ACTIVE'
 `;
 
 export const DELETE_ESTIMATE_SERVICES = `

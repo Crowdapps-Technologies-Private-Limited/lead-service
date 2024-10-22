@@ -17,7 +17,6 @@ const API2PDF_API_KEY = '3490e411-fdcd-4620-a174-8f2e5a952f44'; // Replace with 
 export const generatePdfAndUploadToS3 = async (
     options: GeneratePdfOptions,
 ): Promise<{ pdfUrl: string; file: Buffer }> => {
-    logger.info('options', { options });
     const { html, key, leadId, tenantId, folderName = 'general' } = options;
 
     // Use ISO string to ensure date format works well for filenames
@@ -28,7 +27,7 @@ export const generatePdfAndUploadToS3 = async (
 
     // Construct the final S3 key
     const finalKey = `${tenantId}/${dateFolderName}/${leadId}/${folderName}/${key}-${dt}.pdf`;
-    logger.info('key', { key });
+
     if (!html) {
         throw new Error('HTML content must be provided');
     }

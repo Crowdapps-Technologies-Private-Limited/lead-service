@@ -15,9 +15,7 @@ export const addEstimateHandler: RouteHandler = async (
 
     try {
         const payload = JSON.parse(event.body || '{}');
-        logger.info('payload:', { payload });
         const leadId = event.pathParameters?.id;
-        logger.info('leadId:', { leadId });
         if (!leadId) {
             return {
                 statusCode: 400,
@@ -25,9 +23,7 @@ export const addEstimateHandler: RouteHandler = async (
             };
         }
         const tenant = (event.requestContext as any).tenant;
-        logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
-        logger.info('user:', { user });
         const hasPermission = await checkPermission(
             user.role,
             'Lead:Estimate',
@@ -45,9 +41,8 @@ export const addEstimateHandler: RouteHandler = async (
             const cleanedMessage = error.message.replace('Payload Validation Failed: ', '');
             return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         }
-        logger.info('addEstimateDTO success:');
         const result = await addOrUpdateEstimate(leadId, payload, tenant);
-        logger.info('addEstimate success:', { result });
+
         if (payload?.estimateId) {
             return ResponseHandler.successResponse({ message: getMessage('ESTIMATE_UPDATED') });
         } else {

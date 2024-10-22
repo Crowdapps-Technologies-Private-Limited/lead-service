@@ -14,7 +14,6 @@ export const addManualLogHandler = async (
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
         const leadId = event.pathParameters?.id;
-        logger.info('leadId:', { leadId });
 
         if (!leadId) {
             return {
@@ -29,25 +28,19 @@ export const addManualLogHandler = async (
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
 
-        logger.info('Manual log payload:', { payload });
-
         // Validate payload
         try {
             await validateAddManualLogPayload(payload);
         } catch (validationError: any) {
             return ResponseHandler.badRequestResponse({ message: validationError.message });
         }
-        logger.info('Manual log validated payload:', { payload });
-        // Call service to add manual log entry
-        logger.info('Manual log entry started:');
         const logEntry = await addManualLogAndChangeLeadStatus(payload, leadId, tenant, user);
-        logger.info('Manual log entry completed:', { logEntry });
+
         return ResponseHandler.successResponse({
             message: getMessage('LOG_ENTRY_ADDED'),
             data: logEntry,
         });
     } catch (error: any) {
-        logger.error('Error in addManualLogHandler:', { error });
         return ResponseHandler.badRequestResponse({ message: error.message });
     }
 };

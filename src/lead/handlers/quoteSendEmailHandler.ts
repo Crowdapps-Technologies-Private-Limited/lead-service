@@ -11,7 +11,6 @@ export const quoteSendEmailHandler: RouteHandler = async (
 ): Promise<APIGatewayProxyResult> => {
     logger.info('quoteSendEmailHandler event ', { event });
     try {
-        const payload = JSON.parse(event.body || '{}');
         const tenant = (event.requestContext as any).tenant;
         logger.info('tenant:', { tenant });
 
@@ -31,8 +30,6 @@ export const quoteSendEmailHandler: RouteHandler = async (
         const leadId = event.pathParameters?.id;
         const quoteId = event.pathParameters?.quoteId;
         const action = event.queryStringParameters?.action as string;
-        logger.info('action:', { action });
-        logger.info('leadId:', { leadId });
         if (!quoteId || !leadId) {
             return ResponseHandler.badRequestResponse({
                 message: 'Quote ID and Lead ID are required in path parameters',

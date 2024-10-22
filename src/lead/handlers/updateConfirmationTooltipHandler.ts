@@ -28,9 +28,6 @@ export const updateConfirmationTooltipHandler: RouteHandler = async (
     if (!leadId) {
         return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
     }
-    // if (!confirmationId) {
-    //     return ResponseHandler.badRequestResponse({ message: getMessage('CONFIRMATION_ID_REQUIRED') });
-    // }
 
     try {
         // Update data

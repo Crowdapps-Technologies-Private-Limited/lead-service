@@ -25,11 +25,6 @@ import logger from '../../utils/logger';
 import { AddQuotePayload } from '../interface';
 
 export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload, tenant: any) => {
-    logger.info('addOrUpdateEstimate service is running:');
-    logger.info('payload:', { payload });
-    logger.info('leadId:', { leadId });
-    logger.info('tenant:', { tenant });
-
     const {
         quoteTotal,
         costTotal,
@@ -45,12 +40,10 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
     } = payload;
 
     const quoteId = payload.quoteId;
-    logger.info('quoteId:', { quoteId });
 
     const client = await connectToDatabase();
     let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
-    logger.info('Schema:', { schema });
 
     try {
         await client.query('BEGIN'); // Start transaction
@@ -60,8 +53,6 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
         }
 
         await client.query(`SET search_path TO ${schema}`);
-
-        logger.info('Quote and related tables created successfully');
 
         let finalQuoteId = quoteId;
 
@@ -77,15 +68,12 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
                 materialPriceChargeable,
                 quoteId,
             ]);
-            logger.info('Quote updated successfully', { quoteId });
-
             // Delete existing services, materials, costs, general info, and ancillaries
             await client.query(DELETE_QUOTE_SERVICES, [quoteId]);
             await client.query(DELETE_QUOTE_MATERIALS, [quoteId]);
             await client.query(DELETE_QUOTE_COSTS, [quoteId]);
             await client.query(DELETE_QUOTE_GENERAL_INFO, [quoteId]);
             await client.query(DELETE_QUOTE_ANCILLARIES, [quoteId]);
-            logger.info('Existing services, materials, costs, general info, and ancillaries deleted successfully');
         } else {
             // Insert new estimate
             const result = await client.query(INSERT_QUOTE, [
@@ -98,7 +86,6 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
                 materialPriceChargeable,
             ]);
             finalQuoteId = result.rows[0].id;
-            logger.info('New quote inserted successfully', { finalQuoteId });
         }
 
         // Handle Services
@@ -111,7 +98,6 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
             const serviceId = serviceResult.rows[0].id;
             await client.query(INSERT_QUOTE_SERVICE, [finalQuoteId, serviceId]);
         }
-        logger.info('Services processed successfully');
 
         // Handle Materials
         for (const material of materials) {
@@ -128,7 +114,6 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
             const materialId = materialResult.rows[0].id;
             await client.query(INSERT_QUOTE_MATERIAL, [finalQuoteId, materialId]);
         }
-        logger.info('Materials processed successfully');
 
         // Handle Costs
         for (const cost of costs) {
@@ -144,7 +129,6 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
             const costId = costResult.rows[0].id;
             await client.query(INSERT_QUOTE_COST, [finalQuoteId, costId]);
         }
-        logger.info('Costs processed successfully');
 
         // Handle General Info
         for (const info of generalInfo) {
@@ -161,7 +145,6 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
             const infoId = infoResult.rows[0].id;
             await client.query(INSERT_QUOTE_GENERAL_INFO, [finalQuoteId, infoId]);
         }
-        logger.info('General Info processed successfully');
 
         // Handle Ancillaries
         for (const ancillary of ancillaries) {
@@ -173,11 +156,9 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
             const ancillaryId = ancillaryResult.rows[0].id;
             await client.query(INSERT_QUOTE_ANCILLARY, [finalQuoteId, ancillaryId]);
         }
-        logger.info('Ancillaries processed successfully');
 
         // Update lead status
         await client.query(UPDATE_LEAD_STATUS, ['QUOTE', leadId]);
-        logger.info('Lead status updated successfully');
 
         // Insert log entry
         await client.query(INSERT_LOG, [
@@ -189,7 +170,6 @@ export const addOrUpdateQuote = async (leadId: string, payload: AddQuotePayload,
             'QUOTE',
             leadId,
         ]);
-        logger.info('Log entry created successfully');
 
         await client.query('COMMIT'); // Commit transaction
         return { message: quoteId ? 'Quote updated successfully' : 'Quote added successfully', quoteId: finalQuoteId };

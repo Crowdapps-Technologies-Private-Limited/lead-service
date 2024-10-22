@@ -19,17 +19,11 @@ export const assignSurveyor = async (
     tenant: any,
     isTenant: boolean,
 ) => {
-    logger.info('addSurvey service is running:');
-    logger.info('payload:', { payload });
-    logger.info('leadId:', { leadId });
-    logger.info('tenant:', { tenant });
-
     const { surveyorId, surveyType, surveyDate, remarks, startTime, endTime, description } = payload;
 
     const client = await connectToDatabase();
     let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
-    logger.info('Schema:', { schema });
 
     try {
         await client.query('BEGIN');
@@ -104,7 +98,7 @@ export const assignSurveyor = async (
         // Assign Surveyor
         // Determine if the surveyor is assigned to the tenant
         const isTenantAssigned = !surveyorId.startsWith('EMP');
-        logger.info('isTenantAssigned:', { isTenantAssigned });
+
         await client.query(INSERT_SURVEY, [
             leadId,
             surveyorId,
@@ -118,7 +112,7 @@ export const assignSurveyor = async (
         ]);
         // Update lead status
         await client.query(UPDATE_LEAD_STATUS, ['SURVEY', leadId]);
-        logger.info('Lead status updated successfully');
+
         // Insert log
         await client.query(INSERT_LOG, [
             tenant.id,
@@ -129,7 +123,7 @@ export const assignSurveyor = async (
             'SURVEY',
             leadId,
         ]);
-        logger.info('Log inserted successfully');
+
         // Send nofitication to surveyor on email
         if (surveyorId.startsWith('EMP')) {
             await generateEmail('Assign Survey', surveyorCheckResult?.rows[0]?.email, {

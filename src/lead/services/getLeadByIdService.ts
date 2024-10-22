@@ -10,10 +10,8 @@ export const getLeadById = async (leadId: string, tenant: any) => {
     try {
         await client.query('BEGIN');
         const schema = tenant?.schema || tenant?.tenant?.schema;
-        logger.info('Schema:', { schema });
 
         await client.query(`SET search_path TO ${schema}`);
-        logger.info('Schema set successfully');
 
         // Check if the leads table exists
         let tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'leads']);

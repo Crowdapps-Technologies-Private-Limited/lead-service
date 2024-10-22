@@ -15,7 +15,6 @@ export const getConfirmation = async (tenant: any, leadId: string) => {
     const client = await connectToDatabase();
     let clientReleased = false; // Track if client is released
     const schema = tenant?.schema;
-    logger.info('Schema:', { schema });
     try {
         await client.query(`SET search_path TO ${schema}`);
         // Fetch list
@@ -33,29 +32,24 @@ export const getConfirmation = async (tenant: any, leadId: string) => {
         }
 
         const confirmationDetails = confirmationDetailsRes?.rows[0];
-        logger.info('Confirmation details:', { confirmationDetails });
-
         const leadDetailsRes = await client.query(GET_LEAD_DETAILS_FOR_CUSTOMER, [leadId]);
         if (!leadDetailsRes?.rows?.length) {
             logger.info('No lead details found');
             return {};
         }
         const leadDetails = leadDetailsRes?.rows[0];
-        logger.info('Lead details:', { leadDetails });
 
         const quotesResult = await client.query(GET_LEAD_QUOTES_CONFIRMATION, [confirmationDetails?.quoteId]);
         if (!quotesResult?.rows?.length) {
             logger.info('No quotes found');
         }
         const quoteDetails = quotesResult?.rows[0];
-        logger.info('Quote details:', { quoteDetails });
 
         const invoiceResult = await client.query(GET_INVOICE_BY_LEAD_AND_TYPE, [leadId, 'deposit']);
         if (!invoiceResult?.rows?.length) {
             logger.info('No invoice found');
         }
         const invoice = invoiceResult?.rows[0];
-        logger.info('Invoice:', { invoice });
 
         // Sort services so that 'Door to Door' is at index 0 and 'Full Pack' is at index 1
         const sortedServices = confirmationDetails?.services?.sort((a: any, b: any) => {
@@ -91,7 +85,6 @@ export const getConfirmation = async (tenant: any, leadId: string) => {
             invoiceType: invoice?.invoice_type ? invoice?.invoice_type : null,
         };
 
-        logger.info('Data:', { data });
         return data;
     } catch (error: any) {
         logger.error('Failed to fetch data', { error });

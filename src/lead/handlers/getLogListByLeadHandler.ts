@@ -12,7 +12,6 @@ export const getLogListByLeadHandler: RouteHandler = async (
     logger.info('getLogListByLeadHandler event ', { event });
     try {
         const leadId = event?.pathParameters?.id as string;
-        logger.info('Lead ID', { leadId });
         if (!leadId) {
             return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
         }

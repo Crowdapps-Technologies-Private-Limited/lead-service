@@ -4,8 +4,6 @@ import logger from '../../utils/logger';
 
 // Service to fetch jobs list with details of customers, addresses, and vehicles
 export const getJobsList = async (tenant: any) => {
-    logger.info('Fetching jobs list for tenant:', { tenant });
-
     const client = await connectToDatabase();
     let clientReleased = false; // Track if client is released
     const schema = tenant.schema;
@@ -18,7 +16,6 @@ export const getJobsList = async (tenant: any) => {
         await client.query(`SET search_path TO ${schema}`);
 
         const jobsResult = await client.query(GET_JOB_LIST);
-        logger.info('Jobs fetched successfully:', { rowCount: jobsResult.rowCount });
 
         return jobsResult.rows;
     } catch (error: any) {

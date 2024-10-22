@@ -34,7 +34,6 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         deliveryDistance,
         deliveryVolume,
         deliveryVolumeUnit,
-        status,
         customerNotes,
         batch,
         inceptBatch,
@@ -76,12 +75,6 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             );
             customerId = customerResult.rows[0].id;
         }
-
-        logger.info('Customer created successfully');
-        logger.info('Customer ID:', { customerId });
-        logger.info('Referrer ID:', { referrerId });
-        logger.info('Collection Address:', { collectionAddress });
-        logger.info('Delivery Address:', { deliveryAddress });
 
         // Check if collection address is not empty and exists
         let collectionAddressId = null;
@@ -169,7 +162,6 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             const maxId = Math.max(...ids);
             newGeneratedId = maxId + 1;
         }
-        logger.info('New Generated ID:', { newGeneratedId });
 
         // Insert lead
         await client.query(
@@ -209,8 +201,6 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             ],
         );
 
-        logger.info('Lead added successfully');
-
         await client.query(INSERT_LOG, [
             tenant.id,
             tenant.name,
@@ -220,11 +210,9 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
             'NEW',
             newGeneratedId,
         ]);
-        logger.info('Log added successfully');
 
         // Send email notification
         await generateEmail('Add Lead', customer.email, { username: customer.name });
-        logger.info('Email sent successfully');
 
         await client.query('COMMIT');
         return { message: getMessage('LEAD_ADDED') };

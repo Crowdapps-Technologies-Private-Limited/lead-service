@@ -5,7 +5,6 @@ import {
     GET_SURVEYS_LIST_TENANT,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
-import { getMessage } from '../../utils/errorMessages';
 import logger from '../../utils/logger';
 
 export const getAllSurveys = async (tenant: any, isTenant: boolean, filterBy: string) => {
@@ -14,7 +13,7 @@ export const getAllSurveys = async (tenant: any, isTenant: boolean, filterBy: st
 
     try {
         const schema = tenant?.schema || tenant?.tenant?.schema;
-        logger.info('Schema:', { schema });
+
         await client.query(`SET search_path TO ${schema}`);
 
         // Start transaction
@@ -33,7 +32,6 @@ export const getAllSurveys = async (tenant: any, isTenant: boolean, filterBy: st
         // Fetch surveys count
         const countResult = await client.query(`${GET_SURVEYS_COUNT}`);
         const count = countResult.rows[0]?.count || 0;
-        logger.info('Fetching surveys count', { count });
 
         // Fetch surveys list for tenant
         const tenantQuery = `
@@ -41,7 +39,6 @@ export const getAllSurveys = async (tenant: any, isTenant: boolean, filterBy: st
         `;
         const tenantSurveys = await client.query(tenantQuery);
         const result1 = tenantSurveys.rows || [];
-        logger.info('Fetching tenant surveys list', { count: result1 });
 
         // Fetch surveys list for surveyor or other roles
         const surveyorQuery = `
@@ -49,8 +46,6 @@ export const getAllSurveys = async (tenant: any, isTenant: boolean, filterBy: st
         `;
         const surveyorSurveys = await client.query(surveyorQuery);
         const result2 = surveyorSurveys.rows || [];
-        logger.info('Fetching surveyor surveys list', { count: result2 });
-
         // Combine the results
         const combinedResult = {
             count: count,

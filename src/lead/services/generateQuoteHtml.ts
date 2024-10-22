@@ -1,13 +1,7 @@
 import dayjs from '../../utils/dayjs';
-import logger from '../../utils/logger';
 import { Material, Service } from '../interface';
 
 const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: any; quote: any }) => {
-    logger.info('Generating quote html');
-    logger.info('Client:', { client });
-    logger.info('Lead:', { lead });
-    logger.info('Quote:', { quote });
-
     let collection_addr = '';
     if (lead.collection_street) {
         collection_addr += lead?.collection_street;
@@ -160,7 +154,7 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
             <div>
                 <p><strong>Client ID:</strong> ${lead?.generated_id}</p>
                 <p><strong>Date:</strong> ${createdAtFormatted}</p>
-                <p><strong>Volume:</strong> ${lead?.collection_volume} ${
+                <p><strong>Volume:</strong> ${lead?.collection_volume ? lead?.collection_volume : 0} ${
         lead?.collection_volume_unit === 'm3' ? ' m' : ' ft'
     }<sup>3</sup></p>
                 <p><strong>Quote Expires On:</strong> ${quoteExpiresOnFormatted}</p>

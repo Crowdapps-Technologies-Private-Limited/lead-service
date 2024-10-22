@@ -13,10 +13,6 @@ export const getDistanceHandler: RouteHandler = async (
 
     try {
         const payload = JSON.parse(event.body || '{}');
-        const tenant = (event.requestContext as any).tenant;
-        const user = (event.requestContext as any).user;
-        logger.info('tenant:', { tenant });
-        logger.info('user:', { user });
 
         // Validate payload
         await getDistanceDTO(payload);
@@ -26,7 +22,6 @@ export const getDistanceHandler: RouteHandler = async (
         const distance = await getDistanceBetweenPostcodes(postcode1, postcode2);
 
         if (distance !== null) {
-            logger.info(`Distance between ${postcode1} and ${postcode2} is ${distance.toFixed(2)} miles`);
             return ResponseHandler.createdResponse({
                 message: getMessage('DISTANCE_CALCULATED'),
                 data: { distance: distance.toFixed(2) },

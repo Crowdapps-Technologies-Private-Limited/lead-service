@@ -16,7 +16,6 @@ const isAddressEmpty = (address: any) => {
 };
 
 export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: any) => {
-    logger.info(`EDIT LEAD (${leadId}) payload`, { payload });
     const {
         referrerId,
         customer,
@@ -35,7 +34,6 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         deliveryDistance,
         deliveryVolume,
         deliveryVolumeUnit,
-        status,
         customerNotes,
         batch,
         inceptBatch,
@@ -66,7 +64,6 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
         if (leadCheckResult.rows.length === 0) {
             throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
-        logger.info('leadCheckResult', { leadCheckResult });
 
         // Update customer information
         let customerId = leadCheckResult.rows[0].customer_id;
@@ -113,7 +110,6 @@ export const editLead = async (leadId: string, payload: AddLeadPayload, tenant: 
                 collectionAddressId = collectionAddressResult.rows[0].id;
             }
         } else {
-            logger.warn('Collection address is empty, no address record created or updated.');
             collectionAddressId = null; // Set to null if no valid address
         }
 

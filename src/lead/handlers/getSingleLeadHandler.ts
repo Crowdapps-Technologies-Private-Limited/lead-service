@@ -12,7 +12,6 @@ export const getSingleLeadHandler: RouteHandler = async (
     logger.info('getSingleLeadHandler event ', { event });
     try {
         const tenant = (event.requestContext as any).tenant;
-        logger.info('tenant:', { tenant });
         const user = (event.requestContext as any).user;
         const hasPermission = await checkPermission(
             user.role,
@@ -25,7 +24,7 @@ export const getSingleLeadHandler: RouteHandler = async (
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
         const leadId = event?.pathParameters?.id as string;
-        logger.info('Lead ID', { leadId });
+
         if (!leadId) {
             return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
         }
