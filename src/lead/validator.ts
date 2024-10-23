@@ -64,7 +64,15 @@ export const addLeadSchema = yup.object().shape({
                 .string()
                 .transform((value, originalValue) => (originalValue.trim() === '' ? null : value))
                 .nullable(),
-            email: yup.string().required('Customer email is required').email('Invalid email format').max(100),
+            email: yup
+                .string()
+                .required('Customer email is required')
+                .email('Invalid email format')
+                .max(100)
+                .test('valid-tld', 'Invalid email domain, must contain a valid TLD', (value) => {
+                    if (!value) return true; // Allow null values
+                    return /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(value); // Ensure email contains a valid TLD
+                }),
         })
         .required('Customer information is required')
         .default({}),
@@ -289,7 +297,14 @@ export const sendEmailSchema = yup
     .object()
     .shape({
         from: yup.string().email('Invalid email format').required('From email is required'),
-        to: yup.string().email('Invalid email format').required('To email is required'),
+        to: yup
+            .string()
+            .email('Invalid email format')
+            .required('To email is required')
+            .test('valid-tld', 'Invalid email domain, must contain a valid TLD', (value) => {
+                if (!value) return true; // Allow null values
+                return /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(value); // Ensure email contains a valid TLD
+            }),
         subject: yup.string().required('Subject is required'),
         body: yup.string().required('Body is required'),
         addClientSignature: yup.boolean().required('Client signature status is required'),
