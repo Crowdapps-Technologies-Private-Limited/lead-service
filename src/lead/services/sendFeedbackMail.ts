@@ -4,7 +4,12 @@ import { generateEmail } from '../../utils/generateEmailService';
 import { getMessage } from '../../utils/errorMessages';
 import { decryptPassword } from '../../utils/encryptionAndDecryption';
 
-import { GET_LEAD_CUSTOMER_BY_LEAD_ID, GET_CUSTOMER_BY_EMAIL, DELETE_EXISTING_RESPONSES } from '../../sql/sqlScript';
+import {
+    GET_LEAD_CUSTOMER_BY_LEAD_ID,
+    GET_CUSTOMER_BY_EMAIL,
+    DELETE_EXISTING_RESPONSES,
+    UPDATE_CONFIRMATION_FEEDBACK,
+} from '../../sql/sqlScript';
 
 export const sendFeedbackEmail = async (leadId: string, tenant: any, user: any) => {
     const client = await connectToDatabase();
@@ -28,10 +33,13 @@ export const sendFeedbackEmail = async (leadId: string, tenant: any, user: any) 
 
         const leadData = leadCheckResult.rows[0];
         logger.info('Lead data:', { leadData });
-
+        if (leadData.status !== 'JOB') {
+            throw new Error('Lead status should Job for get feedback.');
+        }
         // Delete any existing feedback responses for the lead
 
         await client.query(DELETE_EXISTING_RESPONSES, [leadId]);
+        await client.query(UPDATE_CONFIRMATION_FEEDBACK, [user.email, leadId]);
 
         // Fetch customer details
         const customerResult = await client.query(GET_CUSTOMER_BY_EMAIL, [leadData?.customer_email]);

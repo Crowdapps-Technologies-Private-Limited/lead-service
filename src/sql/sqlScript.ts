@@ -923,6 +923,16 @@ export const UPDATE_CONFIRMATION = `
     RETURNING *;
 `;
 
+export const UPDATE_CONFIRMATION_FEEDBACK = `
+    UPDATE confirmations
+    SET
+        is_asked_for_feedback = true,
+        updated_by = $1,
+        updated_at = NOW()
+    WHERE lead_id = $2
+    RETURNING *;
+`;
+
 export const UPDATE_CONFIRMATION_SERVICE = `
     UPDATE confirmation_services
     SET
