@@ -195,7 +195,7 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
     <br>
 
         <div class="signature">
-        <p>${client.signature}</p>
+        <p>${client.signature && client.signature !== 'null' ? client.signature : ''}</p>
         </div>
     </div>
     

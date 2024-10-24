@@ -41,7 +41,7 @@ export const assignSurveyorHandler: RouteHandler = async (
             return ResponseHandler.notFoundResponse({ message: cleanedMessage });
         }
 
-        const result = await assignSurveyor(leadId, payload, tenant, isTenant);
+        const result = await assignSurveyor(leadId, payload, tenant, isTenant, user);
 
         return ResponseHandler.createdResponse({ message: result?.message });
     } catch (error: any) {

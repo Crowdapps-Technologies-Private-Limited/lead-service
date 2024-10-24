@@ -213,6 +213,15 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
 
         // Send email notification
         await generateEmail('Add Lead', customer.email, { username: customer.name });
+        await client.query(INSERT_LOG, [
+            tenant.id,
+            tenant.name,
+            tenant.email,
+            'new lead email sent to customer',
+            'LEAD',
+            'NEW',
+            newGeneratedId,
+        ]);
 
         await client.query('COMMIT');
         return { message: getMessage('LEAD_ADDED') };

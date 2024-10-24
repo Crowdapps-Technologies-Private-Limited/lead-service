@@ -129,6 +129,10 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return 'Lead status updated successfully.';
         case 'LOG_ENTRY_ADDED':
             return 'Log entry added successfully.';
+        case 'INVALID_MOVING_DATE_OR_TIME':
+            return 'Invalid moving date and time';
+        case 'INVALID_PACKING_DATE_OR_TIME':
+            return 'Invalid packing date and time';
         default:
             return '';
     }

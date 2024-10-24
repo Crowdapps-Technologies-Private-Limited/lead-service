@@ -197,7 +197,7 @@ export const updateConfirmationByClient = async (
 
                 if (packingDate && packingDate.status === 'fixed') {
                     if (!packingDate?.date || !packingDate?.time) {
-                        throw new Error(getMessage('INVALID_PACKAGING_DATE_OR_TIME'));
+                        throw new Error(getMessage('INVALID_PACKING_DATE_OR_TIME'));
                     }
                     // Handling packingDate
                     const packingDateObj = new Date(packingDate.date);

@@ -5,12 +5,12 @@ import {
     CHECK_SURVEY,
     CHECK_SURVEYOR_AVAILABILITY,
     UPDATE_LEAD_STATUS,
+    GET_CUSTOMER_ADRESS_BY_LEAD_ID,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { getMessage } from '../../utils/errorMessages';
 import { generateEmail } from '../../utils/generateEmailService';
 import logger from '../../utils/logger';
-import { toFloat } from '../../utils/utility';
 import { AssignSurveyorPayload } from '../interface';
 
 export const assignSurveyor = async (
@@ -18,6 +18,7 @@ export const assignSurveyor = async (
     payload: AssignSurveyorPayload,
     tenant: any,
     isTenant: boolean,
+    user: any,
 ) => {
     const { surveyorId, surveyType, surveyDate, remarks, startTime, endTime, description } = payload;
 
@@ -40,15 +41,12 @@ export const assignSurveyor = async (
             throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
         // CHECK IF LEAD EXISTS
-        const leadCheckResult = await client.query(
-            `
-            SELECT * FROM leads WHERE generated_id = $1
-        `,
-            [leadId],
-        );
+        const leadCheckResult = await client.query(GET_CUSTOMER_ADRESS_BY_LEAD_ID, [leadId]);
         if (leadCheckResult.rows.length === 0) {
             throw new Error(getMessage('LEAD_NOT_FOUND'));
         }
+        const lead = leadCheckResult.rows[0];
+        logger.info('lead', lead);
         // Check if surveyor table exists
         tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'staffs']);
         if (!tableCheckRes.rows[0].exists) {
@@ -76,6 +74,7 @@ export const assignSurveyor = async (
         if (surveyCheckResult.rows.length > 0) {
             throw new Error(getMessage('LEAD_SURVEY_EXIST'));
         }
+        logger.info('surveyCheckResult', surveyCheckResult.rows[0]);
         // Check if the surveyor is available in the given time range
         const surveyorAvailabilityResult = await client.query(CHECK_SURVEYOR_AVAILABILITY, [
             surveyorId,
@@ -126,10 +125,63 @@ export const assignSurveyor = async (
 
         // Send nofitication to surveyor on email
         if (surveyorId.startsWith('EMP')) {
-            await generateEmail('Assign Survey', surveyorCheckResult?.rows[0]?.email, {
+            let jobAddress = '__';
+            if (lead?.collection_street) {
+                jobAddress += 'street- ' + lead.collection_street;
+            }
+            if (lead?.collection_town) {
+                jobAddress += 'town- ' + lead.collection_town;
+            }
+            if (lead?.collection_county) {
+                jobAddress += 'county- ' + lead.collection_county;
+            }
+            if (lead?.collection_postcode) {
+                jobAddress += 'postcode- ' + lead.collection_postcode;
+            }
+            await generateEmail('Survey Confirmation for Surveyor', surveyorCheckResult?.rows[0]?.email, {
                 username: surveyorCheckResult?.rows[0]?.name,
+                jobaddress: jobAddress,
+                customername: lead.customer_name,
+                surveydatetime: `${surveyDate}-${startTime}`,
+                surveytype: surveyType,
+            });
+            // Insert log
+            await client.query(INSERT_LOG, [
+                tenant.id,
+                tenant.name,
+                tenant.email,
+                `Survey Confirmation  email sent to Surveyor ${leadId}`,
+                'LEAD',
+                'SURVEY',
+                leadId,
+            ]);
+            await generateEmail('Booked Survey Email for Customer', lead.customer_email, {
+                username: lead.customer_name,
+                lead: leadId,
+                surveyorname: surveyorCheckResult?.rows[0]?.name,
+                surveydate: surveyDate,
+                surveytime: startTime,
+                customerphone: lead.customer_phone ? lead.customer_phone : '__',
+            });
+        } else {
+            await generateEmail('Booked Survey Email for Customer', lead.customer_email, {
+                username: lead.customer_name,
+                lead: leadId,
+                surveyorname: user?.name,
+                surveydate: surveyDate,
+                surveytime: startTime,
+                customerphone: lead.customer_phone ? lead.customer_phone : '__',
             });
         }
+        await client.query(INSERT_LOG, [
+            tenant.id,
+            tenant.name,
+            tenant.email,
+            `Survey Booking  email sent to customer  ${lead.customer_name}`,
+            'LEAD',
+            'SURVEY',
+            leadId,
+        ]);
 
         await client.query('COMMIT');
         return {

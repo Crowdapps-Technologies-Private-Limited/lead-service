@@ -41,6 +41,29 @@ export const GET_LEAD_COUNT_WITH_FILTER = `
     WHERE ($1::TEXT IS NULL OR status = $1::TEXT)
 `;
 
+export const GET_CUSTOMER_ADRESS_BY_LEAD_ID = `
+SELECT 
+    leads.generated_id,
+    customers.id AS customer_id,
+    customers.name AS customer_name,
+    customers.phone AS customer_phone,
+    customers.email AS customer_email,
+    collection_addresses.id AS collection_address_id,
+    collection_addresses.street AS collection_street,
+    collection_addresses.town AS collection_town,
+    collection_addresses.county AS collection_county,
+    collection_addresses.postcode AS collection_postcode,
+    collection_addresses.country AS collection_country
+FROM 
+    leads
+LEFT JOIN 
+    customers ON leads.customer_id = customers.id
+LEFT JOIN 
+    addresses AS collection_addresses ON leads.collection_address_id = collection_addresses.id
+WHERE 
+    leads.generated_id = $1;
+`;
+
 export const GET_LEAD_BY_ID = `
 SELECT 
     leads.generated_id,

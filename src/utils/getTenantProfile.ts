@@ -2,7 +2,6 @@ import AWS from 'aws-sdk';
 import logger from './logger';
 import { connectToDatabase } from './database';
 import { GET_TENANT_BY_ID, SELECT_COMPANY_INFO, SELECT_EMAIL_INFO } from '../sql/sqlScript';
-import { checkSubscriptionStatus } from './checkSubscription';
 import { getconfigSecrets } from './getConfig';
 
 const s3 = new AWS.S3();

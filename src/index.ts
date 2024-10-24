@@ -95,6 +95,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 throw new Error(`${subscription.reason}`);
             }
             // Attach userPayload to the request context
+            user.name = clientDetail.name;
             (event.requestContext as any).user = user;
             (event.requestContext as any).tenant = clientDetail;
             (event.requestContext as any).isTenant = true;
@@ -151,6 +152,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 }
             }
             // Attach userPayload to the request context
+            user.name = clientDetail.name;
             (event.requestContext as any).user = user;
             (event.requestContext as any).tenant = clientDetail;
             (event.requestContext as any).isTenant = false;
