@@ -24,6 +24,12 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
     try {
         const res = await client.query(GET_ESTIMATE_BY_LEAD_ID, [leadId]);
         // Manually convert string fields to numbers, if necessary
+        if (!res.rows.length) {
+            return {
+                message: getMessage('ESTIMATE_NOT_FOUND'),
+                data: {},
+            };
+        }
         const data = res.rows[0];
         data.quoteTotal = data?.quotetotal ? parseFloat(data?.quotetotal) : 0;
         data.costTotal = data?.costtotal ? parseFloat(data?.costtotal) : 0;
@@ -45,7 +51,7 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
         return data;
     } catch (error: any) {
         logger.error('Failed to get latest estimates', { error });
-        throw new Error(`${error.message}`);
+        throw new Error(`Failed to get latest estimates:${error.message}`);
     } finally {
         if (!clientReleased) {
             client.release();

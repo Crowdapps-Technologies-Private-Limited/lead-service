@@ -138,11 +138,16 @@ export const assignSurveyor = async (
             if (lead?.collection_postcode) {
                 jobAddress += 'postcode- ' + lead.collection_postcode;
             }
+            let surveyDatetime = '';
+            if (surveyDate && startTime) {
+                surveyDatetime = `${new Date(surveyDate).toDateString()} -- ${new Date(startTime).toTimeString()}`;
+            }
+
             await generateEmail('Survey Confirmation for Surveyor', surveyorCheckResult?.rows[0]?.email, {
                 username: surveyorCheckResult?.rows[0]?.name,
                 jobaddress: jobAddress,
                 customername: lead.customer_name,
-                surveydatetime: `${surveyDate}-${startTime}`,
+                surveydatetime: surveyDatetime,
                 surveytype: surveyType,
             });
             // Insert log
@@ -159,8 +164,8 @@ export const assignSurveyor = async (
                 username: lead.customer_name,
                 lead: leadId,
                 surveyorname: surveyorCheckResult?.rows[0]?.name,
-                surveydate: surveyDate,
-                surveytime: startTime,
+                surveydate: surveyDate ? new Date(surveyDate).toDateString() : '__',
+                surveytime: startTime ? new Date(startTime).toTimeString() : '__',
                 customerphone: lead.customer_phone ? lead.customer_phone : '__',
             });
         } else {
@@ -168,8 +173,8 @@ export const assignSurveyor = async (
                 username: lead.customer_name,
                 lead: leadId,
                 surveyorname: user?.name,
-                surveydate: surveyDate,
-                surveytime: startTime,
+                surveydate: surveyDate ? new Date(surveyDate).toDateString() : '__',
+                surveytime: startTime ? new Date(startTime).toTimeString() : '__',
                 customerphone: lead.customer_phone ? lead.customer_phone : '__',
             });
         }

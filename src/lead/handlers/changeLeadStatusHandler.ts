@@ -4,6 +4,7 @@ import { ResponseHandler } from '../../utils/ResponseHandler';
 import { getMessage } from '../../utils/errorMessages';
 import { changeLeadStatusService } from '../services';
 import { checkPermission } from '../../utils/checkPermission';
+import { checkLeadCompletion } from '../../utils/checkLeadCompletion';
 
 export const changeLeadStatusHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -15,7 +16,10 @@ export const changeLeadStatusHandler = async (
         const { lead_id, new_status } = payload;
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
-
+        const checkLeadCompionResult = await checkLeadCompletion(lead_id as string, tenant);
+        if (checkLeadCompionResult.isCompleted) {
+            return ResponseHandler.notFoundResponse({ message: getMessage('LEAD_ALREADY_COMPLETED') });
+        }
         const hasPermission = await checkPermission(
             user.role,
             'Lead',

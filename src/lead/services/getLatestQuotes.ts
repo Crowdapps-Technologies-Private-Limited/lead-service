@@ -71,7 +71,7 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
         };
     } catch (error: any) {
         logger.error('Failed to get latest quote', { error });
-        throw new Error(`${error.message}`);
+        throw new Error(`Failed to get latest quote: ${error.message}`);
     } finally {
         if (!clientReleased) {
             client.release();

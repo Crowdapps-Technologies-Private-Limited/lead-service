@@ -35,9 +35,9 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
     if (lead.delivery_postcode) {
         delivery_addr += `, ${lead?.delivery_postcode}`;
     }
-
-    const createdAtFormatted = dayjs(lead?.created_at).format('DD-MM-YYYY');
-    const quoteExpiresOnFormatted = dayjs(estimate?.quoteExpiresOn).format('DD-MM-YYYY');
+    const date_format = client?.date_format ? client?.date_format.toUpperCase() : 'DD/MM/YYYY';
+    const createdAtFormatted = dayjs(lead?.created_at).format(date_format);
+    const quoteExpiresOnFormatted = dayjs(estimate?.quoteExpiresOn).format(date_format);
 
     const materialsHtml = estimate?.materials
         ?.map(

@@ -5,6 +5,8 @@ import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefault
 import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 import { checkPermission } from '../../utils/checkPermission';
+import { checkLeadCompletion } from '../../utils/checkLeadCompletion';
+import { getMessage } from '../../utils/errorMessages';
 
 export const sendEmailHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -17,6 +19,10 @@ export const sendEmailHandler: RouteHandler = async (
         const user = (event.requestContext as any).user;
         if (!leadId) {
             return ResponseHandler.badRequestResponse({ message: 'Lead ID is required' });
+        }
+        const checkLeadCompionResult = await checkLeadCompletion(leadId, tenant);
+        if (checkLeadCompionResult.isCompleted) {
+            return ResponseHandler.notFoundResponse({ message: getMessage('LEAD_ALREADY_COMPLETED') });
         }
         const hasPermission = await checkPermission(
             user.role,

@@ -5,6 +5,7 @@ import { updateConfirmationTooltipDetails } from '../services';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
+import { checkLeadCompletion } from '../../utils/checkLeadCompletion';
 
 export const updateConfirmationTooltipHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -15,6 +16,10 @@ export const updateConfirmationTooltipHandler: RouteHandler = async (
     // const confirmationId = event.queryStringParameters?.confirmationId;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
+    const checkLeadCompionResult = await checkLeadCompletion(leadId as string, tenant);
+    if (checkLeadCompionResult.isCompleted) {
+        return ResponseHandler.notFoundResponse({ message: getMessage('LEAD_ALREADY_COMPLETED') });
+    }
     const hasPermission = await checkPermission(
         user.role,
         'Lead:Confirmation',

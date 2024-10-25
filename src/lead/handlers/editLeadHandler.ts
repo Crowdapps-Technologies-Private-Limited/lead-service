@@ -1,3 +1,4 @@
+import { checkLeadCompletion } from './../../utils/checkLeadCompletion';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { editLead } from '../services';
 import { APIGatewayProxyResult, APIGatewayProxyEventBase, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
@@ -16,6 +17,17 @@ export const editLeadHandler: RouteHandler = async (
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
         logger.info('user:', { user });
+        const leadId = event.pathParameters?.id;
+        logger.info('leadId:', { leadId });
+
+        if (!leadId) {
+            return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
+        }
+        const checkLeadCompionResult = await checkLeadCompletion(leadId, tenant);
+        if (checkLeadCompionResult.isCompleted) {
+            return ResponseHandler.notFoundResponse({ message: getMessage('LEAD_ALREADY_COMPLETED') });
+        }
+
         const hasPermission = await checkPermission(
             user.role,
             'Lead',
@@ -25,13 +37,6 @@ export const editLeadHandler: RouteHandler = async (
         logger.info('hasPermission: -----------', { hasPermission });
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
-        }
-
-        const leadId = event.pathParameters?.id;
-        logger.info('leadId:', { leadId });
-
-        if (!leadId) {
-            return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
         }
 
         // Validate payload

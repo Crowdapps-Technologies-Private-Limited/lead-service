@@ -6,6 +6,7 @@ import { RouteHandler } from '../../types/interfaces';
 import logger from '../../utils/logger';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
+import { checkLeadCompletion } from '../../utils/checkLeadCompletion';
 
 export const assignSurveyorHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -13,11 +14,19 @@ export const assignSurveyorHandler: RouteHandler = async (
     logger.info('assignSurveyorHandler event ', { event });
     try {
         const payload = JSON.parse(event.body || '{}');
+        const leadId = event.pathParameters?.id;
+
+        if (!leadId) {
+            return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
+        }
         const tenant = (event.requestContext as any).tenant;
         const isTenant = (event.requestContext as any).isTenant;
 
         const user = (event.requestContext as any).user;
-
+        const checkLeadCompionResult = await checkLeadCompletion(leadId as string, tenant);
+        if (checkLeadCompionResult.isCompleted) {
+            return ResponseHandler.notFoundResponse({ message: getMessage('LEAD_ALREADY_COMPLETED') });
+        }
         const hasPermission = await checkPermission(
             user.role,
             'Lead:Surveyor',
@@ -29,11 +38,6 @@ export const assignSurveyorHandler: RouteHandler = async (
             return ResponseHandler.forbiddenResponse({ message: getMessage('PERMISSION_DENIED') });
         }
 
-        const leadId = event.pathParameters?.id;
-
-        if (!leadId) {
-            return ResponseHandler.badRequestResponse({ message: getMessage('LEAD_ID_REQUIRED') });
-        }
         try {
             await assignSurveyorDTO(payload);
         } catch (error: any) {

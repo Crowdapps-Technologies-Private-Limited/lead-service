@@ -4,6 +4,7 @@ import { sendFeedbackEmail } from '../services';
 import { ResponseHandler } from '../../utils/ResponseHandler';
 import { getMessage } from '../../utils/errorMessages';
 import { checkPermission } from '../../utils/checkPermission';
+import { checkLeadCompletion } from '../../utils/checkLeadCompletion';
 
 export const sendFeedbackEmailHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -11,6 +12,13 @@ export const sendFeedbackEmailHandler = async (
     try {
         const tenant = (event.requestContext as any).tenant;
         const user = (event.requestContext as any).user;
+        // Get the leadId and action from the path parameters or body
+        const leadId = event.pathParameters?.id;
+
+        const checkLeadCompionResult = await checkLeadCompletion(leadId as string, tenant);
+        if (checkLeadCompionResult.isCompleted) {
+            return ResponseHandler.notFoundResponse({ message: getMessage('LEAD_ALREADY_COMPLETED') });
+        }
         const hasPermission = await checkPermission(
             user.role,
             'Lead:Job',
@@ -21,8 +29,6 @@ export const sendFeedbackEmailHandler = async (
         if (!hasPermission) {
             return ResponseHandler.forbiddenResponse({ message: 'Permission denied' });
         }
-        // Get the leadId and action from the path parameters or body
-        const leadId = event.pathParameters?.id;
 
         if (!leadId) {
             return ResponseHandler.badRequestResponse({ message: 'Lead ID is required.' });

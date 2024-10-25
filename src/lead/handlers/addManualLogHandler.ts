@@ -5,6 +5,7 @@ import { ResponseHandler } from '../../utils/ResponseHandler';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 import { validateAddManualLogPayload } from '../validator';
+import { checkLeadCompletion } from '../../utils/checkLeadCompletion';
 
 export const addManualLogHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -21,7 +22,10 @@ export const addManualLogHandler = async (
                 body: JSON.stringify({ message: getMessage('LEAD_ID_REQUIRED') }),
             };
         }
-
+        const checkLeadCompionResult = await checkLeadCompletion(leadId, tenant);
+        if (checkLeadCompionResult.isCompleted) {
+            return ResponseHandler.notFoundResponse({ message: getMessage('LEAD_ALREADY_COMPLETED') });
+        }
         // Ensure user has permission to add a manual log
         const hasPermission = await checkPermission(user.role, 'Lead:Log', 'create', tenant.schema);
         if (!hasPermission) {

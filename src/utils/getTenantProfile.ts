@@ -37,6 +37,7 @@ export const getTenantProfile = async (userId: string) => {
         user.address = company.rows[0].address;
         user.postCode = company.rows[0].post_code;
         user.general_website = company.rows[0].general_website;
+        user.date_format = company.rows[0].date_format;
         if (user.logo) {
             const config = await getconfigSecrets();
 

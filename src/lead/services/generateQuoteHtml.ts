@@ -35,9 +35,9 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
     if (lead.delivery_postcode) {
         delivery_addr += `, ${lead?.delivery_postcode}`;
     }
-
-    const createdAtFormatted = dayjs(lead?.created_at).format('DD-MM-YYYY');
-    const quoteExpiresOnFormatted = dayjs(quote?.quoteExpiresOn).format('DD-MM-YYYY');
+    const date_format = client?.date_format ? client?.date_format.toUpperCase() : 'DD/MM/YYYY';
+    const createdAtFormatted = dayjs(lead?.created_at).format(date_format);
+    const quoteExpiresOnFormatted = dayjs(quote?.quoteExpiresOn).format(date_format);
 
     const materialsHtml = quote?.materials
         ?.map(
@@ -153,6 +153,7 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
             </div>
             <div>
                 <p><strong>Client ID:</strong> ${lead?.generated_id}</p>
+               
                 <p><strong>Date:</strong> ${createdAtFormatted}</p>
                 <p><strong>Volume:</strong> ${lead?.collection_volume ? lead?.collection_volume : 0} ${
         lead?.collection_volume_unit === 'm3' ? ' m' : ' ft'

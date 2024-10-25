@@ -133,6 +133,8 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return 'Invalid moving date and time';
         case 'INVALID_PACKING_DATE_OR_TIME':
             return 'Invalid packing date and time';
+        case 'LEAD_ALREADY_COMPLETED':
+            return 'Lead already completed';
         default:
             return '';
     }

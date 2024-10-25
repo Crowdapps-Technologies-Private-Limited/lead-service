@@ -36,6 +36,7 @@ export const getUserProfile = async (tenantId: string, userSub: string) => {
         tenant.postCode = company.rows[0].post_code;
         tenant.address = company.rows[0].address;
         tenant.general_website = company.rows[0].general_website;
+        tenant.date_format = company.rows[0].date_format;
 
         logger.info('Tenant profile:', { tenant });
 

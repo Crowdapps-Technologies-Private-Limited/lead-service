@@ -6,6 +6,7 @@ import { ResponseHandler } from '../../utils/ResponseHandler';
 import { checkPermission } from '../../utils/checkPermission';
 import { getMessage } from '../../utils/errorMessages';
 import { updateConfirmationDTO } from '../validator';
+import { checkLeadCompletion } from '../../utils/checkLeadCompletion';
 
 export const updateConfirmationHandler: RouteHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>,
@@ -15,6 +16,10 @@ export const updateConfirmationHandler: RouteHandler = async (
     const leadId = event.pathParameters?.id;
     const tenant = (event.requestContext as any).tenant;
     const user = (event.requestContext as any).user;
+    const checkLeadCompionResult = await checkLeadCompletion(leadId as string, tenant);
+    if (checkLeadCompionResult.isCompleted) {
+        return ResponseHandler.notFoundResponse({ message: getMessage('LEAD_ALREADY_COMPLETED') });
+    }
     const hasPermission = await checkPermission(
         user.role,
         'Lead:Confirmation',
