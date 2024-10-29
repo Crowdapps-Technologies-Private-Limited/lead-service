@@ -12,6 +12,7 @@ import { getMessage } from '../../utils/errorMessages';
 import { generateEmail } from '../../utils/generateEmailService';
 import logger from '../../utils/logger';
 import { AssignSurveyorPayload } from '../interface';
+import dayjs from 'dayjs';
 
 export const assignSurveyor = async (
     leadId: string,
@@ -67,6 +68,11 @@ export const assignSurveyor = async (
             }
         } else if (surveyorId !== tenant.id) {
             throw new Error(getMessage('SURVEYOR_NOT_FOUND'));
+        }
+
+        // Validate that startTime is before endTime using day.js
+        if (!dayjs(startTime).isBefore(dayjs(endTime))) {
+            throw new Error(getMessage('START_TIME_BEFORE_END_TIME'));
         }
 
         //Check if an incomplete survey exists for that lead

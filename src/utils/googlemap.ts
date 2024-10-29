@@ -63,9 +63,6 @@ export const getDistanceBetweenPostcodes = async (originPostcode: string, destin
             throw new Error(`Error with the distance calculation: ${distanceInfo.status}`);
         }
 
-        // const distanceInKm = parseFloat(distanceInfo.distance.text.split(' ')[0]);
-        // const distanceInMiles = distanceInKm * kilometersToMilesConversionFactor;
-        // Use the 'value' field, which is in meters, to avoid parsing issues
         const distanceInMeters = distanceInfo.distance.value;
         const distanceInMiles = (distanceInMeters / 1000) * kilometersToMilesConversionFactor;
 
