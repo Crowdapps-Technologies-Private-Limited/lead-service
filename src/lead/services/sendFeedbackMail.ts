@@ -38,7 +38,7 @@ export const sendFeedbackEmail = async (leadId: string, tenant: any, user: any) 
         }
         // Delete any existing feedback responses for the lead
 
-        await client.query(DELETE_EXISTING_RESPONSES, [leadId]);
+        // await client.query(DELETE_EXISTING_RESPONSES, [leadId]);
         await client.query(UPDATE_CONFIRMATION_FEEDBACK, [user.email, leadId]);
 
         // Fetch customer details

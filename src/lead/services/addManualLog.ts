@@ -27,7 +27,18 @@ const ERROR_MESSAGES: any = {
     },
     QUOTE: {
         CONFIRMED:
-            'Quote stage is required to proceed with confirmation. Kindly fill in quote details to proceed with confirmation.',
+            'State can not be changed from Quote to Confirmation. Please proceed manually by generating invoice and recieving confirmation from customer.',
+    },
+    JOB: {
+        CONFIRMED:
+            'Backward moment from Job state to other previous stages is not allowed as job has already been scheduled.',
+        QUOTE: 'Backward moment from Job state to other previous stages is not allowed as job has already been scheduled.',
+
+        SURVEY: 'Backward moment from Job state to other previous stages is not allowed as job has already been scheduled.',
+        ESTIMATES:
+            'Backward moment from Job state to other previous stages is not allowed as job has already been scheduled.',
+        'NEW LEAD':
+            'Backward moment from Job state to other previous stages is not allowed as job has already been scheduled.',
     },
 };
 
