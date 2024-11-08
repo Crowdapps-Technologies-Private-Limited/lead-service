@@ -1,7 +1,10 @@
+import { GeneralInfo } from './../interface';
 import dayjs from '../../utils/dayjs';
+import logger from '../../utils/logger';
 import { Material, Service } from '../interface';
 
 const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: any; quote: any }) => {
+    logger.info('quote', { quote });
     let collection_addr = '';
     if (lead.collection_street) {
         collection_addr += lead?.collection_street;
@@ -44,9 +47,9 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
             (material: Material) => `
         <tr>
             <td>${material.name}</td>
-            <td>${material.surveyedQty}</td>
+            <td>${material.chargeQty}</td>
             <td>£ ${material.price}</td>
-            <td>£ ${material.cost}</td>
+            <td>£ ${material.total}</td>
         </tr>
     `,
         )
@@ -60,6 +63,17 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
         <tr>
             <td>${service.typeName}</td>
             <td>£ ${service.price}</td>
+        </tr>
+    `,
+        )
+        .join('');
+
+    const insuranceHtml = quote?.generalInfo
+        ?.map(
+            (info: any) => `
+        <tr>
+            <td>Insurance</td>
+            <td>£ ${info?.insuranceAmount ? info.insuranceAmount : 0}</td>
         </tr>
     `,
         )
@@ -185,6 +199,7 @@ const generateQuoteHtml = async ({ client, lead, quote }: { client: any; lead: a
                 <th>Description</th>
                 <th>Price</th>
             </tr>
+            ${insuranceHtml}
             ${servicesHtml}
         </table>
 

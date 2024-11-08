@@ -65,6 +65,17 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
         )
         .join('');
 
+    const insuranceHtml = estimate?.generalInfo
+        ?.map(
+            (info: any) => `
+        <tr>
+            <td>Insurance</td>
+            <td>£ ${info?.insuranceAmount ? info.insuranceAmount : 0}</td>
+        </tr>
+    `,
+        )
+        .join('');
+
     return `<!DOCTYPE html>
     <html>
     <head>
@@ -183,6 +194,7 @@ const generateEstimateHtml = async ({ client, lead, estimate }: { client: any; l
                 <th>Description</th>
                 <th>Price</th>
             </tr>
+             ${insuranceHtml}
             ${servicesHtml}
         </table>
 
