@@ -38,9 +38,19 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
             const resEstimate = await client.query(GET_ESTIMATE_BY_LEAD_ID_FOR_QUOTES, [leadId]);
             // Manually convert string fields to numbers, if necessary
             if (!resEstimate.rows.length) {
+                // Get existing survey items for the given room
+                const existingSurveyItemsRes = await client.query(GET_SURVEY_ITEMS_BY_LEAD_ID, [leadId]);
+                const existingSurveyItems = existingSurveyItemsRes.rows;
+
+                logger.info('Existing survey items:', { existingSurveyItems });
+                const updatedMaterials = updateMaterialsWithSurveyedQty([], existingSurveyItems);
+                console.log(updatedMaterials);
+
                 return {
                     message: getMessage('QUOTE_NOT_FOUND'),
-                    data: {},
+                    data: {
+                        materials: updatedMaterials,
+                    },
                 };
             }
             // Get existing survey items for the given room
