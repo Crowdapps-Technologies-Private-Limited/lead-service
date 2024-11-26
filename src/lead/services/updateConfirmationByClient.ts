@@ -250,6 +250,7 @@ export const updateConfirmationByClient = async (
                 logger.info('Job schedule and lead status updated successfully');
             } else {
                 logger.info('packing and moving date are fixed but deposite not recieved');
+                await client.query(UPDATE_LEAD_STATUS, ['CONFIRMED', confirmRes?.rows[0]?.lead_id]);
             }
         }
 

@@ -135,6 +135,8 @@ export const getMessage = (template: any, systemErr?: any): string => {
             return 'Invalid packing date and time';
         case 'LEAD_ALREADY_COMPLETED':
             return 'Lead already completed';
+        case 'LATEST_LEAD_NOT_COMPLETED':
+            return 'Latest lead of the customer is not completed yet';
         default:
             return '';
     }

@@ -2,7 +2,7 @@ import { connectToDatabase } from '../../utils/database';
 import logger from '../../utils/logger';
 import { AddLeadPayload } from '../interface';
 import { generateEmail } from '../../utils/generateEmailService';
-import { INSERT_LOG, GET_ALL_LEADS } from '../../sql/sqlScript';
+import { INSERT_LOG, GET_ALL_LEADS, UPDATE_CONFIRMATION_TABLE } from '../../sql/sqlScript';
 import { isEmptyString, toFloat } from '../../utils/utility';
 import { getMessage } from '../../utils/errorMessages';
 
@@ -53,6 +53,7 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
         }
 
         await client.query(`SET search_path TO ${schema}`);
+        //update confirmation table by adding new column will remove further
 
         // Check if customer exists
         let customerId;
@@ -65,6 +66,16 @@ export const addLead = async (payload: AddLeadPayload, tenant: any) => {
 
         if (customerCheckResult.rows.length > 0) {
             customerId = customerCheckResult.rows[0].id;
+            // check if customer latest lead close or not
+            // Check if the latest lead for this customer is closed
+            const latestLeadResult = await client.query(
+                `SELECT status FROM leads WHERE customer_id = $1 ORDER BY created_at DESC LIMIT 1`,
+                [customerId],
+            );
+
+            if (latestLeadResult.rows.length > 0 && latestLeadResult.rows[0].status !== 'COMPLETED') {
+                throw new Error(getMessage('LATEST_LEAD_NOT_COMPLETED'));
+            }
         } else {
             const customerResult = await client.query(
                 `

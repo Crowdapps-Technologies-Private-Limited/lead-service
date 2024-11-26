@@ -22,6 +22,7 @@ import { getSecondLatestQuotesHandler } from './getSecondLatestQuotesHandler';
 import { getSingleLeadHandler } from './getSingleLeadHandler';
 import { getSurveyByIdHandler } from './getSurveyByIdHandler';
 import { getSurveyorListHandler } from './getSurveyorListHandler';
+import { importLeadHandler } from './importLeadHandler';
 import { quoteSendEmailHandler } from './quoteSendEmailHandler';
 import { sendEmailHandler } from './sendEmailHandler';
 import { sendFeedbackEmailHandler } from './sendFeedbackEmailHandler';
@@ -58,6 +59,7 @@ const authHandlers = {
     getAllNotesHandler,
     changeLeadStatusHandler,
     addManualLogHandler,
+    importLeadHandler,
 };
 
 export default authHandlers;

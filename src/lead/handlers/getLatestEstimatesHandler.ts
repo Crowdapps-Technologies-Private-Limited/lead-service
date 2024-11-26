@@ -38,7 +38,7 @@ export const getLatestEstimatesHandler: RouteHandler = async (
         const result = await getLatestEstimates(leadId, tenant);
 
         if (result) {
-            return ResponseHandler.successResponse({ message: getMessage('ESTIMATE_FETCHED'), data: result });
+            return ResponseHandler.successResponse(result);
         } else {
             return ResponseHandler.notFoundResponse({ message: getMessage('ESTIMATE_NOT_FOUND') });
         }

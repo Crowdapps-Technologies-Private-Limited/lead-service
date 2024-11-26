@@ -21,6 +21,8 @@ import {
     GET_CONFIRMATION_BY_LEAD_ID,
     GET_CUSTOMER_BY_EMAIL,
     UPDATE_LEAD_STATUS,
+    GET_QUOTE_GENERAL_INFO_BY_QUOTE_ID,
+    UPDATE_CONFIRMATION_TABLE,
 } from '../../sql/sqlScript';
 import { sendAttachmentEmail } from '../../utils/sendAttachmentEmail';
 
@@ -243,7 +245,19 @@ const createConfirmation = async (
     if (quoteDataResult.rows.length === 0) {
         throw new Error(getMessage('QUOTE_NOT_FOUND'));
     }
-
+    let insurance_amount = 0;
+    let insurance_percentage = null;
+    let insurance_type = null;
+    const generalInfoResult = await client.query(GET_QUOTE_GENERAL_INFO_BY_QUOTE_ID, [quoteId]);
+    if (generalInfoResult.rows.length === 0) {
+        logger.info('No general info found');
+    } else {
+        const generalInfo = generalInfoResult.rows[0];
+        logger.info('general info', { generalInfo });
+        insurance_amount = generalInfo.insurance_amount;
+        insurance_percentage = generalInfo.insurance_percentage;
+        insurance_type = generalInfo.insurance_type;
+    }
     const { services, notes: quoteNotes, quoteid: quote_id } = quoteDataResult.rows[0];
     const confirmationResult = await client.query(INSERT_CONFIRMATION, [
         leadData.customer_id,
@@ -257,6 +271,9 @@ const createConfirmation = async (
         false,
         quoteNotes,
         user.email,
+        insurance_amount,
+        insurance_percentage,
+        insurance_type,
         quote_id,
     ]);
 

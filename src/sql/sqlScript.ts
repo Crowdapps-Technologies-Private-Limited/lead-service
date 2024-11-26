@@ -732,6 +732,9 @@ INSERT INTO confirmations (
     is_seen, 
     notes, 
     created_by,
+    insurance_amount,
+    insurance_percentage,
+    insurance_type,
     quote_id
 ) VALUES (
     public.uuid_generate_v4(),   
@@ -746,7 +749,10 @@ INSERT INTO confirmations (
     $9,                         
     $10,                       
     $11,
-    $12                         
+    $12,
+    $13,
+    $14,
+    $15                         
 ) RETURNING confirmation_id;
 `;
 
@@ -1749,4 +1755,57 @@ export const GET_SURVEY_ITEMS_BY_LEAD_ID = `
   JOIN surveys s ON si.survey_id = s.id
   WHERE s.lead_id = $1
     AND si.room = 'Materials';
+`;
+
+export const GET_QUOTE_GENERAL_INFO_BY_QUOTE_ID = `
+ SELECT 
+        qgi.quote_id,
+        qgi.general_info_id,
+        gi.insurance_amount,
+        gi.insurance_percentage,
+        gi.insurance_type,
+        q.id AS quote_id
+    FROM 
+        quote_general_info qgi
+    INNER JOIN 
+        general_information gi ON qgi.general_info_id = gi.id
+    INNER JOIN 
+        quotes q ON qgi.quote_id = q.id
+    WHERE 
+        qgi.quote_id = $1;
+`;
+
+export const UPDATE_CONFIRMATION_TABLE = `
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'confirmations' 
+          AND column_name = 'insurance_amount'
+    ) THEN
+        ALTER TABLE confirmations
+        ADD COLUMN insurance_amount DECIMAL(10, 2);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'confirmations' 
+          AND column_name = 'insurance_percentage'
+    ) THEN
+        ALTER TABLE confirmations
+        ADD COLUMN insurance_percentage DECIMAL(10, 2);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'confirmations' 
+          AND column_name = 'insurance_type'
+    ) THEN
+        ALTER TABLE confirmations
+        ADD COLUMN insurance_type VARCHAR(100);
+    END IF;
+END $$;
 `;

@@ -5,6 +5,7 @@ import {
     GET_LATEST_QUOTES,
     GET_SURVEY_ITEMS_BY_LEAD_ID,
     GET_TERMS_DOC,
+    UPDATE_CONFIRMATION_TABLE,
 } from '../../sql/sqlScript';
 import { connectToDatabase } from '../../utils/database';
 import { getMessage } from '../../utils/errorMessages';
@@ -16,7 +17,8 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
     const schema = tenant.schema;
 
     await client.query(`SET search_path TO ${schema}`);
-
+    // Update confirmation table by adding new column will remove further
+    await client.query(UPDATE_CONFIRMATION_TABLE);
     const tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'quotes']);
 
     const checkTableExists = tableCheckRes.rows[0].exists;

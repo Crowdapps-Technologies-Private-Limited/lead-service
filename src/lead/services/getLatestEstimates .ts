@@ -48,7 +48,10 @@ export const getLatestEstimates = async (leadId: string, tenant: any) => {
         delete data.materialpricechargeable;
         delete data.generalinfo;
 
-        return data;
+        return {
+            message: getMessage('ESTIMATE_FETCHED'),
+            data,
+        };
     } catch (error: any) {
         logger.error('Failed to get latest estimates', { error });
         throw new Error(`Failed to get latest estimates:${error.message}`);
