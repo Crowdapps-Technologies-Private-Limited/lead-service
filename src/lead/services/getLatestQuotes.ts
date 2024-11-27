@@ -18,7 +18,7 @@ export const getLatestQuote = async (leadId: string, tenant: any) => {
 
     await client.query(`SET search_path TO ${schema}`);
     // Update confirmation table by adding new column will remove further
-    await client.query(UPDATE_CONFIRMATION_TABLE);
+    // await client.query(UPDATE_CONFIRMATION_TABLE);
     const tableCheckRes = await client.query(CHECK_TABLE_EXISTS, [schema, 'quotes']);
 
     const checkTableExists = tableCheckRes.rows[0].exists;

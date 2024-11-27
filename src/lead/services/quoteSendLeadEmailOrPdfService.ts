@@ -46,7 +46,7 @@ export const sendQuoteEmailOrPdf = async (leadId: string, quoteId: string, tenan
         }
 
         await client.query(`SET search_path TO ${schema}`);
-
+        // await client.query(UPDATE_CONFIRMATION_TABLE);
         // Check if lead exists
         const leadCheckResult = await client.query(GET_LEAD_CUSTOMER_BY_LEAD_ID, [leadId]);
         if (leadCheckResult.rows.length === 0) {
