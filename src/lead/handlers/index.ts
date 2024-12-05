@@ -23,6 +23,7 @@ import { getSingleLeadHandler } from './getSingleLeadHandler';
 import { getSurveyByIdHandler } from './getSurveyByIdHandler';
 import { getSurveyorListHandler } from './getSurveyorListHandler';
 import { importLeadHandler } from './importLeadHandler';
+import { importLeadJsonHandler } from './importLeadJsonHandler';
 import { quoteSendEmailHandler } from './quoteSendEmailHandler';
 import { sendEmailHandler } from './sendEmailHandler';
 import { sendFeedbackEmailHandler } from './sendFeedbackEmailHandler';
@@ -60,6 +61,7 @@ const authHandlers = {
     changeLeadStatusHandler,
     addManualLogHandler,
     importLeadHandler,
+    importLeadJsonHandler
 };
 
 export default authHandlers;

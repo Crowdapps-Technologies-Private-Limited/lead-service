@@ -13,7 +13,7 @@ export interface Address {
 }
 
 export interface AddLeadPayload {
-    generatedId: string;
+    generatedId?: string;
     referrerId?: string;
     customer: Customer;
     collectionAddress: Address;

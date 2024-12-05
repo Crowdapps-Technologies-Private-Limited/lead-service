@@ -32,7 +32,7 @@ export const adminRoutes: { [key: string]: { [key: string]: RouteHandler } } = {
         '/leads/{id}/confirmation': adminHandlers.updateConfirmationHandler,
         '/leads/{id}/confirmation-tooltip': adminHandlers.updateConfirmationTooltipHandler,
         '/leads': adminHandlers.addLeadHandler,
-        '/leads/bulk-import': adminHandlers.importLeadHandler,
+        '/leads/bulk-import': adminHandlers.importLeadJsonHandler,
         '/leads/{id}/estimates': adminHandlers.addEstimateHandler,
         '/leads/distance': adminHandlers.getDistanceHandler,
         '/leads/{id}/assign-surveyor': adminHandlers.assignSurveyorHandler,
