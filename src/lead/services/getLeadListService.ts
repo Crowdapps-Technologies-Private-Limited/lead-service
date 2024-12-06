@@ -29,8 +29,9 @@ export const getAllLeads = async (
 
     try {
         await client.query('BEGIN');
+        // logger.info('lead list started', { tenant });
 
-        const schema = tenant.schema;
+        const schema = tenant?.schema || tenant?.tenant?.schema;
         logger.info('Schema:', { schema });
 
         await client.query(`SET search_path TO ${schema}`);
