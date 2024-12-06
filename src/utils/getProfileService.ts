@@ -54,6 +54,7 @@ export const getUserProfile = async (tenantId: string, userSub: string) => {
         await client.query(`SET search_path TO ${result.rows[0].schema}`);
         const staffCheck = await client.query(GET_STAFF_BY_SUB, [userSub]);
         const staff = staffCheck.rows[0];
+        staff.schema = tenant.schema;
         logger.info('Staff:', { staff });
         return {
             tenant,
