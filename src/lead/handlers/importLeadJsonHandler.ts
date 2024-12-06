@@ -34,7 +34,7 @@ export const importLeadJsonHandler: RouteHandler = async (
            
             // Map payload to DTO
             const mappedPayload: AddLeadPayload = {
-                referrerId: item.referrerId,
+                referrerId: item.referrerId || null,
                 followUpDate: item.followUpDate || null,
                 movingOnDate: item.movingOnDate || null,
                 packingOnDate: null,
@@ -77,7 +77,7 @@ export const importLeadJsonHandler: RouteHandler = async (
             };
 
             try {
-                await addLeadDTO(mappedPayload);
+                // await addLeadDTO(mappedPayload);
                 try {
                     const result = await addLead(mappedPayload, tenant);
                     results.push({ success: true, message: result?.message });
